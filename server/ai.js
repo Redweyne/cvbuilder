@@ -1,26 +1,26 @@
-import OpenAI from 'openai';
+import { GoogleGenAI } from '@google/genai';
 
-let openai = null;
+// Using Gemini AI - the newest model is "gemini-2.5-flash"
+// Do not change this unless explicitly requested by the user
 
-function getOpenAI() {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OpenAI API key is not configured. Please add OPENAI_API_KEY to your environment.');
+let ai = null;
+
+function getGeminiAI() {
+  if (!process.env.GEMINI_API_KEY) {
+    throw new Error('Gemini API key is not configured. Please add GEMINI_API_KEY to your environment.');
   }
-  if (!openai) {
-    openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  if (!ai) {
+    ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
-  return openai;
+  return ai;
 }
 
 export async function enhanceCV(cvData) {
-  const client = getOpenAI();
+  const client = getGeminiAI();
   
-  const prompt = `You are an expert CV writer and career coach. Enhance this CV to be more professional, impactful, and ATS-optimized.
+  const systemPrompt = `You are an expert CV writer and career coach. You MUST respond with valid JSON only, no markdown or explanation.
 
-Current CV Data:
-${JSON.stringify(cvData, null, 2)}
+Your task: Enhance this CV to be more professional, impactful, and ATS-optimized.
 
 Instructions:
 1. Improve the professional summary to be compelling and keyword-rich
@@ -28,20 +28,26 @@ Instructions:
 3. Optimize for Applicant Tracking Systems by using industry-standard terminology
 4. Keep the same structure but enhance the content
 
-Return the enhanced CV data in the exact same JSON structure.`;
+Return the enhanced CV data in the exact same JSON structure as the input.`;
+
+  const userPrompt = `Current CV Data:
+${JSON.stringify(cvData, null, 2)}
+
+Return ONLY valid JSON with the enhanced CV data.`;
 
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an expert CV writer. Return only valid JSON, no markdown or explanation.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
   } catch (error) {
     console.error('AI enhancement error:', error);
     throw new Error('Failed to enhance CV with AI');
@@ -49,14 +55,11 @@ Return the enhanced CV data in the exact same JSON structure.`;
 }
 
 export async function analyzeJobOffer(jobDescription) {
-  const client = getOpenAI();
+  const client = getGeminiAI();
   
-  const prompt = `Analyze this job offer and extract key information:
+  const systemPrompt = `You are an expert job market analyst. You MUST respond with valid JSON only.
 
-Job Description:
-${jobDescription}
-
-Extract and return as JSON:
+Analyze job offers and extract key information in this exact format:
 {
   "title": "Job title",
   "company": "Company name if mentioned",
@@ -70,18 +73,24 @@ Extract and return as JSON:
   "culture_hints": ["Company culture indicators"]
 }`;
 
+  const userPrompt = `Job Description:
+${jobDescription}
+
+Analyze and return ONLY valid JSON.`;
+
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an expert job market analyst. Return only valid JSON.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.5
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
   } catch (error) {
     console.error('Job analysis error:', error);
     throw new Error('Failed to analyze job offer');
@@ -89,15 +98,11 @@ Extract and return as JSON:
 }
 
 export async function tailorCVForJob(cvData, jobData) {
-  const client = getOpenAI();
+  const client = getGeminiAI();
   
-  const prompt = `You are an expert CV optimizer. Tailor this CV specifically for the job offer while keeping it truthful.
+  const systemPrompt = `You are an expert CV optimizer. You MUST respond with valid JSON only.
 
-Current CV:
-${JSON.stringify(cvData, null, 2)}
-
-Target Job:
-${JSON.stringify(jobData, null, 2)}
+Tailor CVs specifically for job offers while keeping them truthful.
 
 Instructions:
 1. Rewrite the professional summary to highlight relevant experience for this specific role
@@ -107,25 +112,34 @@ Instructions:
 5. Make bullet points more relevant to the position
 6. Keep all information truthful - only rephrase and emphasize, don't add fake experience
 
-Return the tailored CV in the same JSON structure, plus add:
+Return the tailored CV in the same JSON structure, plus add these fields:
 - "match_score": (0-100 percentage of how well CV matches the job)
 - "ats_score": (0-100 ATS compatibility score)
 - "improvements_made": ["List of changes made"]
 - "missing_qualifications": ["Qualifications from job not in CV"]
-- "keywords_to_add": ["Keywords added to improve matching"]`;
+- "keywords_added": ["Keywords added to improve matching"]`;
+
+  const userPrompt = `Current CV:
+${JSON.stringify(cvData, null, 2)}
+
+Target Job:
+${JSON.stringify(jobData, null, 2)}
+
+Return ONLY valid JSON with the tailored CV.`;
 
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an expert CV optimizer. Return only valid JSON.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.7
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
   } catch (error) {
     console.error('CV tailoring error:', error);
     throw new Error('Failed to tailor CV for job');
@@ -133,17 +147,11 @@ Return the tailored CV in the same JSON structure, plus add:
 }
 
 export async function generateCoverLetter(cvData, jobData, tone = 'professional') {
-  const client = getOpenAI();
+  const client = getGeminiAI();
   
-  const prompt = `Write a compelling cover letter for this job application.
+  const systemPrompt = `You are an expert cover letter writer. You MUST respond with valid JSON only.
 
-Applicant CV:
-${JSON.stringify(cvData, null, 2)}
-
-Target Job:
-${JSON.stringify(jobData, null, 2)}
-
-Tone: ${tone} (options: professional, enthusiastic, creative, formal)
+Write compelling cover letters for job applications.
 
 Requirements:
 1. Address specific job requirements with relevant experience
@@ -159,18 +167,29 @@ Return as JSON:
   "personalization_tips": ["Suggestions for further customization"]
 }`;
 
+  const userPrompt = `Applicant CV:
+${JSON.stringify(cvData, null, 2)}
+
+Target Job:
+${JSON.stringify(jobData, null, 2)}
+
+Tone: ${tone} (options: professional, enthusiastic, creative, formal)
+
+Return ONLY valid JSON.`;
+
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an expert cover letter writer. Return only valid JSON.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.8
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
   } catch (error) {
     console.error('Cover letter generation error:', error);
     throw new Error('Failed to generate cover letter');
@@ -178,12 +197,11 @@ Return as JSON:
 }
 
 export async function calculateATSScore(cvData) {
-  const client = getOpenAI();
+  const client = getGeminiAI();
   
-  const prompt = `Analyze this CV for ATS (Applicant Tracking System) compatibility and provide a score.
+  const systemPrompt = `You are an ATS optimization expert. You MUST respond with valid JSON only.
 
-CV Data:
-${JSON.stringify(cvData, null, 2)}
+Analyze CVs for ATS (Applicant Tracking System) compatibility.
 
 Evaluate based on:
 1. Clear section headers
@@ -209,20 +227,70 @@ Return as JSON:
   "suggested_keywords": ["Keywords to add based on common job searches"]
 }`;
 
+  const userPrompt = `CV Data:
+${JSON.stringify(cvData, null, 2)}
+
+Analyze and return ONLY valid JSON.`;
+
   try {
-    const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: 'You are an ATS optimization expert. Return only valid JSON.' },
-        { role: 'user', content: prompt }
-      ],
-      response_format: { type: 'json_object' },
-      temperature: 0.5
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
   } catch (error) {
     console.error('ATS scoring error:', error);
     throw new Error('Failed to calculate ATS score');
+  }
+}
+
+export async function generateMotivationalInsight(userData) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an inspiring career coach. You MUST respond with valid JSON only.
+
+Generate personalized motivational content for job seekers based on their profile and progress.
+
+Return as JSON:
+{
+  "daily_motivation": "A personalized, inspiring message (2-3 sentences)",
+  "career_tip": "A practical, actionable career tip",
+  "strength_highlight": "One strength to celebrate from their profile",
+  "next_step_suggestion": "A specific, encouraging next action"
+}`;
+
+  const userPrompt = `User Profile:
+${JSON.stringify(userData, null, 2)}
+
+Generate personalized motivation. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+    return JSON.parse(text);
+  } catch (error) {
+    console.error('Motivation generation error:', error);
+    return {
+      daily_motivation: "Every application brings you closer to your dream role. Keep pushing forward!",
+      career_tip: "Update your LinkedIn profile to match your CV for consistent branding.",
+      strength_highlight: "Your dedication to improvement sets you apart.",
+      next_step_suggestion: "Consider tailoring your CV for a specific job today."
+    };
   }
 }

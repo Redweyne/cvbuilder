@@ -41,10 +41,6 @@ externalPort = 80
 localPort = 35563
 externalPort = 3000
 
-[[ports]]
-localPort = 40297
-externalPort = 3002
-
 [deployment]
 deploymentTarget = "static"
 build = ["npm", "run", "build"]

@@ -277,8 +277,8 @@ app.post('/api/ai/enhance-cv', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
     }
     
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ error: 'AI service not configured. Please add your OpenAI API key.' });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
     }
     
     const enhanced = await enhanceCV(req.body.cvData);
@@ -298,8 +298,8 @@ app.post('/api/ai/analyze-job', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
     }
     
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ error: 'AI service not configured. Please add your OpenAI API key.' });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
     }
     
     const analysis = await analyzeJobOffer(req.body.description);
@@ -319,8 +319,8 @@ app.post('/api/ai/tailor-cv', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
     }
     
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ error: 'AI service not configured. Please add your OpenAI API key.' });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
     }
     
     const tailored = await tailorCVForJob(req.body.cvData, req.body.jobData);
@@ -340,8 +340,8 @@ app.post('/api/ai/cover-letter', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
     }
     
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ error: 'AI service not configured. Please add your OpenAI API key.' });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
     }
     
     const coverLetter = await generateCoverLetter(req.body.cvData, req.body.jobData, req.body.tone);
@@ -356,8 +356,8 @@ app.post('/api/ai/cover-letter', authMiddleware, async (req, res) => {
 
 app.post('/api/ai/ats-score', authMiddleware, async (req, res) => {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ error: 'AI service not configured. Please add your OpenAI API key.' });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
     }
     
     const score = await calculateATSScore(req.body.cvData);
