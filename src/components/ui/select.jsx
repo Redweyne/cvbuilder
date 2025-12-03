@@ -1,24 +1,42 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 
-const Select = React.forwardRef(({ className, children, value, onValueChange, ...props }, ref) => {
+const SelectContext = React.createContext({});
+
+const Select = ({ children, value, onValueChange, defaultValue }) => {
+  const [selectedValue, setSelectedValue] = React.useState(value || defaultValue || '');
+  const [isOpen, setIsOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setSelectedValue(value);
+    }
+  }, [value]);
+
+  const handleValueChange = (newValue) => {
+    setSelectedValue(newValue);
+    setIsOpen(false);
+    if (onValueChange) {
+      onValueChange(newValue);
+    }
+  };
+
   return (
-    <div className="relative">
-      {React.Children.map(children, child => {
-        if (React.isValidElement(child)) {
-          return React.cloneElement(child, { value, onValueChange });
-        }
-        return child;
-      })}
-    </div>
+    <SelectContext.Provider value={{ value: selectedValue, onValueChange: handleValueChange, isOpen, setIsOpen }}>
+      <div className="relative">
+        {children}
+      </div>
+    </SelectContext.Provider>
   );
-});
-Select.displayName = "Select";
+};
 
 const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) => {
+  const { setIsOpen, isOpen } = React.useContext(SelectContext);
   return (
     <button
       ref={ref}
+      type="button"
+      onClick={() => setIsOpen(!isOpen)}
       className={cn(
         "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
@@ -32,7 +50,7 @@ const SelectTrigger = React.forwardRef(({ className, children, ...props }, ref) 
 SelectTrigger.displayName = "SelectTrigger";
 
 const SelectValue = React.forwardRef(({ className, placeholder, ...props }, ref) => {
-  const { value } = props;
+  const { value } = React.useContext(SelectContext);
   return (
     <span ref={ref} className={cn(className)}>
       {value || placeholder}
@@ -42,6 +60,10 @@ const SelectValue = React.forwardRef(({ className, placeholder, ...props }, ref)
 SelectValue.displayName = "SelectValue";
 
 const SelectContent = React.forwardRef(({ className, children, ...props }, ref) => {
+  const { isOpen, value, onValueChange } = React.useContext(SelectContext);
+  
+  if (!isOpen) return null;
+
   return (
     <div
       ref={ref}
@@ -51,15 +73,19 @@ const SelectContent = React.forwardRef(({ className, children, ...props }, ref) 
       )}
       {...props}
     >
-      {children}
+      {React.Children.map(children, child => {
+        if (React.isValidElement(child)) {
+          return React.cloneElement(child, { selectedValue: value, onSelect: onValueChange });
+        }
+        return child;
+      })}
     </div>
   );
 });
 SelectContent.displayName = "SelectContent";
 
-const SelectItem = React.forwardRef(({ className, children, value: itemValue, ...props }, ref) => {
-  const { value, onValueChange } = props;
-  const isSelected = value === itemValue;
+const SelectItem = React.forwardRef(({ className, children, value: itemValue, selectedValue, onSelect, ...props }, ref) => {
+  const isSelected = selectedValue === itemValue;
 
   return (
     <div
@@ -69,7 +95,7 @@ const SelectItem = React.forwardRef(({ className, children, value: itemValue, ..
         isSelected && "bg-accent",
         className
       )}
-      onClick={() => onValueChange && onValueChange(itemValue)}
+      onClick={() => onSelect && onSelect(itemValue)}
       {...props}
     >
       {children}

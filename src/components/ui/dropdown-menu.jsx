@@ -5,11 +5,14 @@ const DropdownMenu = ({ children }) => {
   return <div className="relative inline-block">{children}</div>;
 };
 
-const DropdownMenuTrigger = React.forwardRef(({ className, children, ...props }, ref) => {
+const DropdownMenuTrigger = React.forwardRef(({ className, children, asChild, ...props }, ref) => {
+  if (asChild) {
+    return React.cloneElement(children, { ref, className: cn(className, children.props?.className), ...props });
+  }
   return (
-    <button ref={ref} className={cn(className)} {...props}>
+    <div ref={ref} role="button" tabIndex={0} className={cn("cursor-pointer", className)} {...props}>
       {children}
-    </button>
+    </div>
   );
 });
 DropdownMenuTrigger.displayName = "DropdownMenuTrigger";
