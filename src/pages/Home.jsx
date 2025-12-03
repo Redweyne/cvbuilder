@@ -185,30 +185,31 @@ const aiFeatures = [
 ];
 
 function ParticleField() {
+  const particles = React.useMemo(() => 
+    [...Array(12)].map((_, i) => ({
+      id: i,
+      width: 3 + (i % 3),
+      height: 3 + (i % 3),
+      left: `${(i * 8.5) % 100}%`,
+      top: `${(i * 12) % 100}%`,
+      delay: i * 0.8,
+      duration: 8 + (i % 4) * 2,
+    })), []
+  );
+
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {[...Array(50)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full"
+      {particles.map((p) => (
+        <div
+          key={p.id}
+          className="absolute rounded-full bg-indigo-400/30 animate-float-slow"
           style={{
-            width: Math.random() * 4 + 2,
-            height: Math.random() * 4 + 2,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            background: `rgba(${99 + Math.random() * 70}, ${102 + Math.random() * 50}, 241, ${0.3 + Math.random() * 0.4})`,
-          }}
-          animate={{
-            y: [0, -100 - Math.random() * 100],
-            x: [0, (Math.random() - 0.5) * 50],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
-          }}
-          transition={{
-            duration: 5 + Math.random() * 5,
-            repeat: Infinity,
-            delay: Math.random() * 5,
-            ease: "easeOut",
+            width: p.width,
+            height: p.height,
+            left: p.left,
+            top: p.top,
+            animationDelay: `${p.delay}s`,
+            animationDuration: `${p.duration}s`,
           }}
         />
       ))}
@@ -219,31 +220,19 @@ function ParticleField() {
 function AuroraBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden">
-      <motion.div
-        className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%]"
+      <div 
+        className="absolute inset-0"
         style={{
-          background: 'radial-gradient(ellipse at center, rgba(99, 102, 241, 0.15) 0%, transparent 50%)',
-        }}
-        animate={{
-          rotate: [0, 360],
-        }}
-        transition={{
-          duration: 60,
-          repeat: Infinity,
-          ease: "linear",
+          background: 'radial-gradient(ellipse at 30% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(168, 85, 247, 0.1) 0%, transparent 50%)',
         }}
       />
-      <motion.div
-        className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl animate-orb-pulse"
-        style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.3), transparent)' }}
+      <div
+        className="absolute top-0 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-30"
+        style={{ background: 'radial-gradient(circle, rgba(139, 92, 246, 0.4), transparent)' }}
       />
-      <motion.div
-        className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl animate-orb-pulse"
-        style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.25), transparent)', animationDelay: '2s' }}
-      />
-      <motion.div
-        className="absolute top-1/3 right-1/3 w-72 h-72 rounded-full blur-3xl animate-orb-pulse"
-        style={{ background: 'radial-gradient(circle, rgba(236, 72, 153, 0.2), transparent)', animationDelay: '4s' }}
+      <div
+        className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-25"
+        style={{ background: 'radial-gradient(circle, rgba(168, 85, 247, 0.4), transparent)' }}
       />
     </div>
   );
@@ -466,22 +455,10 @@ function ScrollIndicator() {
 
 export default function Home() {
   const [activePhase, setActivePhase] = useState(0);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll();
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
   const heroScale = useTransform(scrollYProgress, [0, 0.3], [1, 0.95]);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth) * 100,
-        y: (e.clientY / window.innerHeight) * 100,
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -548,13 +525,6 @@ export default function Home() {
       >
         <AuroraBackground />
         <ParticleField />
-        
-        <div 
-          className="absolute inset-0 pointer-events-none transition-all duration-300"
-          style={{
-            background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, rgba(99, 102, 241, 0.08) 0%, transparent 50%)`
-          }}
-        />
 
         <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 text-center">
           <motion.div
@@ -563,15 +533,11 @@ export default function Home() {
             transition={{ duration: 0.8 }}
           >
             <Badge className="mb-8 px-6 py-2.5 bg-white/80 backdrop-blur-sm text-indigo-700 border border-indigo-200/50 text-sm font-medium shadow-xl">
-              <motion.span 
-                className="flex items-center gap-2"
-                animate={{ scale: [1, 1.05, 1] }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Heart className="w-4 h-4 text-rose-500 animate-heartbeat" />
+              <span className="flex items-center gap-2">
+                <Heart className="w-4 h-4 text-rose-500" />
                 <span className="font-semibold">127,000+ career transformations</span>
                 <span className="text-slate-400">and counting</span>
-              </motion.span>
+              </span>
             </Badge>
           </motion.div>
           
