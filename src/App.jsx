@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Toaster } from 'sonner';
 import Layout from './Layout';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
@@ -38,6 +39,7 @@ function App() {
           <Route path="/Billing" element={<Layout currentPageName="Billing"><Billing /></Layout>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+        <Toaster />
       </Router>
     </QueryClientProvider>
   );
