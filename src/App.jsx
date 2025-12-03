@@ -15,6 +15,10 @@ import Templates from './pages/Templates';
 import TailorCV from './pages/TailorCV';
 import Settings from './pages/Settings';
 import Billing from './pages/Billing';
+import CareerDiscovery from './pages/CareerDiscovery';
+import InterviewSimulator from './pages/InterviewSimulator';
+import CareerMentor from './pages/CareerMentor';
+import SuccessRoadmap from './pages/SuccessRoadmap';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -116,6 +120,26 @@ function AppRoutes() {
       <Route path="/Billing" element={
         <ProtectedRoute>
           <Layout currentPageName="Billing"><Billing /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/CareerDiscovery" element={
+        <ProtectedRoute>
+          <CareerDiscovery />
+        </ProtectedRoute>
+      } />
+      <Route path="/InterviewSimulator" element={
+        <ProtectedRoute>
+          <Layout currentPageName="InterviewSimulator"><InterviewSimulator /></Layout>
+        </ProtectedRoute>
+      } />
+      <Route path="/CareerMentor" element={
+        <ProtectedRoute>
+          <CareerMentor />
+        </ProtectedRoute>
+      } />
+      <Route path="/SuccessRoadmap" element={
+        <ProtectedRoute>
+          <Layout currentPageName="SuccessRoadmap"><SuccessRoadmap /></Layout>
         </ProtectedRoute>
       } />
       

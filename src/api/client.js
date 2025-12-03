@@ -208,6 +208,48 @@ class ApiClient {
         body: JSON.stringify({ cvData }),
       });
     },
+
+    discoverStory: async (responses) => {
+      return this.request('/ai/discover-story', {
+        method: 'POST',
+        body: JSON.stringify({ responses }),
+      });
+    },
+
+    mockInterview: async (cvData, jobData, userAnswer, questionIndex) => {
+      return this.request('/ai/mock-interview', {
+        method: 'POST',
+        body: JSON.stringify({ cvData, jobData, userAnswer, questionIndex }),
+      });
+    },
+
+    interviewSummary: async (cvData, jobData, interviewHistory) => {
+      return this.request('/ai/interview-summary', {
+        method: 'POST',
+        body: JSON.stringify({ cvData, jobData, interviewHistory }),
+      });
+    },
+
+    mentorChat: async (message, context, conversationHistory = []) => {
+      return this.request('/ai/mentor-chat', {
+        method: 'POST',
+        body: JSON.stringify({ message, context, conversationHistory }),
+      });
+    },
+
+    applicationReadiness: async (cvData, jobData) => {
+      return this.request('/ai/application-readiness', {
+        method: 'POST',
+        body: JSON.stringify({ cvData, jobData }),
+      });
+    },
+
+    successRoadmap: async (userData, goals) => {
+      return this.request('/ai/success-roadmap', {
+        method: 'POST',
+        body: JSON.stringify({ userData, goals }),
+      });
+    },
   };
 
   export = {

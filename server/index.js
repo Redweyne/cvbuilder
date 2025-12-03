@@ -8,7 +8,19 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 
 import { users, cvDocuments, jobOffers, subscriptions, templates, coverLetters } from './db.js';
-import { enhanceCV, analyzeJobOffer, tailorCVForJob, generateCoverLetter, calculateATSScore } from './ai.js';
+import { 
+  enhanceCV, 
+  analyzeJobOffer, 
+  tailorCVForJob, 
+  generateCoverLetter, 
+  calculateATSScore,
+  discoverCareerStory,
+  conductMockInterview,
+  generateInterviewSummary,
+  careerMentorChat,
+  analyzeApplicationReadiness,
+  generateSuccessRoadmap
+} from './ai.js';
 import { generateCVPdf, generateCoverLetterPdf } from './pdf.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -365,6 +377,127 @@ app.post('/api/ai/ats-score', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('ATS scoring error:', error);
     res.status(500).json({ error: 'Failed to calculate ATS score' });
+  }
+});
+
+app.post('/api/ai/discover-story', authMiddleware, async (req, res) => {
+  try {
+    const sub = subscriptions.findByUserId(req.user.id);
+    if (sub.ai_credits_used >= sub.ai_credits_limit) {
+      return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
+    }
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const story = await discoverCareerStory(req.body.responses);
+    subscriptions.incrementAICredits(req.user.id);
+    
+    res.json(story);
+  } catch (error) {
+    console.error('Career story discovery error:', error);
+    res.status(500).json({ error: 'Failed to discover career story' });
+  }
+});
+
+app.post('/api/ai/mock-interview', authMiddleware, async (req, res) => {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const result = await conductMockInterview(
+      req.body.cvData, 
+      req.body.jobData, 
+      req.body.userAnswer, 
+      req.body.questionIndex
+    );
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Mock interview error:', error);
+    res.status(500).json({ error: 'Failed to conduct mock interview' });
+  }
+});
+
+app.post('/api/ai/interview-summary', authMiddleware, async (req, res) => {
+  try {
+    const sub = subscriptions.findByUserId(req.user.id);
+    if (sub.ai_credits_used >= sub.ai_credits_limit) {
+      return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
+    }
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const summary = await generateInterviewSummary(
+      req.body.cvData, 
+      req.body.jobData, 
+      req.body.interviewHistory
+    );
+    subscriptions.incrementAICredits(req.user.id);
+    
+    res.json(summary);
+  } catch (error) {
+    console.error('Interview summary error:', error);
+    res.status(500).json({ error: 'Failed to generate interview summary' });
+  }
+});
+
+app.post('/api/ai/mentor-chat', authMiddleware, async (req, res) => {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const response = await careerMentorChat(
+      req.body.message, 
+      req.body.context, 
+      req.body.conversationHistory
+    );
+    
+    res.json(response);
+  } catch (error) {
+    console.error('Career mentor error:', error);
+    res.status(500).json({ error: 'Failed to get mentor response' });
+  }
+});
+
+app.post('/api/ai/application-readiness', authMiddleware, async (req, res) => {
+  try {
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const analysis = await analyzeApplicationReadiness(req.body.cvData, req.body.jobData);
+    
+    res.json(analysis);
+  } catch (error) {
+    console.error('Application readiness error:', error);
+    res.status(500).json({ error: 'Failed to analyze application readiness' });
+  }
+});
+
+app.post('/api/ai/success-roadmap', authMiddleware, async (req, res) => {
+  try {
+    const sub = subscriptions.findByUserId(req.user.id);
+    if (sub.ai_credits_used >= sub.ai_credits_limit) {
+      return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
+    }
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    const roadmap = await generateSuccessRoadmap(req.body.userData, req.body.goals);
+    subscriptions.incrementAICredits(req.user.id);
+    
+    res.json(roadmap);
+  } catch (error) {
+    console.error('Success roadmap error:', error);
+    res.status(500).json({ error: 'Failed to generate success roadmap' });
   }
 });
 

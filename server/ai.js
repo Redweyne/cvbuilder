@@ -15,6 +15,36 @@ function getGeminiAI() {
   return ai;
 }
 
+function extractText(response) {
+  if (response && response.text) {
+    return response.text;
+  }
+  if (response && response.candidates && response.candidates[0]) {
+    const candidate = response.candidates[0];
+    if (candidate.content && candidate.content.parts && candidate.content.parts[0]) {
+      return candidate.content.parts[0].text;
+    }
+  }
+  return null;
+}
+
+function parseJsonResponse(text) {
+  if (!text) throw new Error('Empty response from AI');
+  
+  let cleanText = text.trim();
+  if (cleanText.startsWith('```json')) {
+    cleanText = cleanText.slice(7);
+  } else if (cleanText.startsWith('```')) {
+    cleanText = cleanText.slice(3);
+  }
+  if (cleanText.endsWith('```')) {
+    cleanText = cleanText.slice(0, -3);
+  }
+  cleanText = cleanText.trim();
+  
+  return JSON.parse(cleanText);
+}
+
 export async function enhanceCV(cvData) {
   const client = getGeminiAI();
   
@@ -45,12 +75,11 @@ Return ONLY valid JSON with the enhanced CV data.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('AI enhancement error:', error);
-    throw new Error('Failed to enhance CV with AI');
+    throw new Error('Failed to enhance CV with AI: ' + (error.message || 'Unknown error'));
   }
 }
 
@@ -88,12 +117,11 @@ Analyze and return ONLY valid JSON.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('Job analysis error:', error);
-    throw new Error('Failed to analyze job offer');
+    throw new Error('Failed to analyze job offer: ' + (error.message || 'Unknown error'));
   }
 }
 
@@ -137,12 +165,11 @@ Return ONLY valid JSON with the tailored CV.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('CV tailoring error:', error);
-    throw new Error('Failed to tailor CV for job');
+    throw new Error('Failed to tailor CV for job: ' + (error.message || 'Unknown error'));
   }
 }
 
@@ -187,12 +214,11 @@ Return ONLY valid JSON.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('Cover letter generation error:', error);
-    throw new Error('Failed to generate cover letter');
+    throw new Error('Failed to generate cover letter: ' + (error.message || 'Unknown error'));
   }
 }
 
@@ -242,12 +268,11 @@ Analyze and return ONLY valid JSON.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('ATS scoring error:', error);
-    throw new Error('Failed to calculate ATS score');
+    throw new Error('Failed to calculate ATS score: ' + (error.message || 'Unknown error'));
   }
 }
 
@@ -281,9 +306,8 @@ Generate personalized motivation. Return ONLY valid JSON.`;
       contents: userPrompt,
     });
 
-    const text = response.text;
-    if (!text) throw new Error('Empty response from AI');
-    return JSON.parse(text);
+    const text = extractText(response);
+    return parseJsonResponse(text);
   } catch (error) {
     console.error('Motivation generation error:', error);
     return {
@@ -292,5 +316,368 @@ Generate personalized motivation. Return ONLY valid JSON.`;
       strength_highlight: "Your dedication to improvement sets you apart.",
       next_step_suggestion: "Consider tailoring your CV for a specific job today."
     };
+  }
+}
+
+export async function discoverCareerStory(responses) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are a world-class career storyteller and life coach with deep empathy. You MUST respond with valid JSON only.
+
+Your mission: Transform someone's career experiences into a powerful, authentic narrative that reveals their unique value and inspires them to see themselves in a new light.
+
+You have received deeply personal reflections about someone's career journey. Your task is to:
+1. Identify the golden thread connecting all their experiences
+2. Uncover their hidden superpowers they might not even recognize
+3. Craft a compelling professional identity statement
+4. Create an emotionally resonant "origin story" for their career
+5. Define their unique value proposition in a way that makes them feel seen
+
+Be deeply personal, specific, and transformative. This should feel like a revelation - helping them see themselves clearly for the first time.
+
+Return as JSON:
+{
+  "golden_thread": "The connecting theme across all their experiences (2-3 sentences)",
+  "hidden_superpowers": ["3-5 unique strengths they may not recognize in themselves"],
+  "professional_identity": "A powerful 2-3 sentence identity statement that captures who they are and what makes them extraordinary",
+  "origin_story": "A 4-5 sentence narrative about their career journey that reads like the opening of an inspiring biography",
+  "unique_value_proposition": "A memorable 1-2 sentence statement of their unique value that would make any employer want to learn more",
+  "breakthrough_insights": ["3 profound realizations about themselves based on their responses"],
+  "recommended_positioning": "How they should position themselves in the job market based on their unique story",
+  "emotional_core": "The deep motivation or purpose driving their career (what really matters to them)",
+  "transformation_statement": "A before/after statement showing how they should see themselves now vs. before"
+}`;
+
+  const userPrompt = `Career Reflection Responses:
+${JSON.stringify(responses, null, 2)}
+
+Analyze deeply and create a transformative career story. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Career story discovery error:', error);
+    throw new Error('Failed to discover career story: ' + (error.message || 'Unknown error'));
+  }
+}
+
+export async function conductMockInterview(cvData, jobData, userAnswer, questionIndex) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an expert interviewer and career coach conducting a realistic mock interview. You MUST respond with valid JSON only.
+
+Your role: Conduct a supportive but realistic interview that helps the candidate improve. Provide genuine feedback that builds confidence while identifying areas for growth.
+
+Guidelines:
+1. If this is question 0, start with an opening/rapport question
+2. Ask behavioral questions using STAR method expectations
+3. Include role-specific technical or situational questions
+4. Give constructive, specific feedback on each answer
+5. Score based on clarity, relevance, and impact
+6. Suggest specific improvements without being discouraging
+7. Celebrate what they did well
+
+Return as JSON:
+{
+  "feedback_on_answer": "Specific, constructive feedback on their answer (if provided)",
+  "score": (1-10 score for the answer, null if no answer yet),
+  "what_worked_well": ["Specific things they did well"],
+  "areas_to_improve": ["Specific, actionable improvements"],
+  "sample_better_answer": "An example of how they could strengthen their answer",
+  "next_question": "The next interview question to ask",
+  "question_type": "behavioral/technical/situational/opener/closer",
+  "question_purpose": "What this question is designed to assess",
+  "tips_for_next": "Brief coaching tip for the upcoming question",
+  "overall_progress": "Encouraging statement about their progress so far",
+  "confidence_boost": "Something genuine and specific to boost their confidence"
+}`;
+
+  const userPrompt = `Candidate CV:
+${JSON.stringify(cvData, null, 2)}
+
+Target Job:
+${JSON.stringify(jobData, null, 2)}
+
+Question Number: ${questionIndex}
+${userAnswer ? `Candidate's Answer: "${userAnswer}"` : 'Starting the interview - ask the first question.'}
+
+Conduct the interview. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Mock interview error:', error);
+    throw new Error('Failed to conduct mock interview: ' + (error.message || 'Unknown error'));
+  }
+}
+
+export async function generateInterviewSummary(cvData, jobData, interviewHistory) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an expert interview coach providing a comprehensive session summary. You MUST respond with valid JSON only.
+
+Create an inspiring, actionable summary that helps the candidate feel good about their progress while giving clear next steps.
+
+Return as JSON:
+{
+  "overall_score": (1-100),
+  "performance_summary": "2-3 sentence summary of their overall performance",
+  "key_strengths_demonstrated": ["Top 3-5 strengths they showed"],
+  "growth_opportunities": ["Top 3-5 areas to work on"],
+  "memorable_moments": ["2-3 standout answers or moments"],
+  "confidence_rating": (1-10 how confident they came across),
+  "communication_rating": (1-10 clarity and articulation),
+  "relevance_rating": (1-10 how well answers matched the role),
+  "star_method_usage": (1-10 how well they used STAR format),
+  "personalized_action_plan": ["5 specific steps to improve"],
+  "practice_questions": ["3 questions they should practice more"],
+  "encouragement_message": "A genuine, motivating message about their potential",
+  "ready_for_real_interview": true/false,
+  "days_of_practice_recommended": number
+}`;
+
+  const userPrompt = `Candidate CV:
+${JSON.stringify(cvData, null, 2)}
+
+Target Job:
+${JSON.stringify(jobData, null, 2)}
+
+Interview History:
+${JSON.stringify(interviewHistory, null, 2)}
+
+Generate comprehensive summary. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Interview summary error:', error);
+    throw new Error('Failed to generate interview summary: ' + (error.message || 'Unknown error'));
+  }
+}
+
+export async function careerMentorChat(userMessage, context, conversationHistory = []) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an exceptional AI career mentor with deep empathy, wisdom, and practical expertise. You MUST respond with valid JSON only.
+
+Your personality:
+- Warm, encouraging, and genuinely caring
+- Wise but accessible - avoid jargon
+- Practical and action-oriented
+- Celebratory of wins, supportive during setbacks
+- Honest but kind - give real feedback with compassion
+
+Your expertise:
+- Career strategy and planning
+- Job search tactics and optimization
+- Interview preparation and confidence building
+- Resume/CV optimization
+- Salary negotiation
+- Networking strategies
+- Overcoming career blocks and imposter syndrome
+- Work-life balance and burnout prevention
+
+Guidelines:
+1. Always acknowledge emotions first if the user expresses any
+2. Ask clarifying questions when needed
+3. Provide specific, actionable advice
+4. Reference their CV/profile data to personalize advice
+5. Celebrate their progress and strengths
+6. Be direct but compassionate about areas to improve
+7. End with a clear next step or question
+
+Return as JSON:
+{
+  "response": "Your conversational response to the user",
+  "emotional_acknowledgment": "How you're acknowledging their emotional state (if applicable)",
+  "key_insight": "The most important point from your response",
+  "action_items": ["Specific actions they could take"],
+  "follow_up_question": "A thoughtful question to continue the conversation or null",
+  "resource_suggestion": "A type of resource that might help (e.g., 'practice interview questions for PM roles') or null",
+  "encouragement": "A specific, personalized word of encouragement",
+  "topic_tags": ["career-strategy", "confidence", etc - relevant topics covered]
+}`;
+
+  const userPrompt = `User Context:
+${JSON.stringify(context, null, 2)}
+
+Conversation History:
+${JSON.stringify(conversationHistory.slice(-10), null, 2)}
+
+User's Message: "${userMessage}"
+
+Respond as their career mentor. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Career mentor chat error:', error);
+    throw new Error('Failed to get mentor response: ' + (error.message || 'Unknown error'));
+  }
+}
+
+export async function analyzeApplicationReadiness(cvData, jobData) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an expert job application strategist. You MUST respond with valid JSON only.
+
+Analyze how ready someone is to apply for a specific job and provide strategic guidance.
+
+Return as JSON:
+{
+  "readiness_score": (0-100 overall readiness),
+  "readiness_level": "Ready to Apply" / "Almost Ready" / "Needs Work" / "Not a Good Fit",
+  "match_breakdown": {
+    "skills_match": (0-100),
+    "experience_match": (0-100),
+    "education_match": (0-100),
+    "keywords_match": (0-100)
+  },
+  "strengths_for_role": ["Top 5 qualifications that match well"],
+  "gaps_to_address": ["Skills or experiences they're missing"],
+  "competitive_advantages": ["What sets them apart from other candidates"],
+  "red_flags": ["Potential concerns a recruiter might have"],
+  "mitigation_strategies": ["How to address each red flag"],
+  "application_strategy": {
+    "recommended_approach": "cold-apply/referral-needed/internal-transfer/etc",
+    "best_time_to_apply": "timing strategy",
+    "customization_priority": ["What to emphasize in application"]
+  },
+  "cover_letter_focus": ["3 key points to highlight"],
+  "networking_targets": ["Types of people to connect with"],
+  "confidence_statement": "A statement to boost their confidence",
+  "honest_assessment": "Candid but encouraging assessment",
+  "success_probability": "low/medium/high with explanation"
+}`;
+
+  const userPrompt = `Applicant CV:
+${JSON.stringify(cvData, null, 2)}
+
+Target Job:
+${JSON.stringify(jobData, null, 2)}
+
+Analyze application readiness. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Application readiness error:', error);
+    throw new Error('Failed to analyze application readiness: ' + (error.message || 'Unknown error'));
+  }
+}
+
+export async function generateSuccessRoadmap(userData, goals) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are a strategic career planner creating personalized success roadmaps. You MUST respond with valid JSON only.
+
+Create an inspiring, achievable roadmap that breaks down big career goals into manageable milestones.
+
+Return as JSON:
+{
+  "vision_statement": "A compelling vision of where they're heading",
+  "timeline_weeks": number (estimated weeks to reach goal),
+  "phases": [
+    {
+      "phase_number": 1,
+      "phase_name": "Name of this phase",
+      "duration_weeks": number,
+      "theme": "The focus of this phase",
+      "milestones": [
+        {
+          "title": "Milestone title",
+          "description": "What this milestone involves",
+          "success_criteria": "How they'll know it's complete",
+          "estimated_hours": number,
+          "difficulty": "easy/medium/hard",
+          "celebration_suggestion": "How to celebrate completing this"
+        }
+      ],
+      "skills_to_develop": ["Skills to work on"],
+      "potential_challenges": ["Challenges they might face"],
+      "motivation_tip": "Encouragement for this phase"
+    }
+  ],
+  "quick_wins": ["3 things they can do TODAY to start"],
+  "accountability_suggestions": ["Ways to stay on track"],
+  "support_resources": ["Types of resources or support to seek"],
+  "contingency_plans": ["What to do if things don't go as planned"],
+  "celebration_milestones": ["Major moments to celebrate"],
+  "inspiring_closing": "A motivating message about their journey ahead"
+}`;
+
+  const userPrompt = `User Profile:
+${JSON.stringify(userData, null, 2)}
+
+Career Goals:
+${JSON.stringify(goals, null, 2)}
+
+Create a personalized success roadmap. Return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('Success roadmap error:', error);
+    throw new Error('Failed to generate success roadmap: ' + (error.message || 'Unknown error'));
   }
 }

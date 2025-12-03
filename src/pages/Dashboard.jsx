@@ -31,7 +31,11 @@ import {
   PartyPopper,
   Lightbulb,
   Quote,
-  BarChart3
+  BarChart3,
+  Compass,
+  MessageSquare,
+  Brain,
+  MapPin
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -429,6 +433,103 @@ export default function Dashboard() {
           </motion.div>
         </Link>
       </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-slate-900">AI Career Coaching</h2>
+            <p className="text-sm text-slate-500">Revolutionary tools to transform your job search</p>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Link to="/CareerDiscovery">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-full bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-5 border border-amber-100 cursor-pointer hover:border-amber-300 hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-amber-200/30 to-orange-200/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mb-3 shadow-lg">
+                  <Compass className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Discover Your Story</h3>
+                <p className="text-slate-600 text-sm mt-1">Uncover your unique career narrative in 5 minutes</p>
+                <div className="mt-3 flex items-center text-sm font-medium text-amber-600">
+                  Start Discovery <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+          
+          <Link to="/InterviewSimulator">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-full bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-5 border border-blue-100 cursor-pointer hover:border-blue-300 hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-200/30 to-indigo-200/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center mb-3 shadow-lg">
+                  <MessageSquare className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Interview Simulator</h3>
+                <p className="text-slate-600 text-sm mt-1">Practice with AI and get instant feedback</p>
+                <div className="mt-3 flex items-center text-sm font-medium text-blue-600">
+                  Practice Now <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+          
+          <Link to="/CareerMentor">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-full bg-gradient-to-br from-violet-50 to-purple-50 rounded-2xl p-5 border border-violet-100 cursor-pointer hover:border-violet-300 hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-violet-200/30 to-purple-200/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-400 to-purple-500 flex items-center justify-center mb-3 shadow-lg">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Career Mentor</h3>
+                <p className="text-slate-600 text-sm mt-1">Your 24/7 AI career coach and advisor</p>
+                <div className="mt-3 flex items-center text-sm font-medium text-violet-600">
+                  Chat Now <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+          
+          <Link to="/SuccessRoadmap">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              className="h-full bg-gradient-to-br from-rose-50 to-pink-50 rounded-2xl p-5 border border-rose-100 cursor-pointer hover:border-rose-300 hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
+            >
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-rose-200/30 to-pink-200/30 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-500" />
+              <div className="relative z-10">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center mb-3 shadow-lg">
+                  <MapPin className="w-6 h-6 text-white" />
+                </div>
+                <h3 className="font-bold text-lg text-slate-900">Success Roadmap</h3>
+                <p className="text-slate-600 text-sm mt-1">Create your personalized path to success</p>
+                <div className="mt-3 flex items-center text-sm font-medium text-rose-600">
+                  Map Journey <ChevronRight className="w-4 h-4 ml-1" />
+                </div>
+              </div>
+            </motion.div>
+          </Link>
+        </div>
+      </motion.div>
 
       <DailyMotivation />
 
