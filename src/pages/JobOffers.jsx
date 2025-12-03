@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { format } from 'date-fns';
@@ -20,15 +20,13 @@ import {
   Trash2,
   Edit,
   CheckCircle,
-  XCircle,
-  ChevronDown,
   Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -61,8 +59,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from 'sonner';
 
 const statusConfig = {
+  saved: { label: 'Saved', color: 'bg-slate-100 text-slate-700' },
   active: { label: 'Active', color: 'bg-blue-100 text-blue-700' },
   applied: { label: 'Applied', color: 'bg-indigo-100 text-indigo-700' },
   interviewing: { label: 'Interviewing', color: 'bg-purple-100 text-purple-700' },
@@ -87,96 +87,69 @@ export default function JobOffers() {
 
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['jobs'],
-    queryFn: () => base44.entities.JobOffer.list('-created_date'),
+    queryFn: () => api.jobs.list(),
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.JobOffer.create(data),
+    mutationFn: (data) => api.jobs.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       setIsAddDialogOpen(false);
       setEditingJob(null);
       setJobDescription('');
+      toast.success('Job added successfully');
     },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to add job');
+    }
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) => base44.entities.JobOffer.update(id, data),
+    mutationFn: ({ id, data }) => api.jobs.update(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       setEditingJob(null);
+      toast.success('Job updated successfully');
     },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to update job');
+    }
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => base44.entities.JobOffer.delete(id),
+    mutationFn: (id) => api.jobs.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['jobs'] });
       setDeleteId(null);
+      toast.success('Job deleted successfully');
     },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to delete job');
+    }
   });
 
   const parseJobDescription = async () => {
     if (!jobDescription.trim()) return;
     setIsParsing(true);
 
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt: `
-        Parse this job description and extract structured information.
-        
-        Job Description:
-        ${jobDescription}
-        
-        Extract the following:
-        - Job title
-        - Company name
-        - Location (or "Remote" if remote)
-        - Job type (full-time, part-time, contract, freelance, internship)
-        - Remote type (onsite, remote, hybrid)
-        - Experience level (entry, mid, senior, lead, executive)
-        - Required skills (as array)
-        - Key requirements (as array of strings)
-        - Preferred qualifications (as array of strings)
-        - ATS keywords (important keywords for resume matching)
-        - Company tone/culture (corporate, startup, creative, academic)
-      `,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          title: { type: "string" },
-          company: { type: "string" },
-          location: { type: "string" },
-          job_type: { type: "string" },
-          remote_type: { type: "string" },
-          experience_level: { type: "string" },
-          required_skills: { type: "array", items: { type: "string" } },
-          requirements: { type: "array", items: { type: "string" } },
-          preferred_qualifications: { type: "array", items: { type: "string" } },
-          keywords: { type: "array", items: { type: "string" } },
-          tone: { type: "string" }
-        }
+    try {
+      const analysis = await api.ai.analyzeJob(jobDescription);
+      
+      if (analysis) {
+        setEditingJob({
+          title: analysis.title || '',
+          company: analysis.company || '',
+          location: analysis.location || '',
+          description: jobDescription,
+          requirements: analysis.requirements || [],
+          status: 'saved'
+        });
       }
-    });
-
-    if (response) {
-      setEditingJob({
-        title: response.title || '',
-        company: response.company || '',
-        location: response.location || '',
-        job_type: response.job_type || 'full-time',
-        remote_type: response.remote_type || 'onsite',
-        experience_level: response.experience_level || 'mid',
-        required_skills: response.required_skills || [],
-        requirements: response.requirements || [],
-        preferred_qualifications: response.preferred_qualifications || [],
-        keywords: response.keywords || [],
-        tone: response.tone || 'corporate',
-        description: jobDescription,
-        status: 'active'
-      });
+    } catch (error) {
+      toast.error(error.message || 'Failed to parse job description');
+    } finally {
+      setIsParsing(false);
     }
-
-    setIsParsing(false);
   };
 
   const filteredJobs = jobs.filter(job => {
@@ -196,7 +169,6 @@ export default function JobOffers() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Job Offers</h1>
@@ -211,9 +183,9 @@ export default function JobOffers() {
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {Object.entries(statusConfig).slice(0, 4).map(([key, config]) => {
+        {['saved', 'applied', 'interviewing', 'offer'].map((key) => {
+          const config = statusConfig[key];
           const count = jobs.filter(j => j.status === key).length;
           return (
             <Card key={key} className="border-0 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
@@ -231,7 +203,6 @@ export default function JobOffers() {
         })}
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -256,21 +227,9 @@ export default function JobOffers() {
         </Select>
       </div>
 
-      {/* Job List */}
       {isLoading ? (
-        <div className="space-y-4">
-          {[1, 2, 3].map(i => (
-            <Card key={i} className="animate-pulse">
-              <CardContent className="p-6">
-                <div className="h-6 bg-slate-200 rounded w-1/3 mb-3" />
-                <div className="h-4 bg-slate-200 rounded w-1/4 mb-4" />
-                <div className="flex gap-2">
-                  <div className="h-6 bg-slate-200 rounded w-20" />
-                  <div className="h-6 bg-slate-200 rounded w-24" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
         </div>
       ) : filteredJobs.length === 0 ? (
         <div className="text-center py-16">
@@ -311,14 +270,14 @@ export default function JobOffers() {
                             {job.title}
                           </h3>
                           <Badge className={statusConfig[job.status]?.color || 'bg-slate-100'}>
-                            {statusConfig[job.status]?.label || 'Active'}
+                            {statusConfig[job.status]?.label || 'Saved'}
                           </Badge>
                         </div>
                         
                         <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600 mb-4">
                           <span className="flex items-center gap-1">
                             <Building2 className="w-4 h-4" />
-                            {job.company}
+                            {job.company || 'Unknown Company'}
                           </span>
                           {job.location && (
                             <span className="flex items-center gap-1">
@@ -326,24 +285,24 @@ export default function JobOffers() {
                               {job.location}
                             </span>
                           )}
-                          {job.created_date && (
+                          {job.created_at && (
                             <span className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              Added {format(new Date(job.created_date), 'MMM d, yyyy')}
+                              Added {format(new Date(job.created_at), 'MMM d, yyyy')}
                             </span>
                           )}
                         </div>
 
-                        {job.required_skills && job.required_skills.length > 0 && (
+                        {job.requirements && job.requirements.length > 0 && (
                           <div className="flex flex-wrap gap-2">
-                            {job.required_skills.slice(0, 5).map((skill, i) => (
+                            {job.requirements.slice(0, 5).map((req, i) => (
                               <Badge key={i} variant="secondary" className="text-xs">
-                                {skill}
+                                {req}
                               </Badge>
                             ))}
-                            {job.required_skills.length > 5 && (
+                            {job.requirements.length > 5 && (
                               <Badge variant="secondary" className="text-xs">
-                                +{job.required_skills.length - 5} more
+                                +{job.requirements.length - 5} more
                               </Badge>
                             )}
                           </div>
@@ -372,9 +331,9 @@ export default function JobOffers() {
                               <CheckCircle className="w-4 h-4 mr-2" />
                               Mark Applied
                             </DropdownMenuItem>
-                            {job.source_url && (
+                            {job.url && (
                               <DropdownMenuItem asChild>
-                                <a href={job.source_url} target="_blank" rel="noopener noreferrer">
+                                <a href={job.url} target="_blank" rel="noopener noreferrer">
                                   <ExternalLink className="w-4 h-4 mr-2" />
                                   View Original
                                 </a>
@@ -400,7 +359,6 @@ export default function JobOffers() {
         </div>
       )}
 
-      {/* Add Job Dialog */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -446,9 +404,7 @@ export default function JobOffers() {
                   title: '',
                   company: '',
                   location: '',
-                  job_type: 'full-time',
-                  remote_type: 'onsite',
-                  status: 'active'
+                  status: 'saved'
                 })}
                 className="w-full"
               >
@@ -484,43 +440,9 @@ export default function JobOffers() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Job Type</Label>
-                  <Select
-                    value={editingJob.job_type || 'full-time'}
-                    onValueChange={(value) => setEditingJob({ ...editingJob, job_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="full-time">Full-time</SelectItem>
-                      <SelectItem value="part-time">Part-time</SelectItem>
-                      <SelectItem value="contract">Contract</SelectItem>
-                      <SelectItem value="freelance">Freelance</SelectItem>
-                      <SelectItem value="internship">Internship</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Work Type</Label>
-                  <Select
-                    value={editingJob.remote_type || 'onsite'}
-                    onValueChange={(value) => setEditingJob({ ...editingJob, remote_type: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="onsite">On-site</SelectItem>
-                      <SelectItem value="remote">Remote</SelectItem>
-                      <SelectItem value="hybrid">Hybrid</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
-                    value={editingJob.status || 'active'}
+                    value={editingJob.status || 'saved'}
                     onValueChange={(value) => setEditingJob({ ...editingJob, status: value })}
                   >
                     <SelectTrigger>
@@ -536,10 +458,10 @@ export default function JobOffers() {
               </div>
 
               <div className="space-y-2">
-                <Label>Source URL (Optional)</Label>
+                <Label>Job URL (Optional)</Label>
                 <Input
-                  value={editingJob.source_url || ''}
-                  onChange={(e) => setEditingJob({ ...editingJob, source_url: e.target.value })}
+                  value={editingJob.url || ''}
+                  onChange={(e) => setEditingJob({ ...editingJob, url: e.target.value })}
                   placeholder="https://..."
                 />
               </div>
@@ -570,7 +492,6 @@ export default function JobOffers() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog */}
       <Dialog open={!!editingJob && !isAddDialogOpen} onOpenChange={() => setEditingJob(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -603,7 +524,7 @@ export default function JobOffers() {
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
-                    value={editingJob.status || 'active'}
+                    value={editingJob.status || 'saved'}
                     onValueChange={(value) => setEditingJob({ ...editingJob, status: value })}
                   >
                     <SelectTrigger>
@@ -618,9 +539,11 @@ export default function JobOffers() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setEditingJob(null)}>Cancel</Button>
+                <Button variant="outline" onClick={() => setEditingJob(null)}>
+                  Cancel
+                </Button>
                 <Button onClick={handleSaveJob} className="bg-indigo-600 hover:bg-indigo-700">
-                  Save Changes
+                  Update Job
                 </Button>
               </DialogFooter>
             </div>
@@ -628,13 +551,12 @@ export default function JobOffers() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation */}
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete this job?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete this job offer.
+              This action cannot be undone. This will permanently delete this job from your tracking list.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

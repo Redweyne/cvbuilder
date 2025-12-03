@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from './utils';
-import { base44 } from '@/api/base44Client';
+import { useAuth } from './context/AuthContext';
 import { 
   FileText, 
   Briefcase, 
@@ -13,8 +13,8 @@ import {
   Sparkles,
   Home,
   CreditCard,
-  User,
-  ChevronDown
+  ChevronDown,
+  Target
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,32 +30,19 @@ const navItems = [
   { name: 'Dashboard', page: 'Dashboard', icon: Home },
   { name: 'My CVs', page: 'MyCVs', icon: FileText },
   { name: 'Job Offers', page: 'JobOffers', icon: Briefcase },
+  { name: 'AI Tailor', page: 'TailorCV', icon: Target },
   { name: 'Templates', page: 'Templates', icon: LayoutTemplate },
 ];
 
 export default function Layout({ children, currentPageName }) {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const userData = await base44.auth.me();
-      setUser(userData);
-    } catch (e) {
-      console.log('Not logged in');
-    }
+  const handleLogout = async () => {
+    await logout();
   };
 
-  const handleLogout = () => {
-    base44.auth.logout();
-  };
-
-  // Public pages without sidebar
-  if (currentPageName === 'Home' || currentPageName === 'Login') {
+  if (currentPageName === 'Home' || currentPageName === 'Login' || currentPageName === 'Register') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
         {children}
@@ -96,9 +83,7 @@ export default function Layout({ children, currentPageName }) {
         }
       `}</style>
 
-      {/* Desktop Sidebar */}
       <aside className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-slate-200/80 z-40 hidden lg:flex flex-col">
-        {/* Logo */}
         <div className="p-6 border-b border-slate-100">
           <Link to={createPageUrl('Dashboard')} className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -111,7 +96,6 @@ export default function Layout({ children, currentPageName }) {
           </Link>
         </div>
 
-        {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {navItems.map((item) => (
             <Link
@@ -130,7 +114,6 @@ export default function Layout({ children, currentPageName }) {
           ))}
         </nav>
 
-        {/* User Section */}
         {user && (
           <div className="p-4 border-t border-slate-100">
             <DropdownMenu>
@@ -172,7 +155,6 @@ export default function Layout({ children, currentPageName }) {
         )}
       </aside>
 
-      {/* Mobile Header */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center justify-between px-4">
         <Link to={createPageUrl('Dashboard')} className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center">
@@ -192,7 +174,6 @@ export default function Layout({ children, currentPageName }) {
         </Button>
       </header>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setMobileMenuOpen(false)}>
           <div 
@@ -236,7 +217,6 @@ export default function Layout({ children, currentPageName }) {
         </div>
       )}
 
-      {/* Main Content */}
       <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
         <div className="p-4 md:p-6 lg:p-8">
           {children}

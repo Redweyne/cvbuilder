@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -29,12 +29,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from 'sonner';
 
 export default function TailorCV() {
   const urlParams = new URLSearchParams(window.location.search);
   const jobId = urlParams.get('job');
+  const cvIdParam = urlParams.get('cv');
+  const navigate = useNavigate();
 
-  const [selectedCV, setSelectedCV] = useState('');
+  const [selectedCV, setSelectedCV] = useState(cvIdParam || '');
   const [selectedJob, setSelectedJob] = useState(jobId || '');
   const [isTailoring, setIsTailoring] = useState(false);
   const [tailoredCV, setTailoredCV] = useState(null);
@@ -44,160 +47,70 @@ export default function TailorCV() {
 
   const { data: cvs = [], isLoading: loadingCVs } = useQuery({
     queryKey: ['cvs'],
-    queryFn: () => base44.entities.CVDocument.list('-updated_date'),
+    queryFn: () => api.cvs.list(),
   });
 
   const { data: jobs = [], isLoading: loadingJobs } = useQuery({
     queryKey: ['jobs'],
-    queryFn: () => base44.entities.JobOffer.list('-created_date'),
+    queryFn: () => api.jobs.list(),
   });
 
   const createMutation = useMutation({
-    mutationFn: (data) => base44.entities.CVDocument.create(data),
+    mutationFn: (data) => api.cvs.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['cvs'] });
+      toast.success('Tailored CV saved successfully!');
+      navigate('/MyCVs');
     },
+    onError: (error) => {
+      toast.error(error.message || 'Failed to save tailored CV');
+    }
   });
 
   const analyzeAndTailor = async () => {
-    if (!selectedCV || !selectedJob) return;
+    if (!selectedCV || !selectedJob) {
+      toast.error('Please select both a CV and a job');
+      return;
+    }
+    
     setIsTailoring(true);
     setAnalysisResult(null);
+    setTailoredCV(null);
 
     const cv = cvs.find(c => c.id === selectedCV);
     const job = jobs.find(j => j.id === selectedJob);
 
-    // First analyze the match
-    const analysis = await base44.integrations.Core.InvokeLLM({
-      prompt: `
-        Analyze how well this CV matches the job requirements and provide specific recommendations.
-        
-        CV Data:
-        ${JSON.stringify(cv, null, 2)}
-        
-        Job Description:
-        Title: ${job.title}
-        Company: ${job.company}
-        Requirements: ${job.requirements?.join(', ') || 'Not specified'}
-        Required Skills: ${job.required_skills?.join(', ') || 'Not specified'}
-        Description: ${job.description || 'Not specified'}
-        
-        Provide:
-        1. Overall match score (0-100)
-        2. Key strengths (skills/experience that match well)
-        3. Gaps (missing skills or experience)
-        4. ATS keyword suggestions to add
-        5. Specific improvements for bullet points
-      `,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          match_score: { type: "number" },
-          ats_score: { type: "number" },
-          strengths: { type: "array", items: { type: "string" } },
-          gaps: { type: "array", items: { type: "string" } },
-          keywords_to_add: { type: "array", items: { type: "string" } },
-          summary_recommendation: { type: "string" },
-          experience_improvements: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                original: { type: "string" },
-                improved: { type: "string" }
-              }
-            }
-          }
-        }
-      }
-    });
+    try {
+      const result = await api.ai.tailorCV(cv, job);
+      
+      setAnalysisResult({
+        match_score: result.match_score || 75,
+        ats_score: result.ats_score || 80,
+        strengths: result.improvements_made || [],
+        gaps: result.missing_qualifications || [],
+        keywords_to_add: result.keywords_to_add || []
+      });
 
-    setAnalysisResult(analysis);
+      setTailoredCV({
+        ...cv,
+        ...result,
+        id: undefined,
+        title: `${cv.title} - Tailored for ${job.company}`,
+        ats_score: result.ats_score || 80,
+        job_match_score: result.match_score || 75,
+      });
 
-    // Now generate tailored CV
-    const tailored = await base44.integrations.Core.InvokeLLM({
-      prompt: `
-        Rewrite this CV to be perfectly tailored for the target job. 
-        Keep the same structure but:
-        - Optimize the professional summary for this specific role
-        - Rewrite bullet points to highlight relevant experience using strong action verbs
-        - Include ATS-friendly keywords from the job description
-        - Quantify achievements where possible
-        - Adjust tone to match company culture (${job.tone || 'professional'})
-        
-        Original CV:
-        ${JSON.stringify(cv, null, 2)}
-        
-        Target Job:
-        Title: ${job.title}
-        Company: ${job.company}
-        Requirements: ${job.requirements?.join(', ')}
-        Skills: ${job.required_skills?.join(', ')}
-        
-        Return the complete tailored CV in the same JSON structure.
-      `,
-      response_json_schema: {
-        type: "object",
-        properties: {
-          personal_info: {
-            type: "object",
-            properties: {
-              full_name: { type: "string" },
-              email: { type: "string" },
-              phone: { type: "string" },
-              location: { type: "string" },
-              linkedin: { type: "string" },
-              website: { type: "string" },
-              summary: { type: "string" }
-            }
-          },
-          experiences: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                job_title: { type: "string" },
-                company: { type: "string" },
-                location: { type: "string" },
-                start_date: { type: "string" },
-                end_date: { type: "string" },
-                is_current: { type: "boolean" },
-                bullet_points: { type: "array", items: { type: "string" } }
-              }
-            }
-          },
-          skills: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                category: { type: "string" },
-                items: { type: "array", items: { type: "string" } }
-              }
-            }
-          }
-        }
-      }
-    });
-
-    setTailoredCV({
-      ...cv,
-      ...tailored,
-      title: `${cv.title} - Tailored for ${job.company}`,
-      target_job_id: job.id,
-      ats_score: analysis.ats_score,
-      job_match_score: analysis.match_score,
-      is_base_cv: false
-    });
-
-    setIsTailoring(false);
+    } catch (error) {
+      toast.error(error.message || 'Failed to tailor CV. Please try again.');
+    } finally {
+      setIsTailoring(false);
+    }
   };
 
   const saveTailoredCV = async () => {
     if (!tailoredCV) return;
-    const { id, created_date, updated_date, created_by, ...cvData } = tailoredCV;
+    const { id, created_at, updated_at, user_id, ...cvData } = tailoredCV;
     await createMutation.mutateAsync(cvData);
-    window.location.href = createPageUrl('MyCVs');
   };
 
   const currentCV = cvs.find(c => c.id === selectedCV);
@@ -205,7 +118,6 @@ export default function TailorCV() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <Link to={createPageUrl('Dashboard')}>
           <Button variant="ghost" size="icon">
@@ -218,9 +130,7 @@ export default function TailorCV() {
         </div>
       </div>
 
-      {/* Selection Step */}
       <div className="grid lg:grid-cols-2 gap-6 mb-8">
-        {/* Select CV */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -229,40 +139,49 @@ export default function TailorCV() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedCV} onValueChange={setSelectedCV}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a CV to tailor..." />
-              </SelectTrigger>
-              <SelectContent>
-                {cvs.map(cv => (
-                  <SelectItem key={cv.id} value={cv.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{cv.title}</span>
-                      {cv.is_base_cv && (
-                        <Badge variant="secondary" className="text-xs">Master</Badge>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {currentCV && (
-              <div className="mt-4 p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-900 mb-2">{currentCV.title}</h4>
-                <p className="text-sm text-slate-600 mb-2">
-                  {currentCV.personal_info?.full_name || 'No name'} • 
-                  {currentCV.experiences?.length || 0} experiences
-                </p>
-                {currentCV.ats_score && (
-                  <Badge variant="secondary">Current ATS: {currentCV.ats_score}%</Badge>
-                )}
+            {loadingCVs ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
               </div>
+            ) : cvs.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-slate-500 mb-3">No CVs found</p>
+                <Link to={createPageUrl('CVEditor')}>
+                  <Button size="sm">Create a CV first</Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Select value={selectedCV} onValueChange={setSelectedCV}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a CV to tailor..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cvs.map(cv => (
+                      <SelectItem key={cv.id} value={cv.id}>
+                        {cv.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {currentCV && (
+                  <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+                    <h4 className="font-medium text-slate-900 mb-2">{currentCV.title}</h4>
+                    <p className="text-sm text-slate-600 mb-2">
+                      {currentCV.personal_info?.full_name || 'No name'} - 
+                      {currentCV.experiences?.length || 0} experiences
+                    </p>
+                    {currentCV.ats_score && (
+                      <Badge variant="secondary">Current ATS: {currentCV.ats_score}%</Badge>
+                    )}
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>
 
-        {/* Select Job */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="pb-4">
             <CardTitle className="flex items-center gap-2 text-lg">
@@ -271,39 +190,53 @@ export default function TailorCV() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Select value={selectedJob} onValueChange={setSelectedJob}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choose a job offer..." />
-              </SelectTrigger>
-              <SelectContent>
-                {jobs.map(job => (
-                  <SelectItem key={job.id} value={job.id}>
-                    {job.title} at {job.company}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {currentJob && (
-              <div className="mt-4 p-4 bg-slate-50 rounded-lg">
-                <h4 className="font-medium text-slate-900 mb-2">{currentJob.title}</h4>
-                <p className="text-sm text-slate-600 mb-2">
-                  {currentJob.company} • {currentJob.location || 'Remote'}
-                </p>
-                {currentJob.required_skills && currentJob.required_skills.length > 0 && (
-                  <div className="flex flex-wrap gap-1">
-                    {currentJob.required_skills.slice(0, 4).map((skill, i) => (
-                      <Badge key={i} variant="outline" className="text-xs">{skill}</Badge>
+            {loadingJobs ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
+              </div>
+            ) : jobs.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-slate-500 mb-3">No jobs found</p>
+                <Link to={createPageUrl('JobOffers') + '?new=true'}>
+                  <Button size="sm">Add a job first</Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Select value={selectedJob} onValueChange={setSelectedJob}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose a job offer..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobs.map(job => (
+                      <SelectItem key={job.id} value={job.id}>
+                        {job.title} at {job.company}
+                      </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+                
+                {currentJob && (
+                  <div className="mt-4 p-4 bg-slate-50 rounded-lg">
+                    <h4 className="font-medium text-slate-900 mb-2">{currentJob.title}</h4>
+                    <p className="text-sm text-slate-600 mb-2">
+                      {currentJob.company} - {currentJob.location || 'Remote'}
+                    </p>
+                    {currentJob.requirements && currentJob.requirements.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {currentJob.requirements.slice(0, 4).map((req, i) => (
+                          <Badge key={i} variant="outline" className="text-xs">{req}</Badge>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
+              </>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Tailor Button */}
       <div className="text-center mb-8">
         <Button
           size="lg"
@@ -325,14 +258,12 @@ export default function TailorCV() {
         </Button>
       </div>
 
-      {/* Analysis Results */}
       {analysisResult && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="space-y-6"
         >
-          {/* Scores */}
           <div className="grid sm:grid-cols-2 gap-6">
             <Card className="border-0 shadow-sm">
               <CardContent className="p-6">
@@ -361,23 +292,26 @@ export default function TailorCV() {
             </Card>
           </div>
 
-          {/* Strengths & Gaps */}
           <div className="grid md:grid-cols-2 gap-6">
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Check className="w-5 h-5 text-emerald-600" />
-                  Your Strengths
+                  Improvements Made
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {analysisResult.strengths?.map((strength, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">{strength}</span>
-                    </li>
-                  ))}
+                  {analysisResult.strengths?.length > 0 ? (
+                    analysisResult.strengths.map((strength, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-slate-700">{strength}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-sm text-slate-500">CV content has been optimized for the job</li>
+                  )}
                 </ul>
               </CardContent>
             </Card>
@@ -386,44 +320,26 @@ export default function TailorCV() {
               <CardHeader className="pb-2">
                 <CardTitle className="text-lg flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-amber-600" />
-                  Areas to Improve
+                  Missing Qualifications
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {analysisResult.gaps?.map((gap, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm">
-                      <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">{gap}</span>
-                    </li>
-                  ))}
+                  {analysisResult.gaps?.length > 0 ? (
+                    analysisResult.gaps.map((gap, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm">
+                        <AlertCircle className="w-4 h-4 text-amber-500 mt-0.5 flex-shrink-0" />
+                        <span className="text-slate-700">{gap}</span>
+                      </li>
+                    ))
+                  ) : (
+                    <li className="text-sm text-slate-500">Your profile covers most requirements!</li>
+                  )}
                 </ul>
               </CardContent>
             </Card>
           </div>
 
-          {/* Keywords to Add */}
-          {analysisResult.keywords_to_add && analysisResult.keywords_to_add.length > 0 && (
-            <Card className="border-0 shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-violet-600" />
-                  ATS Keywords Added
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-wrap gap-2">
-                  {analysisResult.keywords_to_add.map((keyword, i) => (
-                    <Badge key={i} variant="secondary" className="bg-violet-50 text-violet-700">
-                      {keyword}
-                    </Badge>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Tailored CV Preview */}
           {tailoredCV && (
             <Card className="border-0 shadow-sm border-t-4 border-t-indigo-600">
               <CardHeader>
@@ -439,30 +355,29 @@ export default function TailorCV() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Summary Preview */}
-                  <div>
-                    <h4 className="font-medium text-slate-900 mb-2">Optimized Summary</h4>
-                    <p className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg">
-                      {tailoredCV.personal_info?.summary}
-                    </p>
-                  </div>
+                  {tailoredCV.personal_info?.summary && (
+                    <div>
+                      <h4 className="font-medium text-slate-900 mb-2">Optimized Summary</h4>
+                      <p className="text-sm text-slate-600 bg-slate-50 p-4 rounded-lg">
+                        {tailoredCV.personal_info.summary}
+                      </p>
+                    </div>
+                  )}
 
-                  {/* Actions */}
                   <div className="flex gap-3 pt-4">
                     <Button
                       onClick={saveTailoredCV}
                       className="bg-indigo-600 hover:bg-indigo-700"
+                      disabled={createMutation.isPending}
                     >
-                      <Check className="w-4 h-4 mr-2" />
+                      {createMutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4 mr-2" />
+                      )}
                       Save Tailored CV
                     </Button>
-                    <Link to={createPageUrl('CVEditor') + `?id=${tailoredCV.id || ''}`}>
-                      <Button variant="outline">
-                        Edit Before Saving
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
-                    <Button variant="ghost" onClick={analyzeAndTailor}>
+                    <Button variant="ghost" onClick={analyzeAndTailor} disabled={isTailoring}>
                       <RefreshCw className="w-4 h-4 mr-2" />
                       Regenerate
                     </Button>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { base44 } from '@/api/base44Client';
+import { api } from '@/api/client';
 import { createPageUrl } from '../utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -10,31 +10,22 @@ import {
   Wand2, 
   ChevronLeft,
   ChevronRight,
-  Plus,
-  Trash2,
-  GripVertical,
   User,
   Briefcase,
   GraduationCap,
   Award,
-  Languages,
-  FolderOpen,
-  Sparkles,
-  Check,
   Loader2,
   ArrowLeft,
-  LayoutTemplate
+  LayoutTemplate,
+  FileText,
+  CheckCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 import CVPreview from '@/components/cv/CVPreview';
 import PersonalInfoForm from '@/components/cv/PersonalInfoForm';
@@ -52,11 +43,13 @@ const sections = [
 export default function CVEditor() {
   const urlParams = new URLSearchParams(window.location.search);
   const cvId = urlParams.get('id');
+  const navigate = useNavigate();
   
   const [activeSection, setActiveSection] = useState('personal');
   const [showPreview, setShowPreview] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isEnhancing, setIsEnhancing] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
   const [cvData, setCvData] = useState({
     title: 'My CV',
     template_id: 'professional',
@@ -89,31 +82,38 @@ export default function CVEditor() {
 
   const { data: existingCV, isLoading: loadingCV } = useQuery({
     queryKey: ['cv', cvId],
-    queryFn: () => base44.entities.CVDocument.filter({ id: cvId }),
+    queryFn: () => api.cvs.get(cvId),
     enabled: !!cvId,
   });
 
   useEffect(() => {
-    if (existingCV && existingCV.length > 0) {
-      setCvData(existingCV[0]);
+    if (existingCV) {
+      setCvData(existingCV);
     }
   }, [existingCV]);
 
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       if (cvId) {
-        return base44.entities.CVDocument.update(cvId, data);
+        return api.cvs.update(cvId, data);
       } else {
-        return base44.entities.CVDocument.create(data);
+        return api.cvs.create(data);
       }
     },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['cvs'] });
+      queryClient.invalidateQueries({ queryKey: ['cv', cvId] });
       setIsSaving(false);
+      setHasChanges(false);
+      toast.success('CV saved successfully!');
       if (!cvId && result?.id) {
-        window.history.replaceState(null, '', `${window.location.pathname}?id=${result.id}`);
+        navigate(`/CVEditor?id=${result.id}`, { replace: true });
       }
     },
+    onError: (error) => {
+      setIsSaving(false);
+      toast.error(error.message || 'Failed to save CV');
+    }
   });
 
   const handleSave = async () => {
@@ -124,57 +124,42 @@ export default function CVEditor() {
   const handleEnhanceWithAI = async () => {
     setIsEnhancing(true);
     
-    const prompt = `
-    Enhance this CV data to make it more professional and ATS-friendly. 
-    Improve the summary to be compelling and keyword-rich.
-    Rewrite bullet points using strong action verbs and quantifiable achievements.
-    
-    Current CV data:
-    ${JSON.stringify(cvData, null, 2)}
-    
-    Return the enhanced CV data in the exact same JSON structure.
-    `;
-    
-    const response = await base44.integrations.Core.InvokeLLM({
-      prompt,
-      response_json_schema: {
-        type: "object",
-        properties: {
+    try {
+      const enhanced = await api.ai.enhanceCV(cvData);
+      
+      if (enhanced) {
+        setCvData(prev => ({
+          ...prev,
           personal_info: {
-            type: "object",
-            properties: {
-              summary: { type: "string" }
-            }
+            ...prev.personal_info,
+            ...enhanced.personal_info
           },
-          experiences: {
-            type: "array",
-            items: {
-              type: "object",
-              properties: {
-                job_title: { type: "string" },
-                bullet_points: { type: "array", items: { type: "string" } }
-              }
-            }
-          }
-        }
+          experiences: enhanced.experiences || prev.experiences,
+          skills: enhanced.skills || prev.skills
+        }));
+        setHasChanges(true);
+        toast.success('CV enhanced with AI! Review the changes and save.');
       }
-    });
-    
-    if (response) {
-      setCvData(prev => ({
-        ...prev,
-        personal_info: {
-          ...prev.personal_info,
-          summary: response.personal_info?.summary || prev.personal_info.summary
-        },
-        experiences: prev.experiences.map((exp, idx) => ({
-          ...exp,
-          bullet_points: response.experiences?.[idx]?.bullet_points || exp.bullet_points
-        }))
-      }));
+    } catch (error) {
+      toast.error(error.message || 'Failed to enhance CV with AI');
+    } finally {
+      setIsEnhancing(false);
     }
-    
-    setIsEnhancing(false);
+  };
+
+  const handleExportPdf = async () => {
+    try {
+      const blob = await api.export.cvPdf(cvData, cvData.template_id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cvData.title || 'cv'}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF exported successfully!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to export PDF');
+    }
   };
 
   const updateCVData = (section, data) => {
@@ -182,6 +167,7 @@ export default function CVEditor() {
       ...prev,
       [section]: data
     }));
+    setHasChanges(true);
   };
 
   if (loadingCV && cvId) {
@@ -194,7 +180,6 @@ export default function CVEditor() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-4">
           <Link to={createPageUrl('MyCVs')}>
@@ -205,7 +190,10 @@ export default function CVEditor() {
           <div>
             <Input
               value={cvData.title}
-              onChange={(e) => setCvData(prev => ({ ...prev, title: e.target.value }))}
+              onChange={(e) => {
+                setCvData(prev => ({ ...prev, title: e.target.value }));
+                setHasChanges(true);
+              }}
               className="text-xl font-semibold border-none px-0 h-auto focus-visible:ring-0 bg-transparent"
               placeholder="CV Title"
             />
@@ -216,6 +204,11 @@ export default function CVEditor() {
               {cvData.ats_score && (
                 <Badge variant="secondary" className="text-xs bg-emerald-100 text-emerald-700">
                   ATS: {cvData.ats_score}%
+                </Badge>
+              )}
+              {hasChanges && (
+                <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
+                  Unsaved changes
                 </Badge>
               )}
             </div>
@@ -261,13 +254,10 @@ export default function CVEditor() {
         </div>
       </div>
 
-      {/* Main Editor */}
       <div className="grid lg:grid-cols-2 gap-6">
-        {/* Form Section */}
         <div className={`${showPreview ? 'hidden lg:block' : ''}`}>
           <Card className="border-0 shadow-sm">
             <CardContent className="p-0">
-              {/* Section Tabs */}
               <div className="border-b border-slate-100 p-4">
                 <div className="flex gap-2 overflow-x-auto pb-2">
                   {sections.map((section) => (
@@ -289,7 +279,6 @@ export default function CVEditor() {
                 </div>
               </div>
 
-              {/* Form Content */}
               <div className="p-6">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -326,7 +315,6 @@ export default function CVEditor() {
                   </motion.div>
                 </AnimatePresence>
 
-                {/* Section Navigation */}
                 <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-100">
                   <Button
                     variant="outline"
@@ -360,7 +348,6 @@ export default function CVEditor() {
           </Card>
         </div>
 
-        {/* Preview Section */}
         <div className={`${!showPreview ? 'hidden lg:block' : ''}`}>
           <Card className="border-0 shadow-sm sticky top-6">
             <CardHeader className="pb-3 border-b border-slate-100">
@@ -373,7 +360,7 @@ export default function CVEditor() {
                       Templates
                     </Button>
                   </Link>
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={handleExportPdf}>
                     <Download className="w-4 h-4 mr-2" />
                     Export
                   </Button>

@@ -1,0 +1,175 @@
+You are an expert full-stack SaaS architect, UX/UI designer, and AI workflow engineer.
+Your mission is to design and blueprint a complete, production-ready SaaS webapp that generates stunning, customizable, ATS-optimized CVs for users, and adapts each CV to any job offer using AI.
+
+🎯 Main Goal
+
+Create a complete plan, architecture, and actionable roadmap to build a polished, modern, high-converting webapp that lets users:
+
+Create a CV automatically from scratch
+
+Upload their existing CV (PDF / DOCX)
+
+Upload or paste a job offer
+
+Have AI analyze job requirements
+
+Have AI rewrite the CV for that specific job
+
+Choose between multiple stunning professional templates
+
+Customize colors, layout, fonts
+
+Export in PDF, Word, or shareable URL
+
+Manage multiple CV versions inside a personal dashboard
+
+Everything must be ATS-friendly, visually gorgeous, and extremely easy for users.
+
+🧱 Deliverables required
+
+Produce all of the following:
+
+1. Full Feature Specification
+
+A detailed breakdown of every feature: MVP vs. Premium vs. Future expansions.
+
+2. Full Technical Architecture
+
+Frontend: Next.js + modern UI components
+
+Backend: Node.js / serverless
+
+Database: Supabase or Firebase
+
+File storage for PDFs
+
+Authentication system
+
+Stripe subscription integration
+
+AI pipelines (job → CV matching, rewriting, formatting)
+
+Export pipeline (PDF, DOCX)
+
+3. AI Workflow Design
+
+Create extremely detailed workflows for:
+
+Parsing CVs
+
+Parsing job offers
+
+Matching skills
+
+Rewriting bullet points in strong action verbs
+
+Optimizing for Applicant Tracking Systems
+
+Selecting templates
+
+Adapting tone (creative, corporate, startup, academic)
+
+Cover letter generation
+
+Portfolio generation
+
+4. UI/UX Wireframes
+
+Describe the layouts, pages, flow, and user experience for:
+
+Homepage
+
+Sign-up / Login
+
+Dashboard
+
+CV Editor
+
+Template Gallery
+
+Job-Offer Analyzer
+
+Export screen
+
+Settings / Billing
+
+5. Database Schema
+
+Name every table and field:
+
+users
+
+documents
+
+cv_versions
+
+job_offers
+
+generated_outputs
+
+subscription_plans
+
+template_library
+
+6. Perfect MVP Roadmap
+
+A week-by-week development plan:
+
+What to build first
+
+What to build next
+
+When to integrate AI
+
+When to integrate payments
+
+When to run beta tests
+
+7. Suggestions for scaling
+
+Caching, rate-limiting, vector embeddings for profile memory, template rendering performance, etc.
+
+⚡ Style Requirements
+
+Clear
+
+Technical when needed
+
+Actionable
+
+Extremely detailed
+
+Organized with headings, bullet points, tables
+
+Zero fluff
+
+🧠 Output Format
+
+Return everything as one structured document following this order:
+
+Executive Summary
+
+Complete Feature List
+
+Architecture Overview
+
+AI Pipelines
+
+Database Schema
+
+UI/UX Wireframes Description
+
+Development Roadmap
+
+Monetization Strategy
+
+Risks & Mitigation
+
+Final Recommendations
+
+💥 Execution Instructions
+
+Begin immediately.
+Think like a senior engineer building a real company.
+Provide maximum detail so the project can start today.
+Do NOT ask clarifying questions — produce the full blueprint now.

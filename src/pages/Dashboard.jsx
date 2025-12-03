@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '../utils';
-import { base44 } from '@/api/base44Client';
+import { api } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { 
@@ -10,7 +11,6 @@ import {
   Plus, 
   TrendingUp, 
   Target, 
-  Clock, 
   ArrowRight,
   Sparkles,
   Upload,
@@ -29,43 +29,43 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from 'sonner';
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    loadUser();
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const userData = await base44.auth.me();
-      setUser(userData);
-    } catch (e) {
-      base44.auth.redirectToLogin();
-    }
-  };
+  const { user } = useAuth();
 
   const { data: cvs = [], isLoading: cvsLoading } = useQuery({
     queryKey: ['cvs'],
-    queryFn: () => base44.entities.CVDocument.list('-updated_date', 10),
+    queryFn: () => api.cvs.list(),
     enabled: !!user,
   });
 
   const { data: jobs = [], isLoading: jobsLoading } = useQuery({
     queryKey: ['jobs'],
-    queryFn: () => base44.entities.JobOffer.list('-created_date', 5),
+    queryFn: () => api.jobs.list(),
     enabled: !!user,
   });
 
   const { data: subscription } = useQuery({
     queryKey: ['subscription'],
-    queryFn: async () => {
-      const subs = await base44.entities.UserSubscription.filter({ created_by: user?.email }, '-created_date', 1);
-      return subs[0] || { plan: 'free', ai_credits_used: 0, ai_credits_limit: 5, exports_used: 0, exports_limit: 3 };
-    },
+    queryFn: () => api.subscription.get(),
     enabled: !!user,
   });
+
+  const handleExportPdf = async (cv) => {
+    try {
+      const blob = await api.export.cvPdf(cv, cv.template_id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${cv.title || 'cv'}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('PDF exported successfully!');
+    } catch (error) {
+      toast.error(error.message || 'Failed to export PDF');
+    }
+  };
 
   const stats = [
     { 
@@ -94,7 +94,7 @@ export default function Dashboard() {
     },
     { 
       label: 'AI Credits', 
-      value: `${subscription?.ai_credits_limit - subscription?.ai_credits_used || 5}`, 
+      value: `${(subscription?.ai_credits_limit || 5) - (subscription?.ai_credits_used || 0)}`, 
       icon: Sparkles, 
       color: 'bg-amber-500',
       lightColor: 'bg-amber-50',
@@ -102,17 +102,8 @@ export default function Dashboard() {
     },
   ];
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="w-8 h-8 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Welcome Section */}
       <div className="mb-8">
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -120,7 +111,7 @@ export default function Dashboard() {
           transition={{ duration: 0.3 }}
         >
           <h1 className="text-3xl font-bold text-slate-900">
-            Welcome back, {user.full_name?.split(' ')[0] || 'there'}! 👋
+            Welcome back, {user?.full_name?.split(' ')[0] || 'there'}!
           </h1>
           <p className="text-slate-600 mt-1">
             Here's what's happening with your job search
@@ -128,7 +119,6 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      {/* Quick Actions */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <Link to={createPageUrl('CVEditor')}>
           <motion.div
@@ -172,7 +162,7 @@ export default function Dashboard() {
           </motion.div>
         </Link>
 
-        <Link to={createPageUrl('Templates')}>
+        <Link to={createPageUrl('TailorCV')}>
           <motion.div
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
@@ -187,7 +177,6 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      {/* Stats */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {stats.map((stat, index) => (
           <motion.div
@@ -213,9 +202,7 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Main Content */}
       <div className="grid lg:grid-cols-3 gap-8">
-        {/* Recent CVs */}
         <div className="lg:col-span-2">
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -294,13 +281,15 @@ export default function Dashboard() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleExportPdf(cv)}>
                               <Download className="w-4 h-4 mr-2" />
                               Export PDF
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Target className="w-4 h-4 mr-2" />
-                              Tailor for Job
+                            <DropdownMenuItem asChild>
+                              <Link to={createPageUrl('TailorCV') + `?cv=${cv.id}`}>
+                                <Target className="w-4 h-4 mr-2" />
+                                Tailor for Job
+                              </Link>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -313,9 +302,7 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Sidebar */}
         <div className="space-y-6">
-          {/* Usage */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-semibold">Your Plan</CardTitle>
@@ -362,7 +349,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Recent Jobs */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-4">
               <CardTitle className="text-lg font-semibold">Recent Jobs</CardTitle>
