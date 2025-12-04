@@ -19,6 +19,7 @@ import CareerDiscovery from './pages/CareerDiscovery';
 import InterviewSimulator from './pages/InterviewSimulator';
 import CareerMentor from './pages/CareerMentor';
 import SuccessRoadmap from './pages/SuccessRoadmap';
+import TemplatePreview from './pages/TemplatePreview';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,6 +143,9 @@ function AppRoutes() {
           <Layout currentPageName="SuccessRoadmap"><SuccessRoadmap /></Layout>
         </ProtectedRoute>
       } />
+      
+      {/* Public template preview - no auth required */}
+      <Route path="/preview" element={<TemplatePreview />} />
       
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

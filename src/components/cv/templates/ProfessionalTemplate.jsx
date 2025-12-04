@@ -1,5 +1,5 @@
 import React from 'react';
-import { Mail, Phone, MapPin, Linkedin, Globe, Award, Briefcase, GraduationCap, Star, Target, User, Languages, CheckCircle2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Linkedin, Globe, Award, Briefcase, GraduationCap, Star, Target, User, Languages, Calendar, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 export default function ProfessionalTemplate({ data, forExport = false }) {
@@ -14,10 +14,13 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
     customization = {}
   } = data || {};
 
-  const primaryColor = customization?.primary_color || '#2D3748';
-  const accentColor = customization?.accent_color || '#6366F1';
-  const fontFamily = customization?.font_family || "'Playfair Display', 'Georgia', serif";
-  const bodyFont = "'Inter', 'Segoe UI', sans-serif";
+  const primaryColor = customization?.primary_color || '#1a1a2e';
+  const accentColor = customization?.accent_color || '#6366f1';
+  const accentLight = '#818cf8';
+  const accentGlow = '#a5b4fc';
+  const goldAccent = '#d4af37';
+  const headerFont = customization?.font_family || "'Cormorant Garamond', 'Playfair Display', Georgia, serif";
+  const bodyFont = "'Inter', 'Segoe UI', -apple-system, sans-serif";
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -31,253 +34,313 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
   const getProficiencyWidth = (proficiency) => {
     const levels = {
       'Native': 100,
-      'Fluent': 95,
-      'Advanced': 85,
-      'Proficient': 75,
-      'Intermediate': 60,
-      'Elementary': 40,
+      'Fluent': 100,
+      'Advanced': 90,
+      'Proficient': 80,
+      'Intermediate': 65,
+      'Elementary': 45,
       'Basic': 25
     };
-    return levels[proficiency] || 50;
+    return levels[proficiency] || 60;
   };
+
+  const firstName = personal_info.full_name?.split(' ')[0] || 'Your';
+  const lastName = personal_info.full_name?.split(' ').slice(1).join(' ') || 'Name';
 
   return (
     <div 
-      className={`bg-white ${forExport ? '' : 'shadow-2xl rounded-xl'} overflow-hidden`}
+      className={`bg-white ${forExport ? '' : 'shadow-2xl'} overflow-hidden`}
       style={{ 
         fontFamily: bodyFont,
         minHeight: forExport ? 'auto' : '1100px',
         maxWidth: '8.5in',
-        margin: '0 auto'
+        margin: '0 auto',
+        fontSize: '11px',
+        lineHeight: '1.6'
       }}
     >
       <div className="flex min-h-full">
-        {/* Elegant Sidebar */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            LEFT SIDEBAR - Premium Dark Panel with Luxurious Depth
+        ═══════════════════════════════════════════════════════════════════ */}
         <aside 
-          className="w-[280px] flex-shrink-0 relative"
+          className="w-[270px] flex-shrink-0 relative overflow-hidden"
           style={{ 
-            background: `linear-gradient(180deg, ${primaryColor} 0%, ${primaryColor}ee 50%, ${primaryColor}dd 100%)`,
+            background: `linear-gradient(175deg, #1e1e3f 0%, ${primaryColor} 30%, #12122a 100%)`,
           }}
         >
-          {/* Subtle pattern overlay */}
+          {/* Luxury subtle texture overlay */}
           <div 
-            className="absolute inset-0 opacity-5"
+            className="absolute inset-0 opacity-[0.03]"
             style={{
-              backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='1' fill-rule='evenodd'/%3E%3C/svg%3E")`,
             }}
           />
           
-          <div className="relative z-10 p-7">
-            {/* Name Section with elegant typography */}
-            <div className="text-center mb-8 pt-4">
-              <div className="mb-4">
-                <div 
-                  className="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-4"
-                  style={{ 
-                    background: `linear-gradient(135deg, ${accentColor}40 0%, ${accentColor}20 100%)`,
-                    border: `2px solid ${accentColor}60`
-                  }}
-                >
-                  <User className="w-10 h-10 text-white opacity-90" />
+          {/* Radiant glow accents */}
+          <div 
+            className="absolute -top-32 -right-32 w-64 h-64 opacity-20"
+            style={{
+              background: `radial-gradient(circle, ${accentColor}40, transparent 60%)`,
+            }}
+          />
+          <div 
+            className="absolute -bottom-24 -left-24 w-48 h-48 opacity-15"
+            style={{
+              background: `radial-gradient(circle, ${accentLight}30, transparent 60%)`,
+            }}
+          />
+          
+          <div className="relative z-10 h-full flex flex-col">
+            {/* ─────────────────────────────────────────────────────────────────
+                NAME HEADER - Elegant First Name, Last Name Format
+            ───────────────────────────────────────────────────────────────── */}
+            <div className="px-7 pt-14 pb-6 text-center">
+              <h1 
+                className="text-white leading-none mb-1"
+                style={{ 
+                  fontFamily: headerFont,
+                  fontSize: '38px',
+                  fontWeight: '600',
+                  letterSpacing: '0.02em',
+                  textShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                }}
+              >
+                {firstName}
+              </h1>
+              <h2 
+                className="text-white/80"
+                style={{ 
+                  fontFamily: headerFont,
+                  fontSize: '32px',
+                  fontWeight: '400',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase'
+                }}
+              >
+                {lastName}
+              </h2>
+            </div>
+
+            {/* Decorative gold accent line with title */}
+            {personal_info.title && (
+              <div className="px-6 mb-7">
+                <div className="relative py-3">
+                  <div 
+                    className="absolute inset-0 opacity-10 rounded"
+                    style={{ 
+                      background: `linear-gradient(90deg, transparent, ${accentColor}40, transparent)` 
+                    }}
+                  />
+                  <div className="flex items-center gap-3">
+                    <div 
+                      className="h-px flex-1"
+                      style={{ background: `linear-gradient(90deg, transparent, ${goldAccent}60)` }}
+                    />
+                    <div 
+                      className="w-2 h-2 rotate-45"
+                      style={{ backgroundColor: goldAccent }}
+                    />
+                    <div 
+                      className="h-px flex-1"
+                      style={{ background: `linear-gradient(90deg, ${goldAccent}60, transparent)` }}
+                    />
+                  </div>
+                  <p 
+                    className="text-center text-[9px] font-bold tracking-[0.25em] uppercase mt-3"
+                    style={{ color: accentLight }}
+                  >
+                    {personal_info.title}
+                  </p>
                 </div>
               </div>
-              <h1 
-                className="text-2xl font-bold text-white tracking-wide leading-tight"
-                style={{ fontFamily }}
-              >
-                {personal_info.full_name?.split(' ')[0] || 'Your'}
-              </h1>
-              <h1 
-                className="text-2xl font-bold text-white tracking-wide"
-                style={{ fontFamily }}
-              >
-                {personal_info.full_name?.split(' ').slice(1).join(' ') || 'Name'}
-              </h1>
-              {personal_info.title && (
-                <p 
-                  className="text-sm mt-3 font-medium tracking-wider uppercase"
-                  style={{ color: `${accentColor}` }}
-                >
-                  {personal_info.title}
-                </p>
-              )}
-            </div>
-
-            {/* Decorative divider */}
-            <div className="flex items-center justify-center mb-8">
-              <div className="h-px w-8 bg-white/20"></div>
-              <div 
-                className="w-2 h-2 rounded-full mx-3"
-                style={{ backgroundColor: accentColor }}
-              ></div>
-              <div className="h-px w-8 bg-white/20"></div>
-            </div>
-
-            {/* Profile Section */}
-            {personal_info.summary && (
-              <section className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
-                  <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${accentColor}30` }}
-                  >
-                    <Target className="w-4 h-4" style={{ color: accentColor }} />
-                  </div>
-                  <h2 
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-white"
-                    style={{ fontFamily }}
-                  >
-                    Profile
-                  </h2>
-                </div>
-                <p className="text-white/80 text-sm leading-relaxed">
-                  {personal_info.summary}
-                </p>
-              </section>
             )}
 
-            {/* Contact Section */}
-            <section className="mb-8">
-              <div className="flex items-center gap-3 mb-4">
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: `${accentColor}30` }}
-                >
-                  <Mail className="w-4 h-4" style={{ color: accentColor }} />
+            {/* ─────────────────────────────────────────────────────────────────
+                PROFILE SECTION
+            ───────────────────────────────────────────────────────────────── */}
+            {personal_info.summary && (
+              <div className="px-6 mb-6">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div 
+                    className="w-7 h-7 rounded-md flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${accentColor}35, ${accentColor}15)`,
+                      boxShadow: `0 2px 8px ${accentColor}20`
+                    }}
+                  >
+                    <User className="w-3.5 h-3.5" style={{ color: accentLight }} />
+                  </div>
+                  <h3 
+                    className="text-[10px] font-bold tracking-[0.2em] uppercase"
+                    style={{ color: 'rgba(255,255,255,0.95)' }}
+                  >
+                    Profile
+                  </h3>
                 </div>
-                <h2 
-                  className="text-xs font-bold uppercase tracking-[0.2em] text-white"
-                  style={{ fontFamily }}
+                <p 
+                  className="text-[10.5px] leading-[1.75] text-justify"
+                  style={{ color: 'rgba(255,255,255,0.72)' }}
+                >
+                  {personal_info.summary}
+                </p>
+              </div>
+            )}
+
+            {/* ─────────────────────────────────────────────────────────────────
+                CONTACT SECTION
+            ───────────────────────────────────────────────────────────────── */}
+            <div className="px-6 mb-6">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div 
+                  className="w-7 h-7 rounded-md flex items-center justify-center"
+                  style={{ 
+                    background: `linear-gradient(135deg, ${accentColor}35, ${accentColor}15)`,
+                    boxShadow: `0 2px 8px ${accentColor}20`
+                  }}
+                >
+                  <Mail className="w-3.5 h-3.5" style={{ color: accentLight }} />
+                </div>
+                <h3 
+                  className="text-[10px] font-bold tracking-[0.2em] uppercase"
+                  style={{ color: 'rgba(255,255,255,0.95)' }}
                 >
                   Contact
-                </h2>
+                </h3>
               </div>
+              
               <div className="space-y-3">
                 {personal_info.full_name && (
-                  <div className="flex items-start gap-3">
-                    <User className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Name</p>
-                      <p className="text-white text-sm">{personal_info.full_name}</p>
-                    </div>
+                  <div className="group">
+                    <p className="text-[8px] uppercase tracking-[0.18em] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Name</p>
+                    <p className="text-[11px] font-medium" style={{ color: 'rgba(255,255,255,0.92)' }}>{personal_info.full_name}</p>
                   </div>
                 )}
                 {personal_info.location && (
-                  <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Address</p>
-                      <p className="text-white text-sm">{personal_info.location}</p>
-                    </div>
+                  <div className="group">
+                    <p className="text-[8px] uppercase tracking-[0.18em] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Address</p>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{personal_info.location}</p>
                   </div>
                 )}
                 {personal_info.phone && (
-                  <div className="flex items-start gap-3">
-                    <Phone className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Phone</p>
-                      <p className="text-white text-sm">{personal_info.phone}</p>
-                    </div>
+                  <div className="group">
+                    <p className="text-[8px] uppercase tracking-[0.18em] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Phone</p>
+                    <p className="text-[11px]" style={{ color: 'rgba(255,255,255,0.88)' }}>{personal_info.phone}</p>
                   </div>
                 )}
                 {personal_info.email && (
-                  <div className="flex items-start gap-3">
-                    <Mail className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-0.5">Email</p>
-                      <p className="text-white text-sm break-all">{personal_info.email}</p>
-                    </div>
-                  </div>
-                )}
-                {personal_info.linkedin && (
-                  <div className="flex items-start gap-3">
-                    <Linkedin className="w-4 h-4 text-white/50 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-white/40 text-xs uppercase tracking-wider mb-0.5">LinkedIn</p>
-                      <a href={personal_info.linkedin} className="text-white text-sm hover:underline">
-                        View Profile
-                      </a>
-                    </div>
+                  <div className="group">
+                    <p className="text-[8px] uppercase tracking-[0.18em] mb-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>Email</p>
+                    <p className="text-[11px] break-all" style={{ color: 'rgba(255,255,255,0.88)' }}>{personal_info.email}</p>
                   </div>
                 )}
               </div>
-            </section>
+            </div>
 
-            {/* Skills/Competences Section */}
+            {/* ─────────────────────────────────────────────────────────────────
+                COMPETENCES
+            ───────────────────────────────────────────────────────────────── */}
             {skills.length > 0 && (
-              <section className="mb-8">
-                <div className="flex items-center gap-3 mb-4">
+              <div className="px-6 mb-6">
+                <div className="flex items-center gap-2.5 mb-4">
                   <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${accentColor}30` }}
+                    className="w-7 h-7 rounded-md flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${accentColor}35, ${accentColor}15)`,
+                      boxShadow: `0 2px 8px ${accentColor}20`
+                    }}
                   >
-                    <Star className="w-4 h-4" style={{ color: accentColor }} />
+                    <Star className="w-3.5 h-3.5" style={{ color: accentLight }} />
                   </div>
-                  <h2 
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-white"
-                    style={{ fontFamily }}
+                  <h3 
+                    className="text-[10px] font-bold tracking-[0.2em] uppercase"
+                    style={{ color: 'rgba(255,255,255,0.95)' }}
                   >
                     Competences
-                  </h2>
+                  </h3>
                 </div>
-                <div className="space-y-2">
+                
+                <div className="space-y-1">
                   {skills.map((skillCategory, index) => (
                     <div key={index}>
-                      {skillCategory.category && (
-                        <p 
-                          className="text-xs font-semibold mb-2 uppercase tracking-wider"
-                          style={{ color: accentColor }}
-                        >
-                          {skillCategory.category}
-                        </p>
-                      )}
                       {(skillCategory.items || []).map((skill, skillIndex) => (
                         <div 
                           key={skillIndex}
-                          className="flex items-center gap-2 text-white/90 text-sm py-1.5"
+                          className="flex items-start gap-2.5 py-1.5"
                         >
-                          <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" style={{ color: accentColor }} />
-                          <span>{skill}</span>
+                          <div 
+                            className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                            style={{ 
+                              backgroundColor: accentLight,
+                              boxShadow: `0 0 6px ${accentColor}60`
+                            }}
+                          />
+                          <span 
+                            className="text-[10.5px] leading-snug"
+                            style={{ color: 'rgba(255,255,255,0.82)' }}
+                          >
+                            {skill}
+                          </span>
                         </div>
                       ))}
                     </div>
                   ))}
                 </div>
-              </section>
+              </div>
             )}
 
-            {/* Languages with elegant progress bars */}
+            {/* ─────────────────────────────────────────────────────────────────
+                LANGUAGES - Premium Progress Bars
+            ───────────────────────────────────────────────────────────────── */}
             {languages && languages.length > 0 && (
-              <section>
-                <div className="flex items-center gap-3 mb-4">
+              <div className="px-6 mt-auto pb-8">
+                <div className="flex items-center gap-2.5 mb-5">
                   <div 
-                    className="w-8 h-8 rounded-lg flex items-center justify-center"
-                    style={{ backgroundColor: `${accentColor}30` }}
+                    className="w-7 h-7 rounded-md flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${accentColor}35, ${accentColor}15)`,
+                      boxShadow: `0 2px 8px ${accentColor}20`
+                    }}
                   >
-                    <Languages className="w-4 h-4" style={{ color: accentColor }} />
+                    <Languages className="w-3.5 h-3.5" style={{ color: accentLight }} />
                   </div>
-                  <h2 
-                    className="text-xs font-bold uppercase tracking-[0.2em] text-white"
-                    style={{ fontFamily }}
+                  <h3 
+                    className="text-[10px] font-bold tracking-[0.2em] uppercase"
+                    style={{ color: 'rgba(255,255,255,0.95)' }}
                   >
                     Languages
-                  </h2>
+                  </h3>
                 </div>
+                
                 <div className="space-y-4">
                   {languages.map((lang, index) => {
                     const width = getProficiencyWidth(lang.proficiency);
                     return (
                       <div key={index}>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-white text-sm font-medium">{lang.language}</span>
-                          <span className="text-white/60 text-xs">{width}%</span>
+                        <div className="flex justify-between items-center mb-1.5">
+                          <span 
+                            className="text-[11px] font-medium"
+                            style={{ color: 'rgba(255,255,255,0.9)' }}
+                          >
+                            {lang.language}
+                          </span>
+                          <span 
+                            className="text-[9px] font-medium"
+                            style={{ color: accentLight }}
+                          >
+                            {width}%
+                          </span>
                         </div>
-                        <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                          className="h-2 rounded-full overflow-hidden"
+                          style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                        >
                           <div 
-                            className="h-full rounded-full transition-all duration-500"
+                            className="h-full rounded-full"
                             style={{ 
                               width: `${width}%`,
-                              background: `linear-gradient(90deg, ${accentColor} 0%, ${accentColor}cc 100%)`
+                              background: `linear-gradient(90deg, ${accentColor}, ${accentLight}, ${accentGlow})`,
+                              boxShadow: `0 0 12px ${accentColor}50`
                             }}
                           />
                         </div>
@@ -285,194 +348,294 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                     );
                   })}
                 </div>
-              </section>
+              </div>
             )}
           </div>
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 bg-gray-50/50">
-          <div className="p-10">
-            {/* Education Section */}
+        {/* ═══════════════════════════════════════════════════════════════════
+            RIGHT MAIN CONTENT - Elegant Cards with Premium Styling
+        ═══════════════════════════════════════════════════════════════════ */}
+        <main 
+          className="flex-1"
+          style={{ 
+            background: 'linear-gradient(180deg, #fafbfc 0%, #f8f9fb 50%, #f5f6f8 100%)'
+          }}
+        >
+          <div className="p-8">
+            
+            {/* ─────────────────────────────────────────────────────────────────
+                EDUCATION SECTION
+            ───────────────────────────────────────────────────────────────── */}
             {education.length > 0 && (
-              <section className="mb-10">
-                <div className="flex items-center gap-3 mb-6">
+              <section className="mb-8">
+                <div className="flex items-center gap-3.5 mb-5">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ 
-                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` 
+                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentLight} 100%)`,
+                      boxShadow: `0 4px 16px ${accentColor}40, 0 0 0 3px rgba(255,255,255,0.8)`
                     }}
                   >
                     <GraduationCap className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h2 
-                      className="text-lg font-bold tracking-wide"
-                      style={{ fontFamily, color: primaryColor }}
+                      className="text-[17px] font-semibold tracking-[0.06em]"
+                      style={{ 
+                        fontFamily: headerFont,
+                        color: primaryColor
+                      }}
                     >
                       EDUCATION
                     </h2>
                     <div 
-                      className="h-0.5 w-12 mt-1 rounded-full"
-                      style={{ backgroundColor: accentColor }}
+                      className="h-[3px] w-12 mt-1 rounded-full"
+                      style={{ 
+                        background: `linear-gradient(90deg, ${accentColor}, ${accentLight})`,
+                        boxShadow: `0 2px 6px ${accentColor}30`
+                      }}
                     />
                   </div>
                 </div>
                 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {education.map((edu, index) => (
                     <article 
-                      key={index} 
-                      className="relative pl-6 border-l-2"
-                      style={{ borderColor: `${accentColor}30` }}
+                      key={index}
+                      className="relative pl-6"
                     >
+                      {/* Vertical timeline line */}
                       <div 
-                        className="absolute -left-[7px] top-1 w-3 h-3 rounded-full border-2 bg-white"
-                        style={{ borderColor: accentColor }}
+                        className="absolute left-[7px] top-3 bottom-0 w-[2px] rounded-full"
+                        style={{ 
+                          background: `linear-gradient(180deg, ${accentColor}50, ${accentColor}15)`
+                        }}
                       />
-                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 mb-1">
-                        <div className="flex-1">
-                          <p 
-                            className="text-sm font-semibold"
-                            style={{ color: accentColor }}
-                          >
-                            {formatDate(edu.start_date)} - {formatDate(edu.graduation_date)}
-                          </p>
-                          <h3 
-                            className="font-bold text-base mt-1"
-                            style={{ color: primaryColor }}
-                          >
-                            {edu.degree}{edu.field && ` in ${edu.field}`}
-                          </h3>
-                          <p className="text-gray-600 text-sm mt-0.5">
-                            {edu.institution}{edu.location && ` • ${edu.location}`}
-                          </p>
-                        </div>
+                      
+                      {/* Glowing timeline dot */}
+                      <div 
+                        className="absolute left-0 top-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
+                          boxShadow: `0 0 0 3px white, 0 0 12px ${accentColor}50`
+                        }}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
                       </div>
-                      {edu.achievements && edu.achievements.length > 0 && (
-                        <div className="mt-2 text-sm text-gray-600">
-                          {edu.achievements.filter(a => a && a.trim()).map((achievement, aIndex) => (
-                            <p key={aIndex}>{achievement}</p>
-                          ))}
+                      
+                      {/* Content card */}
+                      <div 
+                        className="rounded-lg p-4 border"
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.85)',
+                          borderColor: 'rgba(0,0,0,0.05)',
+                          boxShadow: '0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        <div 
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold mb-2"
+                          style={{ 
+                            backgroundColor: `${accentColor}12`,
+                            color: accentColor
+                          }}
+                        >
+                          <Calendar className="w-3 h-3" />
+                          {edu.start_date && formatDate(edu.start_date)} – {edu.graduation_date && formatDate(edu.graduation_date)}
                         </div>
-                      )}
+                        
+                        <h3 
+                          className="font-bold text-[13px] leading-tight mb-1"
+                          style={{ color: primaryColor }}
+                        >
+                          {edu.degree}{edu.field && ` in ${edu.field}`}
+                        </h3>
+                        
+                        <p className="text-gray-500 text-[11px] flex items-center gap-1.5">
+                          <Building2 className="w-3 h-3 text-gray-400" />
+                          {edu.institution}
+                        </p>
+                        
+                        {edu.achievements && edu.achievements.length > 0 && (
+                          <p 
+                            className="text-[10px] mt-2 italic"
+                            style={{ color: `${accentColor}cc` }}
+                          >
+                            {edu.achievements.filter(a => a && a.trim()).join(' • ')}
+                          </p>
+                        )}
+                      </div>
                     </article>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Experience Section */}
+            {/* ─────────────────────────────────────────────────────────────────
+                EXPERIENCES SECTION
+            ───────────────────────────────────────────────────────────────── */}
             {experiences.length > 0 && (
-              <section className="mb-10">
-                <div className="flex items-center gap-3 mb-6">
+              <section className="mb-8">
+                <div className="flex items-center gap-3.5 mb-5">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ 
-                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` 
+                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentLight} 100%)`,
+                      boxShadow: `0 4px 16px ${accentColor}40, 0 0 0 3px rgba(255,255,255,0.8)`
                     }}
                   >
                     <Briefcase className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h2 
-                      className="text-lg font-bold tracking-wide"
-                      style={{ fontFamily, color: primaryColor }}
+                      className="text-[17px] font-semibold tracking-[0.06em]"
+                      style={{ 
+                        fontFamily: headerFont,
+                        color: primaryColor
+                      }}
                     >
                       EXPERIENCES
                     </h2>
                     <div 
-                      className="h-0.5 w-12 mt-1 rounded-full"
-                      style={{ backgroundColor: accentColor }}
+                      className="h-[3px] w-12 mt-1 rounded-full"
+                      style={{ 
+                        background: `linear-gradient(90deg, ${accentColor}, ${accentLight})`,
+                        boxShadow: `0 2px 6px ${accentColor}30`
+                      }}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {experiences.map((exp, index) => (
                     <article 
-                      key={index} 
-                      className="relative pl-6 border-l-2"
-                      style={{ borderColor: `${accentColor}30` }}
+                      key={index}
+                      className="relative pl-6"
                     >
+                      {/* Vertical timeline line */}
                       <div 
-                        className="absolute -left-[7px] top-1 w-3 h-3 rounded-full border-2 bg-white"
-                        style={{ borderColor: accentColor }}
+                        className="absolute left-[7px] top-3 bottom-0 w-[2px] rounded-full"
+                        style={{ 
+                          background: `linear-gradient(180deg, ${accentColor}50, ${accentColor}15)`
+                        }}
                       />
-                      <div className="mb-2">
-                        <p 
-                          className="text-sm font-semibold"
-                          style={{ color: accentColor }}
-                        >
-                          {formatDate(exp.start_date)} – {exp.is_current ? 'Present' : formatDate(exp.end_date)}
-                        </p>
-                        <h3 
-                          className="font-bold text-base mt-1"
-                          style={{ color: primaryColor }}
-                        >
-                          {exp.job_title} – {exp.company}
-                        </h3>
-                        {exp.location && (
-                          <p className="text-gray-500 text-sm">{exp.location}</p>
-                        )}
+                      
+                      {/* Glowing timeline dot */}
+                      <div 
+                        className="absolute left-0 top-1.5 w-4 h-4 rounded-full flex items-center justify-center"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
+                          boxShadow: `0 0 0 3px white, 0 0 12px ${accentColor}50`
+                        }}
+                      >
+                        <div className="w-1.5 h-1.5 rounded-full bg-white" />
                       </div>
                       
-                      {exp.description && (
-                        <p className="text-gray-600 text-sm mb-2">{exp.description}</p>
-                      )}
-                      
-                      {exp.bullet_points && exp.bullet_points.length > 0 && (
-                        <ul className="space-y-1.5">
-                          {exp.bullet_points.filter(bp => bp && bp.trim()).map((bp, bpIndex) => (
-                            <li 
-                              key={bpIndex} 
-                              className="text-gray-700 text-sm flex items-start gap-2"
-                            >
-                              <span 
-                                className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
-                                style={{ backgroundColor: accentColor }}
-                              />
-                              <span>{bp}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      
-                      {exp.achievements && (
-                        <p className="text-gray-600 text-sm mt-3 italic border-l-2 pl-3 bg-gray-50 py-2 rounded-r"
-                          style={{ borderColor: `${accentColor}50` }}
+                      {/* Content card */}
+                      <div 
+                        className="rounded-lg p-4 border"
+                        style={{ 
+                          backgroundColor: 'rgba(255,255,255,0.85)',
+                          borderColor: 'rgba(0,0,0,0.05)',
+                          boxShadow: '0 2px 12px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.03)'
+                        }}
+                      >
+                        <div 
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[9px] font-bold mb-2"
+                          style={{ 
+                            backgroundColor: `${accentColor}12`,
+                            color: accentColor
+                          }}
                         >
-                          {exp.achievements}
-                        </p>
-                      )}
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(exp.start_date)} – {exp.is_current ? 'Present' : formatDate(exp.end_date)}
+                        </div>
+                        
+                        <h3 
+                          className="font-bold text-[13px] leading-tight mb-1"
+                          style={{ color: primaryColor }}
+                        >
+                          {exp.job_title}
+                          <span className="font-normal text-gray-500"> – {exp.company}</span>
+                        </h3>
+                        
+                        {exp.location && (
+                          <p className="text-gray-400 text-[10px] flex items-center gap-1 mb-2">
+                            <MapPin className="w-3 h-3" />
+                            {exp.location}
+                          </p>
+                        )}
+                        
+                        {exp.bullet_points && exp.bullet_points.length > 0 && (
+                          <ul className="space-y-1.5 mt-2">
+                            {exp.bullet_points.filter(bp => bp && bp.trim()).map((bp, bpIndex) => (
+                              <li 
+                                key={bpIndex} 
+                                className="text-gray-600 text-[10.5px] flex items-start gap-2 leading-relaxed"
+                              >
+                                <span 
+                                  className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                                  style={{ 
+                                    backgroundColor: accentColor,
+                                    boxShadow: `0 0 4px ${accentColor}40`
+                                  }}
+                                />
+                                <span>{bp}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                        
+                        {exp.achievements && typeof exp.achievements === 'string' && exp.achievements.trim() && (
+                          <div 
+                            className="mt-3 px-3 py-2 rounded-r-md border-l-[3px] text-[10px] italic leading-relaxed"
+                            style={{ 
+                              borderColor: accentColor,
+                              backgroundColor: `${accentColor}08`,
+                              color: '#5a5a6e'
+                            }}
+                          >
+                            {exp.achievements}
+                          </div>
+                        )}
+                      </div>
                     </article>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Certifications Section */}
+            {/* ─────────────────────────────────────────────────────────────────
+                CERTIFICATIONS
+            ───────────────────────────────────────────────────────────────── */}
             {certifications && certifications.length > 0 && (
-              <section className="mb-10">
-                <div className="flex items-center gap-3 mb-6">
+              <section className="mb-8">
+                <div className="flex items-center gap-3.5 mb-5">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ 
-                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` 
+                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentLight} 100%)`,
+                      boxShadow: `0 4px 16px ${accentColor}40, 0 0 0 3px rgba(255,255,255,0.8)`
                     }}
                   >
                     <Award className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h2 
-                      className="text-lg font-bold tracking-wide"
-                      style={{ fontFamily, color: primaryColor }}
+                      className="text-[17px] font-semibold tracking-[0.06em]"
+                      style={{ 
+                        fontFamily: headerFont,
+                        color: primaryColor
+                      }}
                     >
                       CERTIFICATIONS
                     </h2>
                     <div 
-                      className="h-0.5 w-12 mt-1 rounded-full"
-                      style={{ backgroundColor: accentColor }}
+                      className="h-[3px] w-12 mt-1 rounded-full"
+                      style={{ 
+                        background: `linear-gradient(90deg, ${accentColor}, ${accentLight})`,
+                        boxShadow: `0 2px 6px ${accentColor}30`
+                      }}
                     />
                   </div>
                 </div>
@@ -481,77 +644,95 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                   {certifications.map((cert, index) => (
                     <div 
                       key={index}
-                      className="flex items-center gap-3 p-3 bg-white rounded-lg shadow-sm border border-gray-100"
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg border"
+                      style={{ 
+                        backgroundColor: 'rgba(255,255,255,0.85)',
+                        borderColor: 'rgba(0,0,0,0.05)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                      }}
                     >
                       <div 
                         className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ backgroundColor: `${accentColor}15` }}
+                        style={{ 
+                          background: `linear-gradient(135deg, ${accentColor}18, ${accentColor}08)`
+                        }}
                       >
                         <Award className="w-4 h-4" style={{ color: accentColor }} />
                       </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-sm" style={{ color: primaryColor }}>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-[11px]" style={{ color: primaryColor }}>
                           {cert.name}
                         </h4>
                         {cert.issuer && (
-                          <p className="text-gray-500 text-xs">{cert.issuer}</p>
+                          <p className="text-gray-400 text-[9px]">{cert.issuer}</p>
                         )}
                       </div>
-                      {cert.date && (
-                        <span className="text-xs text-gray-400">{cert.date}</span>
-                      )}
                     </div>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Projects Section */}
+            {/* ─────────────────────────────────────────────────────────────────
+                PROJECTS
+            ───────────────────────────────────────────────────────────────── */}
             {projects && projects.length > 0 && (
               <section>
-                <div className="flex items-center gap-3 mb-6">
+                <div className="flex items-center gap-3.5 mb-5">
                   <div 
-                    className="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center"
                     style={{ 
-                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentColor}dd 100%)` 
+                      background: `linear-gradient(135deg, ${accentColor} 0%, ${accentLight} 100%)`,
+                      boxShadow: `0 4px 16px ${accentColor}40, 0 0 0 3px rgba(255,255,255,0.8)`
                     }}
                   >
                     <Target className="w-5 h-5 text-white" />
                   </div>
                   <div>
                     <h2 
-                      className="text-lg font-bold tracking-wide"
-                      style={{ fontFamily, color: primaryColor }}
+                      className="text-[17px] font-semibold tracking-[0.06em]"
+                      style={{ 
+                        fontFamily: headerFont,
+                        color: primaryColor
+                      }}
                     >
                       PROJECTS
                     </h2>
                     <div 
-                      className="h-0.5 w-12 mt-1 rounded-full"
-                      style={{ backgroundColor: accentColor }}
+                      className="h-[3px] w-12 mt-1 rounded-full"
+                      style={{ 
+                        background: `linear-gradient(90deg, ${accentColor}, ${accentLight})`,
+                        boxShadow: `0 2px 6px ${accentColor}30`
+                      }}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4">
+                <div className="space-y-3">
                   {projects.map((project, index) => (
                     <div 
                       key={index}
-                      className="p-4 bg-white rounded-lg shadow-sm border border-gray-100"
+                      className="p-4 rounded-lg border"
+                      style={{ 
+                        backgroundColor: 'rgba(255,255,255,0.85)',
+                        borderColor: 'rgba(0,0,0,0.05)',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.03)'
+                      }}
                     >
-                      <h4 className="font-semibold" style={{ color: primaryColor }}>
+                      <h4 className="font-semibold text-[12px]" style={{ color: primaryColor }}>
                         {project.name}
                       </h4>
                       {project.description && (
-                        <p className="text-gray-600 text-sm mt-1">{project.description}</p>
+                        <p className="text-gray-500 text-[10.5px] mt-1.5 leading-relaxed">{project.description}</p>
                       )}
                       {project.technologies && project.technologies.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-2">
+                        <div className="flex flex-wrap gap-1.5 mt-2.5">
                           {project.technologies.map((tech, techIndex) => (
                             <span 
                               key={techIndex}
-                              className="px-2 py-0.5 text-xs rounded-full"
+                              className="px-2 py-0.5 text-[8px] rounded-full font-semibold"
                               style={{ 
-                                backgroundColor: `${accentColor}15`,
+                                background: `linear-gradient(135deg, ${accentColor}12, ${accentColor}06)`,
                                 color: accentColor
                               }}
                             >
