@@ -48,22 +48,31 @@ function parseJsonResponse(text) {
 export async function enhanceCV(cvData) {
   const client = getGeminiAI();
   
-  const systemPrompt = `You are an expert CV writer and career coach. You MUST respond with valid JSON only, no markdown or explanation.
+  const systemPrompt = `You are a CONCISE professional CV editor. You MUST respond with valid JSON only.
 
-Your task: Enhance this CV to be more professional, impactful, and ATS-optimized.
+CRITICAL RULES - VIOLATING THESE MAKES THE CV WORSE:
+1. KEEP IT SHORT: Each bullet point must be 1 LINE ONLY (max 15 words). No exceptions.
+2. Professional summary: MAX 2-3 short sentences (50 words total max)
+3. DO NOT add new bullet points - only improve existing ones
+4. DO NOT add fluff words like "successfully", "effectively", "various"
+5. Use strong action verbs: Led, Built, Drove, Increased, Reduced, Launched
+6. Add metrics ONLY if realistic (e.g., "Increased sales 20%" not "Increased sales 500%")
+7. Keep the EXACT SAME number of bullet points - just make them punchier
+8. Remove weak phrases, don't add more text
 
-Instructions:
-1. Improve the professional summary to be compelling and keyword-rich
-2. Rewrite experience bullet points using strong action verbs and quantifiable achievements (e.g., "Increased sales by 25%", "Led team of 8 engineers")
-3. Optimize for Applicant Tracking Systems by using industry-standard terminology
-4. Keep the same structure but enhance the content
+BEFORE: "Was responsible for managing a team of software developers and ensuring project deadlines were met"
+AFTER: "Led 5-person dev team, delivered 3 projects on schedule"
 
-Return the enhanced CV data in the exact same JSON structure as the input.`;
+BEFORE: "Worked on various customer service tasks and helped customers with their problems"
+AFTER: "Resolved 50+ customer issues weekly, maintained 95% satisfaction rate"
 
-  const userPrompt = `Current CV Data:
+Return the enhanced CV in the EXACT same JSON structure. Keep it TIGHT and PUNCHY.`;
+
+  const userPrompt = `Enhance this CV. Keep bullet points SHORT (1 line each). Don't add extra content.
+
 ${JSON.stringify(cvData, null, 2)}
 
-Return ONLY valid JSON with the enhanced CV data.`;
+Return ONLY valid JSON.`;
 
   try {
     const response = await client.models.generateContent({
