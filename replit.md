@@ -16,6 +16,7 @@ CVForge is a revolutionary, breathtaking AI-powered CV builder designed to inspi
 
 ## Key Features
 - CV creation and editing with live preview
+- **CV Import**: Upload existing PDF/DOCX CVs and AI auto-parses content to populate form
 - Job offer tracking and management
 - AI-powered CV tailoring with Gemini
 - Multiple professional templates
@@ -185,9 +186,26 @@ Located in `src/index.css`:
 2. **Confetti System**: Proper cleanup with useState/useEffect pattern
 3. **Performance**: Optimized animations and reduced DOM operations
 
+## Recent Changes (December 4, 2025)
+
+### CV Import Feature
+1. **File Upload API**: `POST /api/ai/parse-cv` accepts PDF and DOCX files (max 10MB)
+2. **Text Extraction**: Uses pdf-parse for PDFs and mammoth for DOCX files
+3. **AI Parsing**: Gemini AI extracts structured CV data (personal info, experience, education, skills)
+4. **Frontend Integration**: CVEditor shows upload interface when accessed via ?upload=true
+5. **Error Handling**: Comprehensive validation for file types, size, and content quality
+
+### Technical Details
+- PDF parsing: pdf-parse library with ESM/CJS interop via createRequire
+- DOCX parsing: mammoth library for extracting plain text
+- Supported formats: .pdf, .docx (old .doc format gracefully rejected with helpful message)
+- Minimum content: 50 characters required to prevent empty/corrupted file processing
+- AI Credits: Uses existing credit system (decrements on successful parse)
+
 ## User Preferences
 - Clean, modern design with gradient accents
 - Inspirational and motivational tone
 - Celebration moments for achievements
 - Mobile-responsive design
 - Using Google Gemini Flash (gemini-2.5-flash) for all AI features
+- Stay within Gemini API free tier limits (15 req/min, 1,500 req/day, 1M tokens/min)
