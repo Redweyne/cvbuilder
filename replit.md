@@ -206,6 +206,23 @@ Located in `src/index.css`:
 - Fixed PDF parsing by updating to pdf-parse v2 API (class-based instead of function-based)
 - The PDFParse class is instantiated with `new PDFParse({ data: buffer })` and `getText()` is called to extract text
 
+### Professional CV Templates (December 4, 2025)
+**8 ATS-Optimized Professional Templates:**
+1. **Professional** - Clean corporate design with traditional serif fonts, blue accent color
+2. **Minimal** - Elegant simplicity with centered header, maximum whitespace
+3. **Executive** - Sophisticated design with gold accents for senior roles
+4. **Modern** - Contemporary layout with bold indigo-purple gradients
+5. **Tech** - Developer-focused with code-style formatting (comments, syntax)
+6. **Creative** - Eye-catching pink-purple design for creative industries
+7. **Academic** - Scholarly design with purple accents for research/education
+8. **Compact** - Space-efficient design fitting more content on single page
+
+**Technical Implementation:**
+- CVTemplateRenderer component for dynamic template switching
+- Inline template selector in CV Editor with visual preview chips
+- PDF export with template-specific colors and proper multi-page pagination
+- PDFBuilder class handles page management, spacing, and consistent styling
+
 ## User Preferences
 - Clean, modern design with gradient accents
 - Inspirational and motivational tone
