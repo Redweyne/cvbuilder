@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web"]
+modules = ["nodejs-20", "web", "postgresql-16"]
 [agent]
 expertMode = true
 integrations = ["javascript_gemini:1.0.0"]
@@ -63,12 +63,12 @@ localPort = 39737
 externalPort = 5173
 
 [[ports]]
-localPort = 40579
-externalPort = 5000
+localPort = 39913
+externalPort = 6800
 
 [[ports]]
-localPort = 45947
-externalPort = 6800
+localPort = 40579
+externalPort = 5000
 
 [deployment]
 deploymentTarget = "static"
