@@ -616,6 +616,119 @@ Analyze application readiness. Return ONLY valid JSON.`;
   }
 }
 
+export async function parseUploadedCV(fileContent, fileType) {
+  const client = getGeminiAI();
+  
+  const systemPrompt = `You are an expert CV parser and data extractor. You MUST respond with valid JSON only.
+
+Your task: Extract all information from the uploaded CV/resume content and structure it into a standardized format.
+
+Instructions:
+1. Extract personal information (name, email, phone, location, LinkedIn, website)
+2. Create a professional summary from the profile/objective section or synthesize one from the content
+3. Extract all work experiences with company, title, dates, location, and bullet points
+4. Extract education history with institution, degree, field, dates, and achievements
+5. Extract all skills mentioned (technical and soft skills)
+6. Extract certifications, languages, and projects if present
+7. If dates are partial, make reasonable assumptions (e.g., "2020-Present" becomes start_date: "2020-01", end_date: null, current: true)
+8. Clean and normalize the data for professional presentation
+
+Return as JSON with this exact structure:
+{
+  "personal_info": {
+    "full_name": "Full Name",
+    "email": "email@example.com",
+    "phone": "+1234567890",
+    "location": "City, Country",
+    "linkedin": "linkedin.com/in/username",
+    "website": "personal-website.com",
+    "summary": "Professional summary paragraph"
+  },
+  "experiences": [
+    {
+      "id": "exp_1",
+      "company": "Company Name",
+      "title": "Job Title",
+      "location": "City, Country",
+      "start_date": "2020-01",
+      "end_date": "2023-06",
+      "current": false,
+      "description": "Brief role description",
+      "achievements": ["Achievement 1 with metrics if available", "Achievement 2"]
+    }
+  ],
+  "education": [
+    {
+      "id": "edu_1",
+      "institution": "University Name",
+      "degree": "Bachelor's/Master's/PhD",
+      "field": "Field of Study",
+      "start_date": "2016-09",
+      "end_date": "2020-06",
+      "gpa": "3.8",
+      "achievements": ["Dean's List", "Relevant coursework"]
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill_1",
+      "name": "Skill Name",
+      "category": "Technical/Soft/Language/Tool",
+      "level": "Expert/Advanced/Intermediate/Beginner"
+    }
+  ],
+  "certifications": [
+    {
+      "id": "cert_1",
+      "name": "Certification Name",
+      "issuer": "Issuing Organization",
+      "date": "2023-01",
+      "expires": "2025-01"
+    }
+  ],
+  "languages": [
+    {
+      "id": "lang_1",
+      "name": "Language Name",
+      "proficiency": "Native/Fluent/Professional/Basic"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj_1",
+      "name": "Project Name",
+      "description": "Brief description",
+      "technologies": ["Tech1", "Tech2"],
+      "url": "project-url.com"
+    }
+  ],
+  "parsing_confidence": 95,
+  "parsing_notes": ["Any notes about unclear data or assumptions made"]
+}`;
+
+  const userPrompt = `CV Content (${fileType}):
+${fileContent}
+
+Extract all CV data and return ONLY valid JSON.`;
+
+  try {
+    const response = await client.models.generateContent({
+      model: 'gemini-2.5-flash',
+      config: {
+        systemInstruction: systemPrompt,
+        responseMimeType: 'application/json',
+      },
+      contents: userPrompt,
+    });
+
+    const text = extractText(response);
+    return parseJsonResponse(text);
+  } catch (error) {
+    console.error('CV parsing error:', error);
+    throw new Error('Failed to parse CV: ' + (error.message || 'Unknown error'));
+  }
+}
+
 export async function generateSuccessRoadmap(userData, goals) {
   const client = getGeminiAI();
   

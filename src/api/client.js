@@ -250,6 +250,30 @@ class ApiClient {
         body: JSON.stringify({ userData, goals }),
       });
     },
+
+    parseCV: async (file) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const headers = {};
+      if (this.token) {
+        headers['Authorization'] = `Bearer ${this.token}`;
+      }
+      
+      const response = await fetch(`${API_BASE}/ai/parse-cv`, {
+        method: 'POST',
+        headers,
+        body: formData,
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Request failed' }));
+        throw new Error(error.error || 'Failed to parse CV');
+      }
+      
+      return response.json();
+    },
   };
 
   export = {

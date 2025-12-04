@@ -6,6 +6,10 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import jwt from 'jsonwebtoken';
 import multer from 'multer';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
+import mammoth from 'mammoth';
 
 import { users, cvDocuments, jobOffers, subscriptions, templates, coverLetters } from './db.js';
 import { 
@@ -19,7 +23,8 @@ import {
   generateInterviewSummary,
   careerMentorChat,
   analyzeApplicationReadiness,
-  generateSuccessRoadmap
+  generateSuccessRoadmap,
+  parseUploadedCV
 } from './ai.js';
 import { generateCVPdf, generateCoverLetterPdf } from './pdf.js';
 
@@ -498,6 +503,81 @@ app.post('/api/ai/success-roadmap', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Success roadmap error:', error);
     res.status(500).json({ error: 'Failed to generate success roadmap' });
+  }
+});
+
+app.post('/api/ai/parse-cv', authMiddleware, upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const allowedMimeTypes = [
+      'application/pdf',
+      'text/plain',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
+    
+    const fileName = req.file.originalname || '';
+    const isAllowedExtension = /\.(pdf|doc|docx|txt)$/i.test(fileName);
+    const isAllowedMime = allowedMimeTypes.includes(req.file.mimetype);
+    
+    if (!isAllowedMime && !isAllowedExtension) {
+      return res.status(400).json({ error: 'Invalid file type. Please upload a PDF, Word document, or text file.' });
+    }
+    
+    const sub = subscriptions.findByUserId(req.user.id);
+    if (sub.ai_credits_used >= sub.ai_credits_limit) {
+      return res.status(403).json({ error: 'AI credits exhausted. Please upgrade your plan.' });
+    }
+    
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI service not configured. Please add your Gemini API key.' });
+    }
+    
+    let fileContent = '';
+    const fileType = req.file.mimetype || 'text/plain';
+    
+    if (fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
+      try {
+        const pdfData = await pdfParse(req.file.buffer);
+        fileContent = pdfData.text;
+      } catch (pdfError) {
+        console.error('PDF parsing error:', pdfError);
+        return res.status(400).json({ error: 'Failed to read PDF file. Please ensure it is not encrypted or corrupted.' });
+      }
+    } else if (
+      fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || 
+      fileName.toLowerCase().endsWith('.docx')
+    ) {
+      try {
+        const result = await mammoth.extractRawText({ buffer: req.file.buffer });
+        fileContent = result.value;
+      } catch (docxError) {
+        console.error('DOCX parsing error:', docxError);
+        return res.status(400).json({ error: 'Failed to read Word document. Please ensure it is not corrupted.' });
+      }
+    } else if (
+      fileType === 'application/msword' || 
+      fileName.toLowerCase().endsWith('.doc')
+    ) {
+      return res.status(400).json({ error: 'Old .doc format is not supported. Please convert to .docx or PDF.' });
+    } else {
+      fileContent = req.file.buffer.toString('utf-8');
+    }
+    
+    if (!fileContent || fileContent.trim().length < 50) {
+      return res.status(400).json({ error: 'Could not extract enough text from the file. Please try a different format.' });
+    }
+    
+    const parsedCV = await parseUploadedCV(fileContent, fileType);
+    subscriptions.incrementAICredits(req.user.id);
+    
+    res.json(parsedCV);
+  } catch (error) {
+    console.error('CV parsing error:', error);
+    res.status(500).json({ error: 'Failed to parse CV: ' + (error.message || 'Unknown error') });
   }
 });
 
