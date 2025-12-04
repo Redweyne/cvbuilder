@@ -427,11 +427,11 @@ function TestimonialCard({ testimonial, index }) {
           </p>
         </div>
         
-        <div className={`flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r ${testimonial.gradient} bg-opacity-10`}>
-          <div className={`text-3xl font-bold bg-gradient-to-r ${testimonial.gradient} bg-clip-text text-transparent`}>
+        <div className={`flex items-center gap-3 p-4 rounded-2xl bg-gradient-to-r ${testimonial.gradient}`}>
+          <div className="text-3xl font-bold text-white">
             {testimonial.metric}
           </div>
-          <div className="text-sm text-slate-600">
+          <div className="text-sm text-white/90">
             {testimonial.metricLabel}
           </div>
         </div>
@@ -548,7 +548,7 @@ export default function Home() {
             transition={{ duration: 0.8, delay: 0.1 }}
           >
             <span className="block text-slate-900">Your Career</span>
-            <span className="block mt-2 text-gradient-aurora glow-text-intense">
+            <span className="block mt-2 text-gradient">
               Transformation
             </span>
             <motion.span 
