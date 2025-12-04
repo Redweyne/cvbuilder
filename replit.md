@@ -196,11 +196,15 @@ Located in `src/index.css`:
 5. **Error Handling**: Comprehensive validation for file types, size, and content quality
 
 ### Technical Details
-- PDF parsing: pdf-parse library with ESM/CJS interop via createRequire
+- PDF parsing: pdf-parse v2 library using PDFParse class with `{ data: buffer }` option and `getText()` method
 - DOCX parsing: mammoth library for extracting plain text
 - Supported formats: .pdf, .docx (old .doc format gracefully rejected with helpful message)
 - Minimum content: 50 characters required to prevent empty/corrupted file processing
 - AI Credits: Uses existing credit system (decrements on successful parse)
+
+### CV Import Fix (December 4, 2025)
+- Fixed PDF parsing by updating to pdf-parse v2 API (class-based instead of function-based)
+- The PDFParse class is instantiated with `new PDFParse({ data: buffer })` and `getText()` is called to extract text
 
 ## User Preferences
 - Clean, modern design with gradient accents
