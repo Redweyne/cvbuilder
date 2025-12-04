@@ -20,7 +20,8 @@ import {
   Calendar,
   Grid,
   List,
-  Loader2
+  Loader2,
+  Upload
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -127,12 +128,20 @@ export default function MyCVs() {
           <h1 className="text-3xl font-bold text-slate-900">My CVs</h1>
           <p className="text-slate-600 mt-1">Manage and organize all your CVs</p>
         </div>
-        <Link to={createPageUrl('CVEditor')}>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25">
-            <Plus className="w-4 h-4 mr-2" />
-            Create New CV
-          </Button>
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link to={createPageUrl('CVEditor') + '?upload=true'}>
+            <Button variant="outline" className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+              <Upload className="w-4 h-4 mr-2" />
+              Import CV
+            </Button>
+          </Link>
+          <Link to={createPageUrl('CVEditor')}>
+            <Button className="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/25">
+              <Plus className="w-4 h-4 mr-2" />
+              Create New CV
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -193,12 +202,20 @@ export default function MyCVs() {
               : 'Create your first CV and start applying for your dream jobs'}
           </p>
           {!searchQuery && statusFilter === 'all' && (
-            <Link to={createPageUrl('CVEditor')}>
-              <Button className="bg-indigo-600 hover:bg-indigo-700">
-                <Plus className="w-4 h-4 mr-2" />
-                Create Your First CV
-              </Button>
-            </Link>
+            <div className="flex items-center justify-center gap-3">
+              <Link to={createPageUrl('CVEditor') + '?upload=true'}>
+                <Button variant="outline" className="border-indigo-200 text-indigo-600 hover:bg-indigo-50">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Import Existing CV
+                </Button>
+              </Link>
+              <Link to={createPageUrl('CVEditor')}>
+                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New CV
+                </Button>
+              </Link>
+            </div>
           )}
         </div>
       ) : (

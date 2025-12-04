@@ -230,6 +230,50 @@ export default function CVEditor() {
     try {
       const parsedData = await api.ai.parseCV(file);
       
+      const transformedExperiences = (parsedData.experiences || []).map(exp => ({
+        ...exp,
+        job_title: exp.title || exp.job_title || '',
+        bullet_points: exp.achievements || exp.bullet_points || [],
+        is_current: exp.current || exp.is_current || false
+      }));
+      
+      const transformedEducation = (parsedData.education || []).map(edu => ({
+        ...edu,
+        start_date: edu.start_date || '',
+        graduation_date: edu.end_date || edu.graduation_date || ''
+      }));
+      
+      const transformedSkills = (parsedData.skills || []).map((skill, index) => {
+        if (typeof skill === 'string') {
+          return { id: `skill_${index}`, category: 'General', items: [skill] };
+        }
+        if (skill.name && !skill.items) {
+          return { 
+            id: skill.id || `skill_${index}`, 
+            category: skill.category || 'General', 
+            items: [skill.name] 
+          };
+        }
+        return skill;
+      });
+      
+      const groupedSkills = transformedSkills.reduce((acc, skill) => {
+        const category = skill.category || 'General';
+        const existing = acc.find(s => s.category === category);
+        if (existing) {
+          existing.items = [...new Set([...(existing.items || []), ...(skill.items || [])])];
+        } else {
+          acc.push({ id: skill.id || `skill_cat_${acc.length}`, category, items: skill.items || [] });
+        }
+        return acc;
+      }, []);
+      
+      const transformedLanguages = (parsedData.languages || []).map(lang => ({
+        ...lang,
+        language: lang.name || lang.language || '',
+        proficiency: lang.proficiency || 'Intermediate'
+      }));
+      
       setCvData(prev => ({
         ...prev,
         title: parsedData.personal_info?.full_name 
@@ -239,11 +283,11 @@ export default function CVEditor() {
           ...prev.personal_info,
           ...parsedData.personal_info
         },
-        experiences: parsedData.experiences || [],
-        education: parsedData.education || [],
-        skills: parsedData.skills || [],
+        experiences: transformedExperiences,
+        education: transformedEducation,
+        skills: groupedSkills,
         certifications: parsedData.certifications || [],
-        languages: parsedData.languages || [],
+        languages: transformedLanguages,
         projects: parsedData.projects || []
       }));
       
