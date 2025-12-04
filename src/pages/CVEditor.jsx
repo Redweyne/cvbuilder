@@ -31,7 +31,7 @@ import { Badge } from '@/components/ui/badge';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
-import CVPreview from '@/components/cv/CVPreview';
+import CVTemplateRenderer from '@/components/cv/templates/CVTemplateRenderer';
 import PersonalInfoForm from '@/components/cv/PersonalInfoForm';
 import ExperienceForm from '@/components/cv/ExperienceForm';
 import EducationForm from '@/components/cv/EducationForm';
@@ -564,25 +564,49 @@ export default function CVEditor() {
         <div className={`${!showPreview ? 'hidden lg:block' : ''}`}>
           <Card className="border-0 shadow-sm sticky top-6">
             <CardHeader className="pb-3 border-b border-slate-100">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-semibold">Preview</CardTitle>
-                <div className="flex items-center gap-2">
-                  <Link to={createPageUrl('Templates')}>
-                    <Button variant="outline" size="sm">
-                      <LayoutTemplate className="w-4 h-4 mr-2" />
-                      Templates
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg font-semibold">Preview</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" onClick={handleExportPdf}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export
                     </Button>
-                  </Link>
-                  <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                    <Download className="w-4 h-4 mr-2" />
-                    Export
-                  </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { id: 'professional', label: 'Professional', color: '#1e40af' },
+                    { id: 'modern', label: 'Modern', color: '#6366f1' },
+                    { id: 'minimal', label: 'Minimal', color: '#111827' },
+                    { id: 'executive', label: 'Executive', color: '#1c1917' },
+                    { id: 'tech', label: 'Tech', color: '#10b981' },
+                    { id: 'creative', label: 'Creative', color: '#ec4899' },
+                    { id: 'academic', label: 'Academic', color: '#7c3aed' },
+                    { id: 'compact', label: 'Compact', color: '#3b82f6' },
+                  ].map((template) => (
+                    <button
+                      key={template.id}
+                      onClick={() => {
+                        setCvData(prev => ({ ...prev, template_id: template.id }));
+                        setHasChanges(true);
+                      }}
+                      className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
+                        cvData.template_id === template.id
+                          ? 'text-white shadow-md scale-105'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                      style={cvData.template_id === template.id ? { backgroundColor: template.color } : {}}
+                    >
+                      {template.label}
+                    </button>
+                  ))}
                 </div>
               </div>
             </CardHeader>
             <CardContent className="p-4">
               <div className="bg-slate-100 rounded-lg p-4 overflow-auto max-h-[calc(100vh-200px)]">
-                <CVPreview data={cvData} />
+                <CVTemplateRenderer data={cvData} templateId={cvData.template_id} />
               </div>
             </CardContent>
           </Card>

@@ -1,40 +1,200 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
+const TEMPLATE_COLORS = {
+  professional: {
+    primary: rgb(0.12, 0.25, 0.69),
+    secondary: rgb(0.12, 0.25, 0.69),
+    accent: rgb(0.12, 0.25, 0.69)
+  },
+  modern: {
+    primary: rgb(0.39, 0.4, 0.95),
+    secondary: rgb(0.49, 0.45, 0.95),
+    accent: rgb(0.39, 0.4, 0.95)
+  },
+  minimal: {
+    primary: rgb(0.07, 0.09, 0.15),
+    secondary: rgb(0.3, 0.3, 0.35),
+    accent: rgb(0.07, 0.09, 0.15)
+  },
+  executive: {
+    primary: rgb(0.11, 0.1, 0.09),
+    secondary: rgb(0.71, 0.33, 0.04),
+    accent: rgb(0.71, 0.33, 0.04)
+  },
+  tech: {
+    primary: rgb(0.06, 0.72, 0.51),
+    secondary: rgb(0.06, 0.09, 0.16),
+    accent: rgb(0.06, 0.72, 0.51)
+  },
+  creative: {
+    primary: rgb(0.93, 0.27, 0.6),
+    secondary: rgb(0.55, 0.36, 0.96),
+    accent: rgb(0.93, 0.27, 0.6)
+  },
+  academic: {
+    primary: rgb(0.49, 0.23, 0.93),
+    secondary: rgb(0.49, 0.23, 0.93),
+    accent: rgb(0.49, 0.23, 0.93)
+  },
+  compact: {
+    primary: rgb(0.23, 0.51, 0.96),
+    secondary: rgb(0.12, 0.16, 0.22),
+    accent: rgb(0.23, 0.51, 0.96)
+  }
+};
+
 const COLORS = {
-  primary: rgb(0.31, 0.27, 0.89),
-  secondary: rgb(0.39, 0.4, 0.95),
   text: rgb(0.1, 0.1, 0.1),
   gray: rgb(0.4, 0.4, 0.4),
   lightGray: rgb(0.6, 0.6, 0.6),
   white: rgb(1, 1, 1),
-  black: rgb(0, 0, 0)
+  black: rgb(0, 0, 0),
+  divider: rgb(0.9, 0.9, 0.9)
 };
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  if (result) {
+    return rgb(
+      parseInt(result[1], 16) / 255,
+      parseInt(result[2], 16) / 255,
+      parseInt(result[3], 16) / 255
+    );
+  }
+  return null;
+}
+
+function getTemplateColors(templateId, customization = {}) {
+  const baseColors = TEMPLATE_COLORS[templateId] || TEMPLATE_COLORS.professional;
+  
+  if (customization?.primary_color) {
+    const customPrimary = hexToRgb(customization.primary_color);
+    if (customPrimary) {
+      return {
+        ...baseColors,
+        primary: customPrimary,
+        accent: customPrimary
+      };
+    }
+  }
+  
+  return baseColors;
+}
+
+class PDFBuilder {
+  constructor(pdfDoc, templateId, fonts, colors) {
+    this.pdfDoc = pdfDoc;
+    this.templateId = templateId;
+    this.fonts = fonts;
+    this.colors = colors;
+    this.width = 595.28;
+    this.height = 841.89;
+    this.margin = templateId === 'compact' ? 40 : 50;
+    this.page = pdfDoc.addPage([this.width, this.height]);
+    this.yPosition = this.height - this.margin;
+    
+    this.isSerif = ['professional', 'executive', 'academic'].includes(templateId);
+    this.isMinimal = templateId === 'minimal';
+    this.isCompact = templateId === 'compact';
+    this.baseFontSize = this.isCompact ? 9 : 10;
+    this.headerSize = this.isCompact ? 20 : 24;
+    this.sectionHeaderSize = this.isCompact ? 10 : 12;
+  }
+
+  get font() {
+    return this.isSerif ? this.fonts.timesRoman : this.fonts.helvetica;
+  }
+
+  get fontBold() {
+    return this.isSerif ? this.fonts.timesRomanBold : this.fonts.helveticaBold;
+  }
+
+  checkSpace(needed = 50) {
+    if (this.yPosition < needed) {
+      this.page = this.pdfDoc.addPage([this.width, this.height]);
+      this.yPosition = this.height - this.margin;
+      return true;
+    }
+    return false;
+  }
+
+  drawText(text, options = {}) {
+    const {
+      font = this.font,
+      size = this.baseFontSize,
+      color = COLORS.text,
+      x = this.margin,
+      centered = false
+    } = options;
+
+    let xPos = x;
+    if (centered) {
+      const textWidth = font.widthOfTextAtSize(text, size);
+      xPos = (this.width - textWidth) / 2;
+    }
+
+    this.page.drawText(text, {
+      x: xPos,
+      y: this.yPosition,
+      size,
+      font,
+      color
+    });
+  }
+
+  drawLine(thickness = 1, color = COLORS.divider) {
+    this.page.drawLine({
+      start: { x: this.margin, y: this.yPosition },
+      end: { x: this.width - this.margin, y: this.yPosition },
+      thickness,
+      color
+    });
+  }
+
+  moveDown(amount) {
+    this.yPosition -= amount;
+  }
+}
 
 export async function generateCVPdf(cvData, templateId = 'professional') {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595.28, 841.89]);
   
-  const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const fonts = {
+    helvetica: await pdfDoc.embedFont(StandardFonts.Helvetica),
+    helveticaBold: await pdfDoc.embedFont(StandardFonts.HelveticaBold),
+    timesRoman: await pdfDoc.embedFont(StandardFonts.TimesRoman),
+    timesRomanBold: await pdfDoc.embedFont(StandardFonts.TimesRomanBold)
+  };
   
-  const { width, height } = page.getSize();
-  const margin = 50;
-  let yPosition = height - margin;
+  const colors = getTemplateColors(templateId, cvData.customization);
+  const builder = new PDFBuilder(pdfDoc, templateId, fonts, colors);
   
   const personalInfo = cvData.personal_info || {};
   const experiences = cvData.experiences || [];
   const education = cvData.education || [];
   const skills = cvData.skills || [];
-  
+  const certifications = cvData.certifications || [];
+  const languages = cvData.languages || [];
+
   if (personalInfo.full_name) {
-    page.drawText(personalInfo.full_name, {
-      x: margin,
-      y: yPosition,
-      size: 24,
-      font: helveticaBold,
-      color: COLORS.primary
+    builder.drawText(personalInfo.full_name, {
+      font: builder.fontBold,
+      size: builder.headerSize,
+      color: colors.primary,
+      centered: builder.isMinimal
     });
-    yPosition -= 30;
+    builder.moveDown(builder.headerSize + 6);
+  }
+  
+  if (personalInfo.title) {
+    const titleSize = builder.isCompact ? 10 : 12;
+    builder.drawText(personalInfo.title, {
+      font: builder.font,
+      size: titleSize,
+      color: colors.secondary,
+      centered: builder.isMinimal
+    });
+    builder.moveDown(titleSize + 8);
   }
   
   const contactParts = [];
@@ -43,211 +203,283 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
   if (personalInfo.location) contactParts.push(personalInfo.location);
   
   if (contactParts.length > 0) {
-    page.drawText(contactParts.join('  |  '), {
-      x: margin,
-      y: yPosition,
-      size: 10,
-      font: helvetica,
-      color: COLORS.gray
+    const contactText = contactParts.join('  |  ');
+    builder.drawText(contactText, {
+      size: builder.baseFontSize,
+      color: COLORS.gray,
+      centered: builder.isMinimal
     });
-    yPosition -= 15;
+    builder.moveDown(builder.baseFontSize + 5);
   }
   
   const linkParts = [];
-  if (personalInfo.linkedin) linkParts.push(personalInfo.linkedin);
-  if (personalInfo.website) linkParts.push(personalInfo.website);
+  if (personalInfo.linkedin) linkParts.push('LinkedIn');
+  if (personalInfo.website) linkParts.push('Portfolio');
   
   if (linkParts.length > 0) {
-    page.drawText(linkParts.join('  |  '), {
-      x: margin,
-      y: yPosition,
-      size: 9,
-      font: helvetica,
-      color: COLORS.secondary
+    const linkText = linkParts.join('  |  ');
+    builder.drawText(linkText, {
+      size: builder.baseFontSize - 1,
+      color: colors.accent,
+      centered: builder.isMinimal
     });
-    yPosition -= 20;
+    builder.moveDown(builder.baseFontSize + 10);
   }
   
-  page.drawLine({
-    start: { x: margin, y: yPosition },
-    end: { x: width - margin, y: yPosition },
-    thickness: 1,
-    color: rgb(0.9, 0.9, 0.9)
-  });
-  yPosition -= 20;
+  builder.drawLine(
+    templateId === 'executive' ? 2 : 1,
+    templateId === 'executive' ? colors.accent : COLORS.divider
+  );
+  builder.moveDown(15);
   
   if (personalInfo.summary) {
-    page.drawText('PROFESSIONAL SUMMARY', {
-      x: margin,
-      y: yPosition,
-      size: 12,
-      font: helveticaBold,
-      color: COLORS.primary
-    });
-    yPosition -= 18;
+    builder.checkSpace(80);
+    const summaryHeader = templateId === 'executive' ? 'EXECUTIVE PROFILE' : 
+                         templateId === 'academic' ? 'RESEARCH STATEMENT' :
+                         templateId === 'tech' ? '/* SUMMARY */' :
+                         'PROFESSIONAL SUMMARY';
     
-    const summaryLines = wrapText(personalInfo.summary, 80);
+    builder.drawText(summaryHeader, {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary,
+      centered: builder.isMinimal
+    });
+    builder.moveDown(builder.sectionHeaderSize + 8);
+    
+    const summaryLines = wrapText(personalInfo.summary, builder.isCompact ? 90 : 80);
     for (const line of summaryLines) {
-      if (yPosition < margin) {
-        const newPage = pdfDoc.addPage([595.28, 841.89]);
-        yPosition = height - margin;
-      }
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: 10,
-        font: helvetica,
+      builder.checkSpace(20);
+      builder.drawText(line, {
+        size: builder.baseFontSize,
         color: COLORS.text
       });
-      yPosition -= 14;
+      builder.moveDown(builder.baseFontSize + 4);
     }
-    yPosition -= 10;
+    builder.moveDown(8);
   }
   
   if (experiences.length > 0) {
-    page.drawText('EXPERIENCE', {
-      x: margin,
-      y: yPosition,
-      size: 12,
-      font: helveticaBold,
-      color: COLORS.primary
+    builder.checkSpace(80);
+    const expHeader = templateId === 'tech' ? '// EXPERIENCE' :
+                      templateId === 'academic' ? 'RESEARCH & PROFESSIONAL EXPERIENCE' :
+                      'EXPERIENCE';
+    
+    builder.drawText(expHeader, {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary
     });
-    yPosition -= 18;
+    builder.moveDown(builder.sectionHeaderSize + 8);
     
     for (const exp of experiences) {
-      if (yPosition < 100) break;
+      builder.checkSpace(60);
       
-      page.drawText(exp.job_title || 'Position', {
-        x: margin,
-        y: yPosition,
-        size: 11,
-        font: helveticaBold,
+      builder.drawText(exp.job_title || 'Position', {
+        font: builder.fontBold,
+        size: builder.baseFontSize + 1,
         color: COLORS.text
       });
-      yPosition -= 14;
+      builder.moveDown(builder.baseFontSize + 5);
       
       const companyLine = [exp.company, exp.location].filter(Boolean).join(', ');
       const dateRange = [exp.start_date, exp.is_current ? 'Present' : exp.end_date].filter(Boolean).join(' - ');
       
       if (companyLine) {
-        page.drawText(companyLine, {
-          x: margin,
-          y: yPosition,
-          size: 10,
-          font: helvetica,
-          color: COLORS.gray
+        builder.drawText(companyLine, {
+          size: builder.baseFontSize,
+          color: colors.secondary
         });
         
         if (dateRange) {
-          page.drawText(dateRange, {
-            x: width - margin - 100,
-            y: yPosition,
-            size: 9,
-            font: helvetica,
+          const dateWidth = builder.font.widthOfTextAtSize(dateRange, builder.baseFontSize - 1);
+          builder.page.drawText(dateRange, {
+            x: builder.width - builder.margin - dateWidth,
+            y: builder.yPosition,
+            size: builder.baseFontSize - 1,
+            font: builder.font,
             color: COLORS.lightGray
           });
         }
-        yPosition -= 14;
+        builder.moveDown(builder.baseFontSize + 5);
       }
       
       if (exp.bullet_points && exp.bullet_points.length > 0) {
-        for (const bullet of exp.bullet_points.slice(0, 4)) {
-          if (yPosition < 80) break;
-          const bulletLines = wrapText(`• ${bullet}`, 75);
+        const maxBullets = builder.isCompact ? 3 : 5;
+        for (const bullet of exp.bullet_points.filter(b => b && b.trim()).slice(0, maxBullets)) {
+          builder.checkSpace(25);
+          const bulletSymbol = templateId === 'tech' ? '→ ' : '• ';
+          const bulletLines = wrapText(bulletSymbol + bullet, builder.isCompact ? 85 : 75);
           for (const line of bulletLines) {
-            page.drawText(line, {
-              x: margin + 10,
-              y: yPosition,
-              size: 9,
-              font: helvetica,
+            builder.checkSpace(15);
+            builder.page.drawText(line, {
+              x: builder.margin + 10,
+              y: builder.yPosition,
+              size: builder.baseFontSize - 1,
+              font: builder.font,
               color: COLORS.text
             });
-            yPosition -= 12;
+            builder.moveDown(builder.baseFontSize + 2);
           }
         }
       }
-      yPosition -= 8;
+      builder.moveDown(8);
     }
   }
   
-  if (education.length > 0 && yPosition > 120) {
-    page.drawText('EDUCATION', {
-      x: margin,
-      y: yPosition,
-      size: 12,
-      font: helveticaBold,
-      color: COLORS.primary
+  if (education.length > 0) {
+    builder.checkSpace(70);
+    const eduHeader = templateId === 'tech' ? '// EDUCATION' : 'EDUCATION';
+    
+    builder.drawText(eduHeader, {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary
     });
-    yPosition -= 18;
+    builder.moveDown(builder.sectionHeaderSize + 8);
     
     for (const edu of education) {
-      if (yPosition < 80) break;
+      builder.checkSpace(50);
       
-      page.drawText(edu.degree || 'Degree', {
-        x: margin,
-        y: yPosition,
-        size: 11,
-        font: helveticaBold,
+      const degreeText = edu.field ? `${edu.degree} in ${edu.field}` : (edu.degree || 'Degree');
+      builder.drawText(degreeText, {
+        font: builder.fontBold,
+        size: builder.baseFontSize + 1,
         color: COLORS.text
       });
-      yPosition -= 14;
+      builder.moveDown(builder.baseFontSize + 5);
       
-      const eduLine = [edu.institution, edu.field_of_study].filter(Boolean).join(' - ');
+      const eduLine = [edu.institution, edu.location].filter(Boolean).join(', ');
       if (eduLine) {
-        page.drawText(eduLine, {
-          x: margin,
-          y: yPosition,
-          size: 10,
-          font: helvetica,
+        builder.drawText(eduLine, {
+          size: builder.baseFontSize,
           color: COLORS.gray
         });
         
         if (edu.graduation_date) {
-          page.drawText(edu.graduation_date, {
-            x: width - margin - 80,
-            y: yPosition,
-            size: 9,
-            font: helvetica,
+          const dateWidth = builder.font.widthOfTextAtSize(edu.graduation_date, builder.baseFontSize - 1);
+          builder.page.drawText(edu.graduation_date, {
+            x: builder.width - builder.margin - dateWidth,
+            y: builder.yPosition,
+            size: builder.baseFontSize - 1,
+            font: builder.font,
             color: COLORS.lightGray
           });
         }
-        yPosition -= 14;
+        builder.moveDown(builder.baseFontSize + 5);
       }
-      yPosition -= 6;
+      
+      if (edu.gpa) {
+        builder.drawText(`GPA: ${edu.gpa}`, {
+          size: builder.baseFontSize - 1,
+          color: COLORS.gray
+        });
+        builder.moveDown(builder.baseFontSize + 2);
+      }
+
+      if (edu.achievements && edu.achievements.length > 0) {
+        for (const achievement of edu.achievements.filter(a => a && a.trim()).slice(0, 3)) {
+          builder.checkSpace(15);
+          builder.page.drawText(`• ${achievement}`, {
+            x: builder.margin + 10,
+            y: builder.yPosition,
+            size: builder.baseFontSize - 1,
+            font: builder.font,
+            color: COLORS.text
+          });
+          builder.moveDown(builder.baseFontSize + 2);
+        }
+      }
+      builder.moveDown(6);
     }
   }
   
-  if (skills.length > 0 && yPosition > 80) {
-    page.drawText('SKILLS', {
-      x: margin,
-      y: yPosition,
-      size: 12,
-      font: helveticaBold,
-      color: COLORS.primary
+  if (skills.length > 0) {
+    builder.checkSpace(60);
+    const skillsHeader = templateId === 'tech' ? 'const techStack = {' :
+                         templateId === 'executive' ? 'CORE COMPETENCIES' :
+                         'SKILLS';
+    
+    builder.drawText(skillsHeader, {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary
     });
-    yPosition -= 18;
+    builder.moveDown(builder.sectionHeaderSize + 8);
     
-    const skillNames = skills.map(s => typeof s === 'string' ? s : s.name).filter(Boolean);
-    const skillsText = skillNames.join('  •  ');
-    const skillLines = wrapText(skillsText, 85);
+    for (const skillCategory of skills) {
+      builder.checkSpace(25);
+      
+      const categoryItems = skillCategory.items || [];
+      const skillLine = `${skillCategory.category}: ${categoryItems.join(', ')}`;
+      const skillLines = wrapText(skillLine, builder.isCompact ? 90 : 85);
+      
+      for (const line of skillLines) {
+        builder.checkSpace(15);
+        builder.drawText(line, {
+          size: builder.baseFontSize,
+          color: COLORS.text
+        });
+        builder.moveDown(builder.baseFontSize + 3);
+      }
+      builder.moveDown(2);
+    }
     
-    for (const line of skillLines) {
-      if (yPosition < 50) break;
-      page.drawText(line, {
-        x: margin,
-        y: yPosition,
-        size: 10,
-        font: helvetica,
+    if (templateId === 'tech') {
+      builder.drawText('}', {
+        font: builder.fontBold,
+        size: builder.sectionHeaderSize,
+        color: colors.primary
+      });
+      builder.moveDown(builder.sectionHeaderSize + 5);
+    }
+  }
+
+  if (certifications && certifications.length > 0) {
+    builder.checkSpace(50);
+    builder.drawText('CERTIFICATIONS', {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary
+    });
+    builder.moveDown(builder.sectionHeaderSize + 6);
+    
+    for (const cert of certifications.slice(0, 6)) {
+      builder.checkSpace(15);
+      const certText = cert.issuer ? `${cert.name} - ${cert.issuer}` : cert.name;
+      builder.drawText(`• ${certText}`, {
+        size: builder.baseFontSize - 1,
         color: COLORS.text
       });
-      yPosition -= 14;
+      builder.moveDown(builder.baseFontSize + 2);
     }
+    builder.moveDown(5);
+  }
+
+  if (languages && languages.length > 0) {
+    builder.checkSpace(40);
+    builder.drawText('LANGUAGES', {
+      font: builder.fontBold,
+      size: builder.sectionHeaderSize,
+      color: colors.primary
+    });
+    builder.moveDown(builder.sectionHeaderSize + 6);
+    
+    const langText = languages.map(l => 
+      l.proficiency ? `${l.language} (${l.proficiency})` : l.language
+    ).join(', ');
+    
+    builder.drawText(langText, {
+      size: builder.baseFontSize,
+      color: COLORS.text
+    });
   }
   
   return await pdfDoc.save();
 }
 
 function wrapText(text, maxChars) {
+  if (!text) return [];
   const words = text.split(' ');
   const lines = [];
   let currentLine = '';
@@ -267,14 +499,22 @@ function wrapText(text, maxChars) {
 
 export async function generateCoverLetterPdf(coverLetterContent, applicantName) {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595.28, 841.89]);
+  let page = pdfDoc.addPage([595.28, 841.89]);
   
   const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
   
-  const { width, height } = page.getSize();
+  const width = 595.28;
+  const height = 841.89;
   const margin = 60;
   let yPosition = height - margin;
+  
+  const checkPage = () => {
+    if (yPosition < margin) {
+      page = pdfDoc.addPage([width, height]);
+      yPosition = height - margin;
+    }
+  };
   
   const today = new Date().toLocaleDateString('en-US', { 
     year: 'numeric', month: 'long', day: 'numeric' 
@@ -294,10 +534,7 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
   for (const paragraph of paragraphs) {
     const lines = wrapText(paragraph.trim(), 75);
     for (const line of lines) {
-      if (yPosition < margin) {
-        const newPage = pdfDoc.addPage([595.28, 841.89]);
-        yPosition = height - margin;
-      }
+      checkPage();
       page.drawText(line, {
         x: margin,
         y: yPosition,
@@ -311,6 +548,7 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
   }
   
   yPosition -= 20;
+  checkPage();
   page.drawText('Sincerely,', {
     x: margin,
     y: yPosition,
@@ -321,6 +559,7 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
   yPosition -= 30;
   
   if (applicantName) {
+    checkPage();
     page.drawText(applicantName, {
       x: margin,
       y: yPosition,
