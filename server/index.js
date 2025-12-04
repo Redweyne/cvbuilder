@@ -8,7 +8,7 @@ import jwt from 'jsonwebtoken';
 import multer from 'multer';
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
-const pdfParse = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 import mammoth from 'mammoth';
 
 import { users, cvDocuments, jobOffers, subscriptions, templates, coverLetters } from './db.js';
@@ -541,7 +541,8 @@ app.post('/api/ai/parse-cv', authMiddleware, upload.single('file'), async (req, 
     
     if (fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf')) {
       try {
-        const pdfData = await pdfParse(req.file.buffer);
+        const parser = new PDFParse({ data: req.file.buffer });
+        const pdfData = await parser.getText();
         fileContent = pdfData.text;
       } catch (pdfError) {
         console.error('PDF parsing error:', pdfError);
