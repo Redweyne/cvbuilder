@@ -475,6 +475,15 @@ export default function CVEditor() {
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
+            onClick={() => setShowUploadModal(true)}
+            className="hidden sm:flex border-indigo-200 text-indigo-600 hover:bg-indigo-50 hover:border-indigo-300"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Import CV
+          </Button>
+          
+          <Button
+            variant="outline"
             onClick={handleEnhanceWithAI}
             disabled={isEnhancing}
             className="hidden sm:flex"
