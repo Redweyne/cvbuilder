@@ -135,10 +135,31 @@ class TwoColumnPDFBuilder {
 
   checkMainSpace(needed) {
     if (this.mainY < needed + 40) {
-      this.addPage();
+      this.addNewMainPage();
       return true;
     }
     return false;
+  }
+
+  addNewMainPage() {
+    this.page = this.pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+    this.mainY = PAGE_HEIGHT - 30;
+    
+    this.page.drawRectangle({
+      x: SIDEBAR_WIDTH,
+      y: 0,
+      width: MAIN_WIDTH,
+      height: PAGE_HEIGHT,
+      color: COLORS.mainBg
+    });
+    
+    this.page.drawRectangle({
+      x: 0,
+      y: 0,
+      width: SIDEBAR_WIDTH,
+      height: PAGE_HEIGHT,
+      color: rgb(0.08, 0.08, 0.18)
+    });
   }
 
   drawSidebarText(text, options = {}) {
@@ -470,10 +491,46 @@ class TwoColumnPDFBuilder {
     this.sidebarY -= 15;
   }
 
+  estimateTimelineItemHeight(data) {
+    const cardWidth = MAIN_WIDTH - PADDING * 2 - 30;
+    const textMaxWidth = cardWidth - 20;
+    
+    let height = 35;
+    
+    if (data.dateRange) height += 22;
+    
+    if (data.title) {
+      const titleLines = wrapText(data.title, this.fonts.helveticaBold, 11, textMaxWidth);
+      height += titleLines.length * 14;
+    }
+    
+    if (data.subtitle) {
+      const subtitleLines = wrapText(data.subtitle, this.fonts.helvetica, 9, textMaxWidth);
+      height += subtitleLines.length * 12;
+    }
+    
+    if (data.bullets && data.bullets.length > 0) {
+      height += 4;
+      for (const bullet of data.bullets.filter(b => b && b.trim()).slice(0, 5)) {
+        const bulletLines = wrapText(bullet, this.fonts.helvetica, 9, textMaxWidth - 12);
+        height += bulletLines.length * 12;
+      }
+    }
+    
+    if (data.achievements && data.achievements.length > 0) {
+      height += 15;
+    }
+    
+    return height + 20;
+  }
+
   drawTimelineItem(data, isLast = false) {
     const timelineX = MAIN_START_X + PADDING;
     const cardX = timelineX + 22;
     const cardWidth = MAIN_WIDTH - PADDING * 2 - 30;
+    
+    const estimatedHeight = this.estimateTimelineItemHeight(data);
+    this.checkMainSpace(estimatedHeight);
     
     const dotSize = 5;
     this.page.drawCircle({
@@ -490,14 +547,6 @@ class TwoColumnPDFBuilder {
     });
 
     const cardStartY = this.mainY;
-    
-    let estimatedHeight = 50;
-    if (data.bullets && data.bullets.length > 0) {
-      estimatedHeight += data.bullets.length * 14;
-    }
-    if (data.achievements && data.achievements.length > 0) {
-      estimatedHeight += 15;
-    }
 
     this.page.drawRectangle({
       x: cardX,
