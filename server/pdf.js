@@ -1,22 +1,16 @@
-import puppeteer from 'puppeteer';
+import { chromium } from 'playwright';
 
 let browserInstance = null;
 
 async function getBrowser() {
   if (!browserInstance) {
-    browserInstance = await puppeteer.launch({
+    browserInstance = await chromium.launch({
       headless: true,
-      executablePath: process.env.CHROMIUM_PATH || '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--single-process',
-        '--font-render-hinting=none'
+        '--disable-gpu'
       ]
     });
   }
@@ -24,31 +18,38 @@ async function getBrowser() {
 }
 
 export async function generateCVPdf(cvData, templateId = 'professional', baseUrl = 'http://localhost:5000') {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  let browser = null;
+  let context = null;
+  let page = null;
   
   try {
+    browser = await getBrowser();
+    context = await browser.newContext({
+      viewport: {
+        width: 794,
+        height: 1123
+      },
+      deviceScaleFactor: 2
+    });
+    page = await context.newPage();
+    
     const encodedData = encodeURIComponent(JSON.stringify(cvData));
     const exportUrl = `${baseUrl}/cv-export?template=${templateId}&data=${encodedData}`;
     
-    await page.setViewport({
-      width: 794,
-      height: 1123,
-      deviceScaleFactor: 2
-    });
+    console.log('Navigating to export URL...');
     
     await page.goto(exportUrl, {
-      waitUntil: 'networkidle0',
+      waitUntil: 'networkidle',
       timeout: 60000
     });
     
     await page.waitForSelector('#cv-export-container', { timeout: 15000 });
     
-    await page.evaluate(() => {
-      return document.fonts.ready;
-    });
+    await page.evaluate(() => document.fonts.ready);
     
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await page.waitForTimeout(1500);
+    
+    console.log('Generating PDF...');
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -63,17 +64,31 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
       scale: 1
     });
     
+    console.log('PDF generated successfully');
+    
     return pdfBuffer;
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    throw error;
   } finally {
-    await page.close();
+    if (page) await page.close().catch(() => {});
+    if (context) await context.close().catch(() => {});
   }
 }
 
 export async function generateCoverLetterPdf(coverLetterContent, applicantName) {
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  let browser = null;
+  let context = null;
+  let page = null;
   
   try {
+    browser = await getBrowser();
+    context = await browser.newContext({
+      viewport: { width: 794, height: 1123 },
+      deviceScaleFactor: 2
+    });
+    page = await context.newPage();
+    
     const today = new Date().toLocaleDateString('en-US', { 
       year: 'numeric', month: 'long', day: 'numeric' 
     });
@@ -128,13 +143,11 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
       </html>
     `;
     
-    await page.setContent(html, { waitUntil: 'networkidle0' });
+    await page.setContent(html, { waitUntil: 'networkidle' });
     
-    await page.evaluate(() => {
-      return document.fonts.ready;
-    });
+    await page.evaluate(() => document.fonts.ready);
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await page.waitForTimeout(500);
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -148,8 +161,12 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
     });
     
     return pdfBuffer;
+  } catch (error) {
+    console.error('Cover letter PDF generation error:', error);
+    throw error;
   } finally {
-    await page.close();
+    if (page) await page.close().catch(() => {});
+    if (context) await context.close().catch(() => {});
   }
 }
 
@@ -157,4 +174,11 @@ process.on('exit', async () => {
   if (browserInstance) {
     await browserInstance.close();
   }
+});
+
+process.on('SIGTERM', async () => {
+  if (browserInstance) {
+    await browserInstance.close();
+  }
+  process.exit(0);
 });

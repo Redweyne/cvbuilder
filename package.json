@@ -31,6 +31,7 @@
     "openai": "^4.77.3",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",
+    "playwright": "^1.57.0",
     "puppeteer": "^24.32.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
