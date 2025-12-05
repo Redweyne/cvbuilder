@@ -589,7 +589,8 @@ app.post('/api/export/cv-pdf', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Export limit reached. Please upgrade your plan.' });
     }
     
-    const pdfBytes = await generateCVPdf(req.body.cvData, req.body.templateId);
+    const baseUrl = 'http://localhost:5000';
+    const pdfBytes = await generateCVPdf(req.body.cvData, req.body.templateId, baseUrl);
     subscriptions.incrementExports(req.user.id);
     
     res.setHeader('Content-Type', 'application/pdf');

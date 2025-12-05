@@ -20,6 +20,7 @@ import InterviewSimulator from './pages/InterviewSimulator';
 import CareerMentor from './pages/CareerMentor';
 import SuccessRoadmap from './pages/SuccessRoadmap';
 import TemplatePreview from './pages/TemplatePreview';
+import CVExport from './pages/CVExport';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -146,6 +147,9 @@ function AppRoutes() {
       
       {/* Public template preview - no auth required */}
       <Route path="/preview" element={<TemplatePreview />} />
+      
+      {/* CV Export route for Puppeteer PDF generation */}
+      <Route path="/cv-export" element={<CVExport />} />
       
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
