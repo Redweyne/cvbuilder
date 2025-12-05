@@ -6,6 +6,7 @@ async function getBrowser() {
   if (!browserInstance) {
     browserInstance = await puppeteer.launch({
       headless: true,
+      executablePath: process.env.CHROME_PATH || '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -13,7 +14,8 @@ async function getBrowser() {
         '--disable-accelerated-2d-canvas',
         '--no-first-run',
         '--no-zygote',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--single-process'
       ]
     });
   }

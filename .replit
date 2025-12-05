@@ -5,6 +5,7 @@ integrations = ["javascript_gemini:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
+packages = ["glib", "nss", "nspr", "at-spi2-atk", "cups", "libdrm", "libxkbcommon", "mesa", "pango", "cairo", "alsa-lib", "xorg.libX11", "xorg.libXcomposite", "xorg.libXdamage", "xorg.libXext", "xorg.libXfixes", "xorg.libXrandr", "xorg.libxcb", "xorg.libxshmfence", "expat", "chromium", "dbus", "gtk3"]
 
 [workflows]
 runButton = "Project"
