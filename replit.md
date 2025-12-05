@@ -223,6 +223,34 @@ Located in `src/index.css`:
 - PDF export with template-specific colors and proper multi-page pagination
 - PDFBuilder class handles page management, spacing, and consistent styling
 
+## Recent Changes (December 5, 2025)
+
+### Pixel-Perfect PDF Export with Puppeteer
+**Problem solved**: Exported PDFs now exactly match the live preview.
+
+**Implementation:**
+1. **CVExport.jsx** - Dedicated export route at `/cv-export` that renders CV templates
+   - Dynamically loads Google Fonts (Cormorant Garamond, Playfair Display, Inter, Fira Code)
+   - Waits for fonts.ready before rendering
+   - Fixed A4 dimensions (210mm x 297mm)
+   
+2. **server/pdf.js** - Puppeteer-based PDF generation
+   - Uses system Chromium for headless rendering
+   - Renders actual React templates in headless browser
+   - A4 viewport with deviceScaleFactor=2 for crisp output
+   - Waits for networkidle0 and #cv-export-container
+   - Prints with backgrounds and zero margins
+
+3. **System Dependencies** - Required for Chromium
+   - chromium, glib, nss, nspr, at-spi2-atk, cups, libdrm, libxkbcommon
+   - mesa, pango, cairo, alsa-lib, gtk3, dbus
+   - X11 libraries (libX11, libXcomposite, libXdamage, etc.)
+
+**Technical Notes:**
+- Puppeteer renders the actual frontend React components
+- Same CSS, fonts, and styles as the live preview
+- Result: Pixel-perfect match between preview and PDF
+
 ## User Preferences
 - Clean, modern design with gradient accents
 - Inspirational and motivational tone
