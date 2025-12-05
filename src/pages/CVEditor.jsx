@@ -32,6 +32,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import CVTemplateRenderer from '@/components/cv/templates/CVTemplateRenderer';
+import PagedCVPreview from '@/components/cv/PagedCVPreview';
 import PersonalInfoForm from '@/components/cv/PersonalInfoForm';
 import ExperienceForm from '@/components/cv/ExperienceForm';
 import EducationForm from '@/components/cv/EducationForm';
@@ -672,8 +673,8 @@ export default function CVEditor() {
               </div>
             </CardHeader>
             <CardContent className="p-4">
-              <div className="bg-slate-100 rounded-lg p-4 overflow-auto max-h-[calc(100vh-200px)]">
-                <CVTemplateRenderer data={cvData} templateId={cvData.template_id} />
+              <div className="overflow-auto max-h-[calc(100vh-200px)]">
+                <PagedCVPreview data={cvData} templateId={cvData.template_id} />
               </div>
             </CardContent>
           </Card>
