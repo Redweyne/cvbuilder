@@ -28,7 +28,7 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
     context = await browser.newContext({
       viewport: {
         width: 794,
-        height: 1123
+        height: 2000
       },
       deviceScaleFactor: 2
     });
@@ -50,6 +50,16 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
     
     await page.waitForTimeout(500);
     
+    const contentHeight = await page.evaluate(() => {
+      const container = document.getElementById('cv-export-container');
+      return container ? container.scrollHeight : 1123;
+    });
+    
+    if (contentHeight > 2000) {
+      await page.setViewportSize({ width: 794, height: contentHeight + 100 });
+      await page.waitForTimeout(200);
+    }
+    
     console.log('Generating PDF...');
     
     const pdfBuffer = await page.pdf({
@@ -61,7 +71,6 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
         bottom: '0',
         left: '0'
       },
-      preferCSSPageSize: true,
       scale: 1
     });
     

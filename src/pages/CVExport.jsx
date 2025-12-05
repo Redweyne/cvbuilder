@@ -75,14 +75,10 @@ export default function CVExport() {
         id="cv-export-container"
         style={{
           width: '210mm',
-          height: '297mm',
-          maxHeight: '297mm',
+          minHeight: '297mm',
           margin: '0 auto',
           padding: '0',
-          backgroundColor: 'white',
-          overflow: 'hidden',
-          pageBreakAfter: 'avoid',
-          pageBreakInside: 'avoid'
+          backgroundColor: 'white'
         }}
       >
         <CVTemplateRenderer data={cvData} templateId={templateId} forExport={true} />
