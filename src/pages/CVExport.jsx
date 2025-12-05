@@ -50,18 +50,43 @@ export default function CVExport() {
   }
 
   return (
-    <div 
-      id="cv-export-container"
-      style={{
-        width: '210mm',
-        minHeight: '297mm',
-        margin: '0 auto',
-        padding: '0',
-        backgroundColor: 'white',
-        overflow: 'hidden'
-      }}
-    >
-      <CVTemplateRenderer data={cvData} templateId={templateId} forExport={true} />
-    </div>
+    <>
+      <style>
+        {`
+          @page {
+            size: A4;
+            margin: 0;
+          }
+          @media print {
+            html, body {
+              width: 210mm;
+              height: 297mm;
+              margin: 0;
+              padding: 0;
+            }
+          }
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+        `}
+      </style>
+      <div 
+        id="cv-export-container"
+        style={{
+          width: '210mm',
+          height: '297mm',
+          maxHeight: '297mm',
+          margin: '0 auto',
+          padding: '0',
+          backgroundColor: 'white',
+          overflow: 'hidden',
+          pageBreakAfter: 'avoid',
+          pageBreakInside: 'avoid'
+        }}
+      >
+        <CVTemplateRenderer data={cvData} templateId={templateId} forExport={true} />
+      </div>
+    </>
   );
 }

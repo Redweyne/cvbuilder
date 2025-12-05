@@ -60,6 +60,7 @@ export default function CVEditor() {
   const [isParsing, setIsParsing] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [uploadedFileName, setUploadedFileName] = useState('');
+  const [isExporting, setIsExporting] = useState(false);
   const [cvData, setCvData] = useState({
     title: 'My CV',
     template_id: 'professional',
@@ -158,6 +159,8 @@ export default function CVEditor() {
   };
 
   const handleExportPdf = async () => {
+    setIsExporting(true);
+    toast.loading('Generating your PDF...', { id: 'export-pdf' });
     try {
       const blob = await api.export.cvPdf(cvData, cvData.template_id);
       const url = URL.createObjectURL(blob);
@@ -166,9 +169,11 @@ export default function CVEditor() {
       a.download = `${cvData.title || 'cv'}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success('PDF exported successfully!');
+      toast.success('PDF exported successfully!', { id: 'export-pdf' });
     } catch (error) {
-      toast.error(error.message || 'Failed to export PDF');
+      toast.error(error.message || 'Failed to export PDF', { id: 'export-pdf' });
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -621,9 +626,18 @@ export default function CVEditor() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg font-semibold">Preview</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" onClick={handleExportPdf}>
-                      <Download className="w-4 h-4 mr-2" />
-                      Export
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleExportPdf}
+                      disabled={isExporting}
+                    >
+                      {isExporting ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Download className="w-4 h-4 mr-2" />
+                      )}
+                      {isExporting ? 'Exporting...' : 'Export'}
                     </Button>
                   </div>
                 </div>

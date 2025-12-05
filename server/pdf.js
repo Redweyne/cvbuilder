@@ -40,15 +40,15 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
     console.log('Navigating to export URL...');
     
     await page.goto(exportUrl, {
-      waitUntil: 'networkidle',
-      timeout: 60000
+      waitUntil: 'domcontentloaded',
+      timeout: 30000
     });
     
-    await page.waitForSelector('#cv-export-container', { timeout: 15000 });
+    await page.waitForSelector('#cv-export-container', { timeout: 10000 });
     
     await page.evaluate(() => document.fonts.ready);
     
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(500);
     
     console.log('Generating PDF...');
     
