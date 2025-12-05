@@ -2,32 +2,41 @@ import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 
 const PAGE_WIDTH = 595.28;
 const PAGE_HEIGHT = 841.89;
-const SIDEBAR_WIDTH = 200;
+const SIDEBAR_WIDTH = 195;
 const MAIN_START_X = SIDEBAR_WIDTH;
 const MAIN_WIDTH = PAGE_WIDTH - SIDEBAR_WIDTH;
-const PADDING = 20;
-const SIDEBAR_PADDING = 18;
+const PADDING = 24;
+const SIDEBAR_PADDING = 16;
 
 const COLORS = {
-  sidebarDark: rgb(0.075, 0.075, 0.18),
-  sidebarMid: rgb(0.1, 0.1, 0.23),
-  sidebarLight: rgb(0.12, 0.12, 0.25),
-  accent: rgb(0.39, 0.4, 0.95),
-  accentLight: rgb(0.51, 0.55, 0.97),
+  sidebarDark: rgb(0.06, 0.06, 0.14),
+  sidebarMid: rgb(0.08, 0.08, 0.18),
+  sidebarLight: rgb(0.10, 0.10, 0.22),
+  accent: rgb(0.39, 0.40, 0.95),
+  accentLight: rgb(0.55, 0.58, 0.98),
+  accentSoft: rgb(0.75, 0.77, 0.99),
+  gold: rgb(0.85, 0.68, 0.25),
   white: rgb(1, 1, 1),
-  white90: rgb(0.9, 0.9, 0.9),
-  white70: rgb(0.7, 0.7, 0.7),
-  white50: rgb(0.5, 0.5, 0.5),
-  white40: rgb(0.4, 0.4, 0.4),
-  white30: rgb(0.3, 0.3, 0.3),
-  mainBg: rgb(0.973, 0.976, 0.984),
+  white95: rgb(0.95, 0.95, 0.95),
+  white90: rgb(0.90, 0.90, 0.92),
+  white80: rgb(0.80, 0.80, 0.82),
+  white70: rgb(0.70, 0.70, 0.72),
+  white60: rgb(0.60, 0.60, 0.62),
+  white50: rgb(0.50, 0.50, 0.52),
+  white40: rgb(0.40, 0.40, 0.42),
+  white30: rgb(0.30, 0.30, 0.32),
+  white20: rgb(0.20, 0.20, 0.22),
+  mainBg: rgb(0.965, 0.970, 0.980),
   cardBg: rgb(1, 1, 1),
-  cardBorder: rgb(0.93, 0.94, 0.96),
-  textDark: rgb(0.15, 0.15, 0.15),
-  textGray: rgb(0.35, 0.35, 0.35),
-  textLight: rgb(0.5, 0.5, 0.5),
-  datePillBg: rgb(0.95, 0.95, 1),
-  primary: rgb(0.1, 0.1, 0.18)
+  cardBorder: rgb(0.90, 0.91, 0.93),
+  cardShadow: rgb(0.85, 0.86, 0.88),
+  textDark: rgb(0.12, 0.12, 0.14),
+  textMid: rgb(0.30, 0.30, 0.32),
+  textGray: rgb(0.42, 0.42, 0.44),
+  textLight: rgb(0.55, 0.55, 0.57),
+  datePillBg: rgb(0.94, 0.94, 0.99),
+  datePillBorder: rgb(0.88, 0.88, 0.96),
+  primary: rgb(0.08, 0.08, 0.16)
 };
 
 function hexToRgb(hex) {
@@ -63,17 +72,6 @@ function wrapText(text, font, fontSize, maxWidth) {
   return lines;
 }
 
-function drawRoundedRect(page, x, y, width, height, radius, color) {
-  page.drawRectangle({
-    x,
-    y,
-    width,
-    height,
-    color,
-    borderRadius: radius
-  });
-}
-
 class TwoColumnPDFBuilder {
   constructor(pdfDoc, fonts, customization = {}) {
     this.pdfDoc = pdfDoc;
@@ -85,6 +83,11 @@ class TwoColumnPDFBuilder {
     this.accentColor = customization?.accent_color 
       ? (hexToRgb(customization.accent_color) || COLORS.accent)
       : COLORS.accent;
+    this.accentLight = rgb(
+      Math.min(1, this.accentColor.red + 0.15),
+      Math.min(1, this.accentColor.green + 0.15),
+      Math.min(1, this.accentColor.blue + 0.05)
+    );
     this.primaryColor = customization?.primary_color
       ? (hexToRgb(customization.primary_color) || COLORS.sidebarDark)
       : COLORS.sidebarDark;
@@ -92,28 +95,27 @@ class TwoColumnPDFBuilder {
 
   addPage() {
     this.page = this.pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-    this.sidebarY = PAGE_HEIGHT - 30;
-    this.mainY = PAGE_HEIGHT - 30;
+    this.sidebarY = PAGE_HEIGHT - 28;
+    this.mainY = PAGE_HEIGHT - 28;
     this.drawBackgrounds();
   }
 
   drawBackgrounds() {
-    const bandHeight = PAGE_HEIGHT / 5;
-    const gradientColors = [
-      rgb(0.12, 0.12, 0.25),
-      rgb(0.1, 0.1, 0.22),
-      rgb(0.08, 0.08, 0.18),
-      rgb(0.07, 0.07, 0.16),
-      rgb(0.05, 0.05, 0.12)
-    ];
+    const numBands = 8;
+    const bandHeight = PAGE_HEIGHT / numBands;
     
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < numBands; i++) {
+      const t = i / (numBands - 1);
+      const r = 0.12 - t * 0.06;
+      const g = 0.12 - t * 0.06;
+      const b = 0.26 - t * 0.12;
+      
       this.page.drawRectangle({
         x: 0,
         y: PAGE_HEIGHT - (i + 1) * bandHeight,
         width: SIDEBAR_WIDTH,
         height: bandHeight + 1,
-        color: gradientColors[i]
+        color: rgb(Math.max(0.04, r), Math.max(0.04, g), Math.max(0.10, b))
       });
     }
 
@@ -124,17 +126,22 @@ class TwoColumnPDFBuilder {
       height: PAGE_HEIGHT,
       color: COLORS.mainBg
     });
+
+    this.page.drawCircle({
+      x: SIDEBAR_WIDTH - 20,
+      y: PAGE_HEIGHT - 60,
+      size: 80,
+      color: rgb(this.accentColor.red * 0.15, this.accentColor.green * 0.15, this.accentColor.blue * 0.25),
+      opacity: 0.3
+    });
   }
 
   checkSidebarSpace(needed) {
-    if (this.sidebarY < needed + 30) {
-      return false;
-    }
-    return true;
+    return this.sidebarY >= needed + 30;
   }
 
   checkMainSpace(needed) {
-    if (this.mainY < needed + 40) {
+    if (this.mainY < needed + 45) {
       this.addNewMainPage();
       return true;
     }
@@ -143,7 +150,7 @@ class TwoColumnPDFBuilder {
 
   addNewMainPage() {
     this.page = this.pdfDoc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
-    this.mainY = PAGE_HEIGHT - 30;
+    this.mainY = PAGE_HEIGHT - 28;
     
     this.page.drawRectangle({
       x: SIDEBAR_WIDTH,
@@ -158,191 +165,157 @@ class TwoColumnPDFBuilder {
       y: 0,
       width: SIDEBAR_WIDTH,
       height: PAGE_HEIGHT,
-      color: rgb(0.08, 0.08, 0.18)
+      color: rgb(0.07, 0.07, 0.15)
     });
   }
 
-  drawSidebarText(text, options = {}) {
-    const {
-      font = this.fonts.helvetica,
-      size = 10,
-      color = COLORS.white90,
-      x = SIDEBAR_PADDING,
-      centered = false,
-      maxWidth = SIDEBAR_WIDTH - SIDEBAR_PADDING * 2
-    } = options;
-
-    const lines = wrapText(text, font, size, maxWidth);
-    
-    for (const line of lines) {
-      let xPos = x;
-      if (centered) {
-        const textWidth = font.widthOfTextAtSize(line, size);
-        xPos = (SIDEBAR_WIDTH - textWidth) / 2;
-      }
-      
-      this.page.drawText(line, {
-        x: xPos,
-        y: this.sidebarY,
-        size,
-        font,
-        color
-      });
-      this.sidebarY -= size + 4;
-    }
-  }
-
-  drawMainText(text, options = {}) {
-    const {
-      font = this.fonts.helvetica,
-      size = 10,
-      color = COLORS.textDark,
-      x = MAIN_START_X + PADDING,
-      maxWidth = MAIN_WIDTH - PADDING * 2
-    } = options;
-
-    const lines = wrapText(text, font, size, maxWidth);
-    
-    for (const line of lines) {
-      this.page.drawText(line, {
-        x,
-        y: this.mainY,
-        size,
-        font,
-        color
-      });
-      this.mainY -= size + 4;
-    }
-  }
-
-  drawSidebarSectionHeader(title, iconType = 'default') {
+  drawSidebarSectionHeader(title, iconLetter = '*') {
     this.page.drawRectangle({
       x: SIDEBAR_PADDING,
-      y: this.sidebarY - 4,
-      width: 16,
-      height: 16,
-      color: rgb(this.accentColor.red * 0.3, this.accentColor.green * 0.3, this.accentColor.blue * 0.5)
+      y: this.sidebarY - 5,
+      width: 18,
+      height: 18,
+      color: rgb(this.accentColor.red * 0.25, this.accentColor.green * 0.25, this.accentColor.blue * 0.4)
     });
-
-    const iconSymbols = {
-      profile: 'P',
-      contact: 'C',
-      skills: 'S',
-      languages: 'L',
-      default: '*'
-    };
     
-    this.page.drawText(iconSymbols[iconType] || '*', {
-      x: SIDEBAR_PADDING + 5,
+    this.page.drawText(iconLetter, {
+      x: SIDEBAR_PADDING + 6,
       y: this.sidebarY - 1,
-      size: 8,
+      size: 9,
       font: this.fonts.helveticaBold,
-      color: COLORS.accentLight
+      color: this.accentLight
     });
 
     this.page.drawText(title.toUpperCase(), {
-      x: SIDEBAR_PADDING + 22,
+      x: SIDEBAR_PADDING + 24,
       y: this.sidebarY,
-      size: 8,
+      size: 9,
       font: this.fonts.helveticaBold,
       color: COLORS.white90
     });
     
-    this.sidebarY -= 20;
+    this.sidebarY -= 22;
   }
 
-  drawMainSectionHeader(title) {
-    this.checkMainSpace(80);
+  drawMainSectionHeader(title, iconLetter = 'S') {
+    this.checkMainSpace(85);
     
     this.page.drawRectangle({
       x: MAIN_START_X + PADDING,
+      y: this.mainY - 10,
+      width: 32,
+      height: 32,
+      color: this.accentColor
+    });
+    
+    this.page.drawRectangle({
+      x: MAIN_START_X + PADDING + 1,
+      y: this.mainY - 9,
+      width: 30,
+      height: 30,
+      color: this.accentLight
+    });
+    
+    this.page.drawRectangle({
+      x: MAIN_START_X + PADDING + 2,
       y: this.mainY - 8,
       width: 28,
       height: 28,
       color: this.accentColor
     });
-
-    const iconSymbols = {
-      'EDUCATION': 'E',
-      'EXPERIENCES': 'W',
-      'EXPERIENCE': 'W',
-      'CERTIFICATIONS': 'C',
-      'PROJECTS': 'P'
-    };
     
-    this.page.drawText(iconSymbols[title.toUpperCase()] || 'S', {
-      x: MAIN_START_X + PADDING + 9,
-      y: this.mainY - 2,
-      size: 12,
+    this.page.drawText(iconLetter, {
+      x: MAIN_START_X + PADDING + 10,
+      y: this.mainY - 3,
+      size: 14,
       font: this.fonts.helveticaBold,
       color: COLORS.white
     });
 
     this.page.drawText(title.toUpperCase(), {
-      x: MAIN_START_X + PADDING + 38,
-      y: this.mainY,
-      size: 13,
+      x: MAIN_START_X + PADDING + 42,
+      y: this.mainY - 2,
+      size: 14,
       font: this.fonts.helveticaBold,
       color: COLORS.primary
     });
 
     this.page.drawRectangle({
-      x: MAIN_START_X + PADDING + 38,
-      y: this.mainY - 14,
-      width: 35,
-      height: 2,
+      x: MAIN_START_X + PADDING + 42,
+      y: this.mainY - 18,
+      width: 40,
+      height: 3,
       color: this.accentColor
     });
     
-    this.mainY -= 35;
+    this.page.drawRectangle({
+      x: MAIN_START_X + PADDING + 82,
+      y: this.mainY - 18,
+      width: 20,
+      height: 3,
+      color: this.accentLight
+    });
+    
+    this.mainY -= 42;
   }
 
-  drawProfilePhoto(hasPhoto = false) {
+  drawProfilePhoto() {
     const centerX = SIDEBAR_WIDTH / 2;
-    const photoSize = 70;
+    const photoSize = 72;
     const photoY = this.sidebarY - photoSize;
     
     this.page.drawCircle({
       x: centerX,
       y: photoY + photoSize / 2,
-      size: photoSize / 2 + 4,
-      color: rgb(this.accentColor.red * 0.5, this.accentColor.green * 0.5, this.accentColor.blue * 0.7),
-      borderWidth: 0
+      size: photoSize / 2 + 6,
+      color: rgb(this.accentColor.red * 0.4, this.accentColor.green * 0.4, this.accentColor.blue * 0.6)
+    });
+    
+    this.page.drawCircle({
+      x: centerX,
+      y: photoY + photoSize / 2,
+      size: photoSize / 2 + 3,
+      color: rgb(this.accentColor.red * 0.6, this.accentColor.green * 0.6, this.accentColor.blue * 0.8)
     });
     
     this.page.drawCircle({
       x: centerX,
       y: photoY + photoSize / 2,
       size: photoSize / 2,
-      color: rgb(0.15, 0.15, 0.25),
-      borderWidth: 0
+      color: rgb(0.12, 0.12, 0.22)
     });
 
-    this.page.drawText('U', {
-      x: centerX - 8,
-      y: photoY + photoSize / 2 - 10,
-      size: 28,
-      font: this.fonts.helvetica,
+    this.page.drawCircle({
+      x: centerX,
+      y: photoY + photoSize / 2 + 8,
+      size: 12,
       color: COLORS.white50
     });
     
-    this.sidebarY = photoY - 15;
+    this.page.drawCircle({
+      x: centerX,
+      y: photoY + photoSize / 2 - 8,
+      size: 18,
+      color: COLORS.white50
+    });
+    
+    this.sidebarY = photoY - 18;
   }
 
   drawName(firstName, lastName) {
     const centerX = SIDEBAR_WIDTH / 2;
     
-    let firstWidth = this.fonts.helveticaBold.widthOfTextAtSize(firstName, 24);
+    const firstWidth = this.fonts.helveticaBold.widthOfTextAtSize(firstName, 26);
     this.page.drawText(firstName, {
       x: centerX - firstWidth / 2,
       y: this.sidebarY,
-      size: 24,
+      size: 26,
       font: this.fonts.helveticaBold,
       color: COLORS.white
     });
-    this.sidebarY -= 28;
+    this.sidebarY -= 30;
 
-    let lastWidth = this.fonts.helvetica.widthOfTextAtSize(lastName.toUpperCase(), 18);
+    const lastWidth = this.fonts.helvetica.widthOfTextAtSize(lastName.toUpperCase(), 18);
     this.page.drawText(lastName.toUpperCase(), {
       x: centerX - lastWidth / 2,
       y: this.sidebarY,
@@ -350,35 +323,35 @@ class TwoColumnPDFBuilder {
       font: this.fonts.helvetica,
       color: COLORS.white70
     });
-    this.sidebarY -= 25;
+    this.sidebarY -= 28;
   }
 
   drawTitle(title) {
     const centerX = SIDEBAR_WIDTH / 2;
     
     this.page.drawLine({
-      start: { x: centerX - 30, y: this.sidebarY + 5 },
-      end: { x: centerX - 8, y: this.sidebarY + 5 },
+      start: { x: centerX - 35, y: this.sidebarY + 6 },
+      end: { x: centerX - 10, y: this.sidebarY + 6 },
       thickness: 0.5,
       color: COLORS.white30
     });
     
     this.page.drawRectangle({
-      x: centerX - 3,
+      x: centerX - 4,
       y: this.sidebarY + 2,
-      width: 6,
-      height: 6,
-      color: rgb(0.85, 0.65, 0.2)
+      width: 8,
+      height: 8,
+      color: COLORS.gold
     });
     
     this.page.drawLine({
-      start: { x: centerX + 8, y: this.sidebarY + 5 },
-      end: { x: centerX + 30, y: this.sidebarY + 5 },
+      start: { x: centerX + 10, y: this.sidebarY + 6 },
+      end: { x: centerX + 35, y: this.sidebarY + 6 },
       thickness: 0.5,
       color: COLORS.white30
     });
     
-    this.sidebarY -= 12;
+    this.sidebarY -= 16;
     
     const titleWidth = this.fonts.helveticaBold.widthOfTextAtSize(title.toUpperCase(), 7);
     this.page.drawText(title.toUpperCase(), {
@@ -386,10 +359,10 @@ class TwoColumnPDFBuilder {
       y: this.sidebarY,
       size: 7,
       font: this.fonts.helveticaBold,
-      color: COLORS.accentLight
+      color: this.accentLight
     });
     
-    this.sidebarY -= 20;
+    this.sidebarY -= 24;
   }
 
   drawContactItem(label, value) {
@@ -400,153 +373,176 @@ class TwoColumnPDFBuilder {
       font: this.fonts.helvetica,
       color: COLORS.white40
     });
-    this.sidebarY -= 10;
+    this.sidebarY -= 11;
     
-    const lines = wrapText(value, this.fonts.helvetica, 9, SIDEBAR_WIDTH - SIDEBAR_PADDING * 2);
+    const lines = wrapText(value, this.fonts.helvetica, 9.5, SIDEBAR_WIDTH - SIDEBAR_PADDING * 2);
     for (const line of lines) {
       this.page.drawText(line, {
         x: SIDEBAR_PADDING,
         y: this.sidebarY,
-        size: 9,
+        size: 9.5,
         font: this.fonts.helvetica,
         color: COLORS.white90
       });
-      this.sidebarY -= 12;
+      this.sidebarY -= 13;
     }
-    this.sidebarY -= 4;
+    this.sidebarY -= 5;
   }
 
   drawSkillItem(skill) {
     this.page.drawCircle({
-      x: SIDEBAR_PADDING + 3,
-      y: this.sidebarY + 3,
-      size: 2,
-      color: COLORS.accentLight
+      x: SIDEBAR_PADDING + 4,
+      y: this.sidebarY + 4,
+      size: 3,
+      color: this.accentLight
+    });
+    this.page.drawCircle({
+      x: SIDEBAR_PADDING + 4,
+      y: this.sidebarY + 4,
+      size: 1.5,
+      color: COLORS.white
     });
     
-    const lines = wrapText(skill, this.fonts.helvetica, 9, SIDEBAR_WIDTH - SIDEBAR_PADDING * 2 - 12);
+    const lines = wrapText(skill, this.fonts.helvetica, 9.5, SIDEBAR_WIDTH - SIDEBAR_PADDING * 2 - 14);
     for (const line of lines) {
       this.page.drawText(line, {
-        x: SIDEBAR_PADDING + 10,
+        x: SIDEBAR_PADDING + 12,
         y: this.sidebarY,
-        size: 9,
+        size: 9.5,
         font: this.fonts.helvetica,
-        color: COLORS.white70
+        color: COLORS.white80
       });
-      this.sidebarY -= 12;
+      this.sidebarY -= 13;
     }
   }
 
   drawLanguageBar(language, proficiency) {
     const barWidth = SIDEBAR_WIDTH - SIDEBAR_PADDING * 2;
-    const barHeight = 5;
+    const barHeight = 6;
     
     const levels = {
-      'Native': 100,
-      'Fluent': 100,
-      'Advanced': 90,
-      'Proficient': 80,
-      'Intermediate': 65,
-      'Elementary': 45,
-      'Basic': 25
+      'Native': 100, 'Fluent': 100, 'Advanced': 90, 'Proficient': 80,
+      'Intermediate': 65, 'Elementary': 45, 'Basic': 25
     };
     const percent = levels[proficiency] || 60;
     
     this.page.drawText(language, {
       x: SIDEBAR_PADDING,
       y: this.sidebarY,
-      size: 9,
+      size: 10,
       font: this.fonts.helvetica,
       color: COLORS.white90
     });
     
     const percentText = `${percent}%`;
-    const percentWidth = this.fonts.helvetica.widthOfTextAtSize(percentText, 7);
+    const percentWidth = this.fonts.helvetica.widthOfTextAtSize(percentText, 8);
     this.page.drawText(percentText, {
       x: SIDEBAR_WIDTH - SIDEBAR_PADDING - percentWidth,
       y: this.sidebarY,
-      size: 7,
+      size: 8,
       font: this.fonts.helvetica,
-      color: COLORS.accentLight
+      color: this.accentLight
     });
     
-    this.sidebarY -= 14;
+    this.sidebarY -= 16;
 
     this.page.drawRectangle({
       x: SIDEBAR_PADDING,
       y: this.sidebarY,
       width: barWidth,
       height: barHeight,
-      color: COLORS.white30
+      color: COLORS.white20
     });
 
+    const fillWidth = barWidth * (percent / 100);
     this.page.drawRectangle({
       x: SIDEBAR_PADDING,
       y: this.sidebarY,
-      width: barWidth * (percent / 100),
+      width: fillWidth,
       height: barHeight,
       color: this.accentColor
     });
     
-    this.sidebarY -= 15;
+    this.page.drawRectangle({
+      x: SIDEBAR_PADDING,
+      y: this.sidebarY + barHeight - 2,
+      width: fillWidth,
+      height: 2,
+      color: this.accentLight
+    });
+    
+    this.sidebarY -= 18;
   }
 
   estimateTimelineItemHeight(data) {
-    const cardWidth = MAIN_WIDTH - PADDING * 2 - 30;
-    const textMaxWidth = cardWidth - 20;
+    const cardWidth = MAIN_WIDTH - PADDING * 2 - 32;
+    const textMaxWidth = cardWidth - 24;
     
-    let height = 35;
+    let height = 40;
     
-    if (data.dateRange) height += 22;
+    if (data.dateRange) height += 24;
     
     if (data.title) {
-      const titleLines = wrapText(data.title, this.fonts.helveticaBold, 11, textMaxWidth);
-      height += titleLines.length * 14;
+      const titleLines = wrapText(data.title, this.fonts.helveticaBold, 11.5, textMaxWidth);
+      height += titleLines.length * 15;
     }
     
     if (data.subtitle) {
-      const subtitleLines = wrapText(data.subtitle, this.fonts.helvetica, 9, textMaxWidth);
-      height += subtitleLines.length * 12;
+      const subtitleLines = wrapText(data.subtitle, this.fonts.helvetica, 9.5, textMaxWidth);
+      height += subtitleLines.length * 13;
     }
     
     if (data.bullets && data.bullets.length > 0) {
-      height += 4;
+      height += 6;
       for (const bullet of data.bullets.filter(b => b && b.trim()).slice(0, 5)) {
-        const bulletLines = wrapText(bullet, this.fonts.helvetica, 9, textMaxWidth - 12);
-        height += bulletLines.length * 12;
+        const bulletLines = wrapText(bullet, this.fonts.helvetica, 9.5, textMaxWidth - 14);
+        height += bulletLines.length * 13;
       }
     }
     
     if (data.achievements && data.achievements.length > 0) {
-      height += 15;
+      height += 18;
     }
     
-    return height + 20;
+    return height + 22;
   }
 
   drawTimelineItem(data, isLast = false) {
     const timelineX = MAIN_START_X + PADDING;
-    const cardX = timelineX + 22;
-    const cardWidth = MAIN_WIDTH - PADDING * 2 - 30;
+    const cardX = timelineX + 24;
+    const cardWidth = MAIN_WIDTH - PADDING * 2 - 32;
     
     const estimatedHeight = this.estimateTimelineItemHeight(data);
     this.checkMainSpace(estimatedHeight);
     
-    const dotSize = 5;
     this.page.drawCircle({
       x: timelineX + 6,
-      y: this.mainY - 8,
-      size: dotSize + 2,
+      y: this.mainY - 10,
+      size: 8,
       color: COLORS.cardBg
     });
     this.page.drawCircle({
       x: timelineX + 6,
-      y: this.mainY - 8,
-      size: dotSize,
+      y: this.mainY - 10,
+      size: 6,
       color: this.accentColor
+    });
+    this.page.drawCircle({
+      x: timelineX + 6,
+      y: this.mainY - 10,
+      size: 3,
+      color: COLORS.white
     });
 
     const cardStartY = this.mainY;
+
+    this.page.drawRectangle({
+      x: cardX + 2,
+      y: cardStartY - estimatedHeight - 2,
+      width: cardWidth,
+      height: estimatedHeight + 8,
+      color: COLORS.cardShadow
+    });
 
     this.page.drawRectangle({
       x: cardX,
@@ -559,102 +555,133 @@ class TwoColumnPDFBuilder {
     this.page.drawLine({
       start: { x: cardX, y: cardStartY - estimatedHeight },
       end: { x: cardX + cardWidth, y: cardStartY - estimatedHeight },
-      thickness: 0.5,
+      thickness: 1,
       color: COLORS.cardBorder
     });
     this.page.drawLine({
       start: { x: cardX, y: cardStartY + 8 },
       end: { x: cardX + cardWidth, y: cardStartY + 8 },
-      thickness: 0.5,
+      thickness: 1,
       color: COLORS.cardBorder
     });
     this.page.drawLine({
       start: { x: cardX, y: cardStartY - estimatedHeight },
       end: { x: cardX, y: cardStartY + 8 },
-      thickness: 0.5,
+      thickness: 1,
       color: COLORS.cardBorder
     });
     this.page.drawLine({
       start: { x: cardX + cardWidth, y: cardStartY - estimatedHeight },
       end: { x: cardX + cardWidth, y: cardStartY + 8 },
-      thickness: 0.5,
+      thickness: 1,
       color: COLORS.cardBorder
     });
 
-    const textX = cardX + 10;
+    const textX = cardX + 12;
     let textY = cardStartY;
-    const textMaxWidth = cardWidth - 20;
+    const textMaxWidth = cardWidth - 24;
 
     if (data.dateRange) {
       const dateText = data.dateRange;
-      const dateWidth = this.fonts.helveticaBold.widthOfTextAtSize(dateText, 7) + 16;
+      const dateWidth = this.fonts.helveticaBold.widthOfTextAtSize(dateText, 8) + 18;
       
       this.page.drawRectangle({
         x: textX,
-        y: textY - 8,
+        y: textY - 10,
         width: dateWidth,
-        height: 14,
+        height: 16,
         color: COLORS.datePillBg
       });
       
+      this.page.drawLine({
+        start: { x: textX, y: textY - 10 },
+        end: { x: textX + dateWidth, y: textY - 10 },
+        thickness: 0.5,
+        color: COLORS.datePillBorder
+      });
+      this.page.drawLine({
+        start: { x: textX, y: textY + 6 },
+        end: { x: textX + dateWidth, y: textY + 6 },
+        thickness: 0.5,
+        color: COLORS.datePillBorder
+      });
+      this.page.drawLine({
+        start: { x: textX, y: textY - 10 },
+        end: { x: textX, y: textY + 6 },
+        thickness: 0.5,
+        color: COLORS.datePillBorder
+      });
+      this.page.drawLine({
+        start: { x: textX + dateWidth, y: textY - 10 },
+        end: { x: textX + dateWidth, y: textY + 6 },
+        thickness: 0.5,
+        color: COLORS.datePillBorder
+      });
+      
       this.page.drawText(dateText, {
-        x: textX + 8,
-        y: textY - 4,
-        size: 7,
+        x: textX + 9,
+        y: textY - 5,
+        size: 8,
         font: this.fonts.helveticaBold,
         color: this.accentColor
       });
-      textY -= 22;
+      textY -= 26;
     }
 
     if (data.title) {
-      const titleLines = wrapText(data.title, this.fonts.helveticaBold, 11, textMaxWidth);
+      const titleLines = wrapText(data.title, this.fonts.helveticaBold, 11.5, textMaxWidth);
       for (const line of titleLines) {
         this.page.drawText(line, {
           x: textX,
           y: textY,
-          size: 11,
+          size: 11.5,
           font: this.fonts.helveticaBold,
           color: COLORS.textDark
         });
-        textY -= 14;
+        textY -= 15;
       }
     }
 
     if (data.subtitle) {
-      const subtitleLines = wrapText(data.subtitle, this.fonts.helvetica, 9, textMaxWidth);
+      const subtitleLines = wrapText(data.subtitle, this.fonts.helvetica, 9.5, textMaxWidth);
       for (const line of subtitleLines) {
         this.page.drawText(line, {
           x: textX,
           y: textY,
-          size: 9,
+          size: 9.5,
           font: this.fonts.helvetica,
           color: COLORS.textLight
         });
-        textY -= 12;
+        textY -= 13;
       }
     }
 
     if (data.bullets && data.bullets.length > 0) {
-      textY -= 4;
+      textY -= 6;
       for (const bullet of data.bullets.filter(b => b && b.trim()).slice(0, 5)) {
         this.page.drawCircle({
-          x: textX + 3,
-          y: textY + 3,
-          size: 1.5,
+          x: textX + 4,
+          y: textY + 4,
+          size: 2.5,
           color: this.accentColor
         });
+        this.page.drawCircle({
+          x: textX + 4,
+          y: textY + 4,
+          size: 1,
+          color: COLORS.white
+        });
         
-        const bulletLines = wrapText(bullet, this.fonts.helvetica, 9, textMaxWidth - 12);
+        const bulletLines = wrapText(bullet, this.fonts.helvetica, 9.5, textMaxWidth - 14);
         for (let i = 0; i < bulletLines.length; i++) {
           this.page.drawText(bulletLines[i], {
-            x: textX + 10,
+            x: textX + 12,
             y: textY,
-            size: 9,
+            size: 9.5,
             font: this.fonts.helvetica,
-            color: COLORS.textGray
+            color: COLORS.textMid
           });
-          textY -= 12;
+          textY -= 13;
         }
       }
     }
@@ -662,32 +689,33 @@ class TwoColumnPDFBuilder {
     if (data.achievements && data.achievements.length > 0) {
       const achievementText = data.achievements.filter(a => a && a.trim()).join(' | ');
       if (achievementText) {
-        const achieveLines = wrapText(achievementText, this.fonts.helvetica, 8, textMaxWidth);
+        textY -= 4;
+        const achieveLines = wrapText(achievementText, this.fonts.helvetica, 8.5, textMaxWidth);
         for (const line of achieveLines.slice(0, 1)) {
           this.page.drawText(line, {
             x: textX,
             y: textY,
-            size: 8,
+            size: 8.5,
             font: this.fonts.helvetica,
             color: this.accentColor
           });
-          textY -= 10;
+          textY -= 12;
         }
       }
     }
 
-    const actualHeight = cardStartY - textY + 15;
+    const actualHeight = cardStartY - textY + 18;
     
     if (!isLast) {
       this.page.drawLine({
-        start: { x: timelineX + 6, y: this.mainY - 8 - dotSize - 2 },
-        end: { x: timelineX + 6, y: this.mainY - actualHeight - 5 },
-        thickness: 1.5,
+        start: { x: timelineX + 6, y: this.mainY - 10 - 8 },
+        end: { x: timelineX + 6, y: this.mainY - actualHeight - 8 },
+        thickness: 2,
         color: rgb(this.accentColor.red * 0.3, this.accentColor.green * 0.3, this.accentColor.blue * 0.5)
       });
     }
 
-    this.mainY -= actualHeight + 10;
+    this.mainY -= actualHeight + 12;
   }
 }
 
@@ -712,7 +740,7 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
   const languages = cvData.languages || [];
   const projects = cvData.projects || [];
 
-  builder.drawProfilePhoto(!!personalInfo.photo_url);
+  builder.drawProfilePhoto();
 
   const nameParts = (personalInfo.full_name || 'Your Name').split(' ');
   const firstName = nameParts[0] || 'Your';
@@ -724,32 +752,32 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
   }
 
   if (personalInfo.summary) {
-    builder.sidebarY -= 5;
-    builder.drawSidebarSectionHeader('Profile', 'profile');
+    builder.sidebarY -= 6;
+    builder.drawSidebarSectionHeader('Profile', 'P');
     
     const summaryLines = wrapText(
       personalInfo.summary, 
       fonts.helvetica, 
-      9, 
+      9.5, 
       SIDEBAR_WIDTH - SIDEBAR_PADDING * 2
     );
     for (const line of summaryLines) {
       builder.page.drawText(line, {
         x: SIDEBAR_PADDING,
         y: builder.sidebarY,
-        size: 9,
+        size: 9.5,
         font: fonts.helvetica,
         color: COLORS.white70
       });
-      builder.sidebarY -= 12;
+      builder.sidebarY -= 13;
     }
-    builder.sidebarY -= 10;
+    builder.sidebarY -= 12;
   }
 
   const hasContact = personalInfo.full_name || personalInfo.location || 
                      personalInfo.phone || personalInfo.email;
   if (hasContact) {
-    builder.drawSidebarSectionHeader('Contact', 'contact');
+    builder.drawSidebarSectionHeader('Contact', 'C');
     
     if (personalInfo.full_name) {
       builder.drawContactItem('Name', personalInfo.full_name);
@@ -763,28 +791,28 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
     if (personalInfo.email) {
       builder.drawContactItem('Email', personalInfo.email);
     }
-    builder.sidebarY -= 10;
+    builder.sidebarY -= 12;
   }
 
   if (skills.length > 0) {
-    builder.drawSidebarSectionHeader('Competences', 'skills');
+    builder.drawSidebarSectionHeader('Competences', 'S');
     
     for (const skillCategory of skills) {
       const items = skillCategory.items || [];
       for (const skill of items) {
-        if (builder.checkSidebarSpace(15)) {
+        if (builder.checkSidebarSpace(16)) {
           builder.drawSkillItem(skill);
         }
       }
     }
-    builder.sidebarY -= 10;
+    builder.sidebarY -= 12;
   }
 
-  if (languages.length > 0 && builder.checkSidebarSpace(40)) {
-    builder.drawSidebarSectionHeader('Languages', 'languages');
+  if (languages.length > 0 && builder.checkSidebarSpace(45)) {
+    builder.drawSidebarSectionHeader('Languages', 'L');
     
     for (const lang of languages) {
-      if (builder.checkSidebarSpace(30)) {
+      if (builder.checkSidebarSpace(35)) {
         const langName = lang.language || lang.name || lang;
         const proficiency = lang.proficiency || 'Intermediate';
         builder.drawLanguageBar(langName, proficiency);
@@ -793,11 +821,10 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
   }
 
   if (education.length > 0) {
-    builder.drawMainSectionHeader('Education');
+    builder.drawMainSectionHeader('Education', 'E');
     
     for (let i = 0; i < education.length; i++) {
       const edu = education[i];
-      builder.checkMainSpace(100);
       
       const formatDate = (dateStr) => {
         if (!dateStr) return '';
@@ -823,15 +850,14 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
         achievements: edu.achievements
       }, i === education.length - 1);
     }
-    builder.mainY -= 10;
+    builder.mainY -= 8;
   }
 
   if (experiences.length > 0) {
-    builder.drawMainSectionHeader('Experiences');
+    builder.drawMainSectionHeader('Experiences', 'W');
     
     for (let i = 0; i < experiences.length; i++) {
       const exp = experiences[i];
-      builder.checkMainSpace(100);
       
       const formatDate = (dateStr) => {
         if (!dateStr) return '';
@@ -851,7 +877,6 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
       }
       
       const jobTitle = exp.job_title || exp.title || 'Position';
-      const companyLocation = [exp.company, exp.location].filter(Boolean).join(' | ');
       
       builder.drawTimelineItem({
         dateRange,
@@ -860,78 +885,84 @@ export async function generateCVPdf(cvData, templateId = 'professional') {
         bullets: exp.bullet_points
       }, i === experiences.length - 1);
     }
-    builder.mainY -= 10;
+    builder.mainY -= 8;
   }
 
   if (certifications && certifications.length > 0) {
-    builder.drawMainSectionHeader('Certifications');
+    builder.drawMainSectionHeader('Certifications', 'C');
     
     for (const cert of certifications.slice(0, 5)) {
-      builder.checkMainSpace(30);
+      builder.checkMainSpace(32);
       const certName = cert.name || cert;
       const certText = cert.issuer ? `${certName} - ${cert.issuer}` : certName;
       const dateText = cert.date ? ` (${cert.date})` : '';
       
       builder.page.drawCircle({
-        x: MAIN_START_X + PADDING + 3,
-        y: builder.mainY + 3,
-        size: 2,
+        x: MAIN_START_X + PADDING + 4,
+        y: builder.mainY + 4,
+        size: 3,
         color: builder.accentColor
+      });
+      builder.page.drawCircle({
+        x: MAIN_START_X + PADDING + 4,
+        y: builder.mainY + 4,
+        size: 1.5,
+        color: COLORS.white
       });
       
       builder.page.drawText(`${certText}${dateText}`, {
-        x: MAIN_START_X + PADDING + 12,
+        x: MAIN_START_X + PADDING + 14,
         y: builder.mainY,
-        size: 9,
+        size: 10,
         font: fonts.helvetica,
-        color: COLORS.textGray
+        color: COLORS.textMid
       });
-      builder.mainY -= 16;
+      builder.mainY -= 18;
     }
-    builder.mainY -= 10;
+    builder.mainY -= 8;
   }
 
   if (projects && projects.length > 0) {
-    builder.drawMainSectionHeader('Projects');
+    builder.drawMainSectionHeader('Projects', 'P');
     
     for (const project of projects.slice(0, 3)) {
-      builder.checkMainSpace(50);
+      builder.checkMainSpace(55);
       
       builder.page.drawText(project.name || 'Project', {
         x: MAIN_START_X + PADDING,
         y: builder.mainY,
-        size: 10,
+        size: 11,
         font: fonts.helveticaBold,
         color: COLORS.textDark
       });
-      builder.mainY -= 14;
+      builder.mainY -= 16;
       
       if (project.description) {
-        const descLines = wrapText(project.description, fonts.helvetica, 9, MAIN_WIDTH - PADDING * 2);
+        const descLines = wrapText(project.description, fonts.helvetica, 9.5, MAIN_WIDTH - PADDING * 2);
         for (const line of descLines.slice(0, 2)) {
           builder.page.drawText(line, {
-            x: MAIN_START_X + PADDING + 8,
+            x: MAIN_START_X + PADDING + 10,
             y: builder.mainY,
-            size: 9,
+            size: 9.5,
             font: fonts.helvetica,
-            color: COLORS.textGray
+            color: COLORS.textMid
           });
-          builder.mainY -= 12;
+          builder.mainY -= 13;
         }
       }
       
       if (project.technologies && project.technologies.length > 0) {
         const techText = 'Tech: ' + project.technologies.join(', ');
         builder.page.drawText(techText, {
-          x: MAIN_START_X + PADDING + 8,
+          x: MAIN_START_X + PADDING + 10,
           y: builder.mainY,
-          size: 8,
+          size: 9,
           font: fonts.helvetica,
           color: builder.accentColor
         });
-        builder.mainY -= 16;
+        builder.mainY -= 18;
       }
-      builder.mainY -= 8;
+      builder.mainY -= 10;
     }
   }
 
