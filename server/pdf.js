@@ -6,7 +6,6 @@ async function getBrowser() {
   if (!browserInstance) {
     browserInstance = await puppeteer.launch({
       headless: true,
-      executablePath: process.env.CHROME_PATH || '/nix/store/qa9cnw4v5xkxyip6mb9kxqfq1z4x2dx1-chromium-138.0.7204.100/bin/chromium',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
@@ -15,7 +14,8 @@ async function getBrowser() {
         '--no-first-run',
         '--no-zygote',
         '--disable-gpu',
-        '--single-process'
+        '--single-process',
+        '--font-render-hinting=none'
       ]
     });
   }
@@ -38,12 +38,16 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
     
     await page.goto(exportUrl, {
       waitUntil: 'networkidle0',
-      timeout: 30000
+      timeout: 60000
     });
     
-    await page.waitForSelector('#cv-export-container', { timeout: 10000 });
+    await page.waitForSelector('#cv-export-container', { timeout: 15000 });
     
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await page.evaluate(() => {
+      return document.fonts.ready;
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 1500));
     
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -54,7 +58,8 @@ export async function generateCVPdf(cvData, templateId = 'professional', baseUrl
         bottom: '0',
         left: '0'
       },
-      preferCSSPageSize: true
+      preferCSSPageSize: true,
+      scale: 1
     });
     
     return pdfBuffer;
@@ -77,6 +82,7 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
       <html>
       <head>
         <meta charset="UTF-8">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
         <style>
           * {
             margin: 0;
@@ -84,7 +90,7 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
             box-sizing: border-box;
           }
           body {
-            font-family: 'Georgia', 'Times New Roman', serif;
+            font-family: 'Inter', 'Georgia', 'Times New Roman', serif;
             font-size: 12pt;
             line-height: 1.6;
             color: #333;
@@ -122,6 +128,12 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
     `;
     
     await page.setContent(html, { waitUntil: 'networkidle0' });
+    
+    await page.evaluate(() => {
+      return document.fonts.ready;
+    });
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     const pdfBuffer = await page.pdf({
       format: 'A4',

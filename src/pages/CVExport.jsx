@@ -1,25 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import ProfessionalTemplate from '@/components/cv/templates/ProfessionalTemplate';
-import MinimalTemplate from '@/components/cv/templates/MinimalTemplate';
-import CreativeTemplate from '@/components/cv/templates/CreativeTemplate';
-import ExecutiveTemplate from '@/components/cv/templates/ExecutiveTemplate';
-import TechTemplate from '@/components/cv/templates/TechTemplate';
-import AcademicTemplate from '@/components/cv/templates/AcademicTemplate';
-import CompactTemplate from '@/components/cv/templates/CompactTemplate';
-import ModernTemplate from '@/components/cv/templates/ModernTemplate';
-
-const templates = {
-  professional: ProfessionalTemplate,
-  minimal: MinimalTemplate,
-  creative: CreativeTemplate,
-  executive: ExecutiveTemplate,
-  tech: TechTemplate,
-  academic: AcademicTemplate,
-  compact: CompactTemplate,
-  modern: ModernTemplate,
-  designer: CreativeTemplate,
-};
+import CVTemplateRenderer from '@/components/cv/templates/CVTemplateRenderer';
 
 export default function CVExport() {
   const [searchParams] = useSearchParams();
@@ -38,10 +19,10 @@ export default function CVExport() {
     
     if (document.fonts && document.fonts.ready) {
       document.fonts.ready.then(() => {
-        setFontsLoaded(true);
+        setTimeout(() => setFontsLoaded(true), 300);
       });
     } else {
-      setTimeout(() => setFontsLoaded(true), 500);
+      setTimeout(() => setFontsLoaded(true), 1000);
     }
   }, []);
 
@@ -68,20 +49,19 @@ export default function CVExport() {
     );
   }
 
-  const TemplateComponent = templates[templateId] || templates.professional;
-
   return (
     <div 
       id="cv-export-container"
       style={{
         width: '210mm',
         minHeight: '297mm',
-        margin: '0',
+        margin: '0 auto',
         padding: '0',
         backgroundColor: 'white',
+        overflow: 'hidden'
       }}
     >
-      <TemplateComponent data={cvData} forExport={true} />
+      <CVTemplateRenderer data={cvData} templateId={templateId} forExport={true} />
     </div>
   );
 }
