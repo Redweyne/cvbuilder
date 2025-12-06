@@ -33,7 +33,7 @@ export default function PagedCVPreview({ data, templateId }) {
     return () => observer.disconnect();
   }, []);
 
-  const scale = 0.5;
+  const scale = 0.75;
 
   return (
     <div className="flex flex-col items-center gap-4">
