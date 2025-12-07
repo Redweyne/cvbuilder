@@ -51,32 +51,27 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
       className={`bg-white ${forExport ? '' : 'shadow-2xl'}`}
       style={{ 
         fontFamily: bodyFont,
-        minHeight: forExport ? 'auto' : '1100px',
-        height: forExport ? '297mm' : 'auto',
-        width: forExport ? '210mm' : '100%',
-        maxWidth: forExport ? '210mm' : '850px',
+        minHeight: '297mm',
+        width: '210mm',
+        maxWidth: '210mm',
         margin: '0 auto',
-        fontSize: forExport ? '9px' : '11px',
-        lineHeight: forExport ? '1.4' : '1.6',
-        overflow: 'hidden'
+        fontSize: '9px',
+        lineHeight: '1.4'
       }}
     >
       {/* Use CSS Grid for proper two-column layout */}
       <div 
-        className="grid h-full"
+        className="grid"
         style={{ 
-          gridTemplateColumns: forExport ? '200px 1fr' : '300px 1fr',
-          columnGap: forExport ? '0' : '0'
+          gridTemplateColumns: '200px 1fr',
+          minHeight: '297mm'
         }}
       >
-        {/* ═══════════════════════════════════════════════════════════════════
-            LEFT SIDEBAR
-        ═══════════════════════════════════════════════════════════════════ */}
+        {/* LEFT SIDEBAR */}
         <aside 
           className="relative"
           style={{ 
-            background: `linear-gradient(175deg, #1e1e3f 0%, ${primaryColor} 30%, #12122a 100%)`,
-            overflow: 'hidden'
+            background: `linear-gradient(175deg, #1e1e3f 0%, ${primaryColor} 30%, #12122a 100%)`
           }}
         >
           {/* Subtle texture */}
@@ -95,18 +90,16 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
             }}
           />
           
-          <div className="relative z-10" style={{ padding: forExport ? '16px' : '28px' }}>
-            {/* ─────────────────────────────────────────────────────────────────
-                PHOTO + NAME HEADER
-            ───────────────────────────────────────────────────────────────── */}
-            <div className={`text-center ${forExport ? 'mb-3' : 'mb-6'}`}>
+          <div className="relative z-10" style={{ padding: '16px' }}>
+            {/* PHOTO + NAME HEADER */}
+            <div className="text-center mb-3">
               {/* Photo placeholder */}
-              <div className={forExport ? 'mb-2' : 'mb-4'}>
+              <div className="mb-2">
                 {personal_info.photo_url ? (
                   <img 
                     src={personal_info.photo_url} 
                     alt={personal_info.full_name}
-                    className={`${forExport ? 'w-16 h-16' : 'w-24 h-24'} rounded-full mx-auto object-cover`}
+                    className="w-16 h-16 rounded-full mx-auto object-cover"
                     style={{ 
                       border: `3px solid ${accentColor}`,
                       boxShadow: `0 4px 20px rgba(0,0,0,0.3), 0 0 0 4px rgba(255,255,255,0.1)`
@@ -114,14 +107,14 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                   />
                 ) : (
                   <div 
-                    className={`${forExport ? 'w-16 h-16' : 'w-24 h-24'} rounded-full mx-auto flex items-center justify-center`}
+                    className="w-16 h-16 rounded-full mx-auto flex items-center justify-center"
                     style={{ 
                       background: `linear-gradient(135deg, ${accentColor}40, ${accentColor}20)`,
                       border: `3px solid ${accentColor}50`,
                       boxShadow: `0 4px 20px rgba(0,0,0,0.2)`
                     }}
                   >
-                    <User className={`${forExport ? 'w-7 h-7' : 'w-10 h-10'} text-white/60`} />
+                    <User className="w-7 h-7 text-white/60" />
                   </div>
                 )}
               </div>
@@ -131,7 +124,7 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                 className="text-white leading-tight"
                 style={{ 
                   fontFamily: headerFont,
-                  fontSize: forExport ? '22px' : '32px',
+                  fontSize: '22px',
                   fontWeight: '600',
                   letterSpacing: '0.02em'
                 }}
@@ -142,7 +135,7 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                 className="text-white/75 mt-1"
                 style={{ 
                   fontFamily: headerFont,
-                  fontSize: forExport ? '18px' : '26px',
+                  fontSize: '18px',
                   fontWeight: '400',
                   letterSpacing: '0.06em',
                   textTransform: 'uppercase'
@@ -169,102 +162,96 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
               )}
             </div>
 
-            {/* ─────────────────────────────────────────────────────────────────
-                PROFILE
-            ───────────────────────────────────────────────────────────────── */}
+            {/* PROFILE */}
             {personal_info.summary && (
-              <div className={forExport ? 'mb-3' : 'mb-6'}>
-                <div className={`flex items-center gap-2 ${forExport ? 'mb-2' : 'mb-3'}`}>
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
                   <div 
-                    className={`${forExport ? 'w-5 h-5' : 'w-6 h-6'} rounded flex items-center justify-center`}
+                    className="w-5 h-5 rounded flex items-center justify-center"
                     style={{ backgroundColor: `${accentColor}30` }}
                   >
-                    <User className={`${forExport ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: accentLight }} />
+                    <User className="w-2.5 h-2.5" style={{ color: accentLight }} />
                   </div>
-                  <h3 className={`${forExport ? 'text-[8px]' : 'text-[10px]'} font-bold tracking-[0.15em] uppercase text-white/90`}>
+                  <h3 className="text-[8px] font-bold tracking-[0.15em] uppercase text-white/90">
                     Profile
                   </h3>
                 </div>
-                <p className={`text-white/70 ${forExport ? 'text-[8px] leading-[1.5]' : 'text-[10.5px] leading-[1.7]'} text-justify`}>
+                <p className="text-white/70 text-[8px] leading-[1.5] text-justify">
                   {personal_info.summary}
                 </p>
               </div>
             )}
 
-            {/* ─────────────────────────────────────────────────────────────────
-                CONTACT
-            ───────────────────────────────────────────────────────────────── */}
-            <div className={forExport ? 'mb-3' : 'mb-6'}>
-              <div className={`flex items-center gap-2 ${forExport ? 'mb-2' : 'mb-3'}`}>
+            {/* CONTACT */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <div 
-                  className={`${forExport ? 'w-5 h-5' : 'w-6 h-6'} rounded flex items-center justify-center`}
+                  className="w-5 h-5 rounded flex items-center justify-center"
                   style={{ backgroundColor: `${accentColor}30` }}
                 >
-                  <Mail className={`${forExport ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: accentLight }} />
+                  <Mail className="w-2.5 h-2.5" style={{ color: accentLight }} />
                 </div>
-                <h3 className={`${forExport ? 'text-[8px]' : 'text-[10px]'} font-bold tracking-[0.15em] uppercase text-white/90`}>
+                <h3 className="text-[8px] font-bold tracking-[0.15em] uppercase text-white/90">
                   Contact
                 </h3>
               </div>
               
-              <div className={forExport ? 'space-y-1.5' : 'space-y-2.5'}>
+              <div className="space-y-1.5">
                 {personal_info.full_name && (
                   <div>
-                    <p className={`${forExport ? 'text-[7px]' : 'text-[8px]'} text-white/40 uppercase tracking-wider mb-0.5`}>Name</p>
-                    <p className={`text-white/90 ${forExport ? 'text-[8px]' : 'text-[10.5px]'}`}>{personal_info.full_name}</p>
+                    <p className="text-[7px] text-white/40 uppercase tracking-wider mb-0.5">Name</p>
+                    <p className="text-white/90 text-[8px]">{personal_info.full_name}</p>
                   </div>
                 )}
                 {personal_info.location && (
                   <div>
-                    <p className={`${forExport ? 'text-[7px]' : 'text-[8px]'} text-white/40 uppercase tracking-wider mb-0.5`}>Address</p>
-                    <p className={`text-white/90 ${forExport ? 'text-[8px]' : 'text-[10.5px]'}`}>{personal_info.location}</p>
+                    <p className="text-[7px] text-white/40 uppercase tracking-wider mb-0.5">Address</p>
+                    <p className="text-white/90 text-[8px]">{personal_info.location}</p>
                   </div>
                 )}
                 {personal_info.phone && (
                   <div>
-                    <p className={`${forExport ? 'text-[7px]' : 'text-[8px]'} text-white/40 uppercase tracking-wider mb-0.5`}>Phone</p>
-                    <p className={`text-white/90 ${forExport ? 'text-[8px]' : 'text-[10.5px]'}`}>{personal_info.phone}</p>
+                    <p className="text-[7px] text-white/40 uppercase tracking-wider mb-0.5">Phone</p>
+                    <p className="text-white/90 text-[8px]">{personal_info.phone}</p>
                   </div>
                 )}
                 {personal_info.email && (
                   <div>
-                    <p className={`${forExport ? 'text-[7px]' : 'text-[8px]'} text-white/40 uppercase tracking-wider mb-0.5`}>Email</p>
-                    <p className={`text-white/90 ${forExport ? 'text-[8px]' : 'text-[10.5px]'} break-words`}>{personal_info.email}</p>
+                    <p className="text-[7px] text-white/40 uppercase tracking-wider mb-0.5">Email</p>
+                    <p className="text-white/90 text-[8px] break-words">{personal_info.email}</p>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* ─────────────────────────────────────────────────────────────────
-                COMPETENCES
-            ───────────────────────────────────────────────────────────────── */}
+            {/* COMPETENCES */}
             {skills.length > 0 && (
-              <div className={forExport ? 'mb-3' : 'mb-6'}>
-                <div className={`flex items-center gap-2 ${forExport ? 'mb-2' : 'mb-3'}`}>
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
                   <div 
-                    className={`${forExport ? 'w-5 h-5' : 'w-6 h-6'} rounded flex items-center justify-center`}
+                    className="w-5 h-5 rounded flex items-center justify-center"
                     style={{ backgroundColor: `${accentColor}30` }}
                   >
-                    <Star className={`${forExport ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: accentLight }} />
+                    <Star className="w-2.5 h-2.5" style={{ color: accentLight }} />
                   </div>
-                  <h3 className={`${forExport ? 'text-[8px]' : 'text-[10px]'} font-bold tracking-[0.15em] uppercase text-white/90`}>
+                  <h3 className="text-[8px] font-bold tracking-[0.15em] uppercase text-white/90">
                     Competences
                   </h3>
                 </div>
                 
-                <div className={forExport ? 'space-y-0.5' : 'space-y-1'}>
-                  {skills.slice(0, forExport ? 2 : undefined).map((skillCategory, index) => (
+                <div className="space-y-0.5">
+                  {skills.map((skillCategory, index) => (
                     <div key={index}>
-                      {(skillCategory.items || []).slice(0, forExport ? 4 : undefined).map((skill, skillIndex) => (
+                      {(skillCategory.items || []).map((skill, skillIndex) => (
                         <div 
                           key={skillIndex}
-                          className={`flex items-start gap-2 ${forExport ? 'py-0.5' : 'py-1'}`}
+                          className="flex items-start gap-2 py-0.5"
                         >
                           <div 
-                            className={`${forExport ? 'w-1 h-1' : 'w-1.5 h-1.5'} rounded-full mt-1.5 flex-shrink-0`}
+                            className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0"
                             style={{ backgroundColor: accentLight }}
                           />
-                          <span className={`text-white/80 ${forExport ? 'text-[8px]' : 'text-[10px]'} leading-snug`}>
+                          <span className="text-white/80 text-[8px] leading-snug">
                             {skill}
                           </span>
                         </div>
@@ -275,37 +262,35 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
               </div>
             )}
 
-            {/* ─────────────────────────────────────────────────────────────────
-                LANGUAGES
-            ───────────────────────────────────────────────────────────────── */}
+            {/* LANGUAGES */}
             {languages && languages.length > 0 && (
               <div>
-                <div className={`flex items-center gap-2 ${forExport ? 'mb-2' : 'mb-3'}`}>
+                <div className="flex items-center gap-2 mb-2">
                   <div 
-                    className={`${forExport ? 'w-5 h-5' : 'w-6 h-6'} rounded flex items-center justify-center`}
+                    className="w-5 h-5 rounded flex items-center justify-center"
                     style={{ backgroundColor: `${accentColor}30` }}
                   >
-                    <Languages className={`${forExport ? 'w-2.5 h-2.5' : 'w-3 h-3'}`} style={{ color: accentLight }} />
+                    <Languages className="w-2.5 h-2.5" style={{ color: accentLight }} />
                   </div>
-                  <h3 className={`${forExport ? 'text-[8px]' : 'text-[10px]'} font-bold tracking-[0.15em] uppercase text-white/90`}>
+                  <h3 className="text-[8px] font-bold tracking-[0.15em] uppercase text-white/90">
                     Languages
                   </h3>
                 </div>
                 
-                <div className={forExport ? 'space-y-2' : 'space-y-3'}>
-                  {languages.slice(0, forExport ? 4 : undefined).map((lang, index) => {
+                <div className="space-y-2">
+                  {languages.map((lang, index) => {
                     const width = getProficiencyWidth(lang.proficiency);
                     return (
                       <div key={index}>
                         <div className="flex justify-between items-center mb-1">
-                          <span className={`text-white/90 ${forExport ? 'text-[8px]' : 'text-[10px]'} font-medium`}>
+                          <span className="text-white/90 text-[8px] font-medium">
                             {lang.language}
                           </span>
-                          <span className={forExport ? 'text-[7px]' : 'text-[9px]'} style={{ color: accentLight }}>
+                          <span className="text-[7px]" style={{ color: accentLight }}>
                             {width}%
                           </span>
                         </div>
-                        <div className={`${forExport ? 'h-1' : 'h-1.5'} rounded-full bg-white/10`}>
+                        <div className="h-1 rounded-full bg-white/10">
                           <div 
                             className="h-full rounded-full"
                             style={{ 
@@ -323,49 +308,44 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
           </div>
         </aside>
 
-        {/* ═══════════════════════════════════════════════════════════════════
-            RIGHT MAIN CONTENT
-        ═══════════════════════════════════════════════════════════════════ */}
+        {/* RIGHT MAIN CONTENT */}
         <main 
           className="min-w-0"
           style={{ 
             backgroundColor: '#f8f9fb',
-            padding: forExport ? '12px' : '24px',
-            overflow: 'hidden'
+            padding: '12px'
           }}
         >
-          {/* ─────────────────────────────────────────────────────────────────
-              EDUCATION
-          ───────────────────────────────────────────────────────────────── */}
+          {/* EDUCATION */}
           {education.length > 0 && (
-            <section className={forExport ? 'mb-3' : 'mb-6'}>
-              <div className={`flex items-center ${forExport ? 'gap-2 mb-2' : 'gap-3 mb-4'}`}>
+            <section className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <div 
-                  className={`${forExport ? 'w-6 h-6' : 'w-9 h-9'} rounded-lg flex items-center justify-center flex-shrink-0`}
+                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ 
                     background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
                     boxShadow: `0 3px 12px ${accentColor}40`
                   }}
                 >
-                  <GraduationCap className={`${forExport ? 'w-3 h-3' : 'w-4 h-4'} text-white`} />
+                  <GraduationCap className="w-3 h-3 text-white" />
                 </div>
                 <div className="min-w-0">
                   <h2 
-                    className={forExport ? 'text-[11px] font-semibold' : 'text-[15px] font-semibold'}
+                    className="text-[11px] font-semibold"
                     style={{ fontFamily: headerFont, color: primaryColor }}
                   >
                     EDUCATION
                   </h2>
                   <div 
-                    className={`${forExport ? 'h-0.5 w-8' : 'h-0.5 w-10'} mt-0.5 rounded-full`}
+                    className="h-0.5 w-8 mt-0.5 rounded-full"
                     style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentLight})` }}
                   />
                 </div>
               </div>
               
-              <div className={forExport ? 'space-y-2' : 'space-y-4'}>
-                {education.slice(0, forExport ? 2 : undefined).map((edu, index) => (
-                  <div key={index} className={forExport ? 'flex gap-2' : 'flex gap-3'}>
+              <div className="space-y-2">
+                {education.map((edu, index) => (
+                  <div key={index} className="flex gap-2">
                     {/* Timeline dot */}
                     <div className="flex flex-col items-center flex-shrink-0">
                       <div 
@@ -417,24 +397,22 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
             </section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────────
-              EXPERIENCES
-          ───────────────────────────────────────────────────────────────── */}
+          {/* EXPERIENCES */}
           {experiences.length > 0 && (
-            <section className={forExport ? 'mb-3' : 'mb-6'}>
-              <div className={`flex items-center ${forExport ? 'gap-2 mb-2' : 'gap-3 mb-4'}`}>
+            <section className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <div 
-                  className={`${forExport ? 'w-6 h-6' : 'w-9 h-9'} rounded-lg flex items-center justify-center flex-shrink-0`}
+                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ 
                     background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
                     boxShadow: `0 3px 12px ${accentColor}40`
                   }}
                 >
-                  <Briefcase className={`${forExport ? 'w-3 h-3' : 'w-4 h-4'} text-white`} />
+                  <Briefcase className="w-3 h-3 text-white" />
                 </div>
                 <div className="min-w-0">
                   <h2 
-                    className={forExport ? 'text-[11px] font-semibold' : 'text-[15px] font-semibold'}
+                    className="text-[11px] font-semibold"
                     style={{ fontFamily: headerFont, color: primaryColor }}
                   >
                     EXPERIENCES
@@ -446,9 +424,9 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                 </div>
               </div>
 
-              <div className={forExport ? 'space-y-2' : 'space-y-4'}>
-                {experiences.slice(0, forExport ? 3 : undefined).map((exp, index) => (
-                  <div key={index} className={forExport ? 'flex gap-2' : 'flex gap-3'}>
+              <div className="space-y-2">
+                {experiences.map((exp, index) => (
+                  <div key={index} className="flex gap-2">
                     {/* Timeline dot */}
                     <div className="flex flex-col items-center flex-shrink-0">
                       <div 
@@ -471,53 +449,45 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                       className="flex-1 min-w-0 bg-white rounded-lg p-3 border border-gray-100"
                       style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
                     >
-                      <div 
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold mb-2"
-                        style={{ backgroundColor: `${accentColor}12`, color: accentColor }}
-                      >
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(exp.start_date)} – {exp.is_current ? 'Present' : formatDate(exp.end_date)}
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <div 
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-semibold"
+                          style={{ backgroundColor: `${accentColor}12`, color: accentColor }}
+                        >
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(exp.start_date)} – {exp.is_current ? 'Present' : formatDate(exp.end_date)}
+                        </div>
+                        {exp.is_current && (
+                          <span 
+                            className="text-[8px] px-1.5 py-0.5 rounded-full font-semibold text-white"
+                            style={{ backgroundColor: '#10b981' }}
+                          >
+                            Current
+                          </span>
+                        )}
                       </div>
                       
                       <h3 className="font-bold text-[12px] text-gray-800 leading-tight">
                         {exp.job_title}
-                        <span className="font-normal text-gray-500"> – {exp.company}</span>
                       </h3>
                       
-                      {exp.location && (
-                        <p className="text-gray-400 text-[9px] flex items-center gap-1 mt-0.5">
-                          <MapPin className="w-3 h-3 flex-shrink-0" />
-                          {exp.location}
-                        </p>
-                      )}
+                      <p className="text-gray-500 text-[10px] mt-0.5 flex items-center gap-1">
+                        <Building2 className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">{exp.company}{exp.location && ` • ${exp.location}`}</span>
+                      </p>
                       
                       {exp.bullet_points && exp.bullet_points.length > 0 && (
                         <ul className="mt-2 space-y-1">
                           {exp.bullet_points.filter(bp => bp && bp.trim()).map((bp, bpIndex) => (
-                            <li 
-                              key={bpIndex} 
-                              className="text-gray-600 text-[10px] flex items-start gap-2 leading-relaxed"
-                            >
-                              <span 
+                            <li key={bpIndex} className="flex items-start gap-1.5">
+                              <div 
                                 className="w-1 h-1 rounded-full mt-1.5 flex-shrink-0"
                                 style={{ backgroundColor: accentColor }}
                               />
-                              <span>{bp}</span>
+                              <span className="text-gray-600 text-[9px] leading-relaxed">{bp}</span>
                             </li>
                           ))}
                         </ul>
-                      )}
-                      
-                      {exp.achievements && typeof exp.achievements === 'string' && exp.achievements.trim() && (
-                        <div 
-                          className="mt-2 px-2 py-1.5 rounded text-[9px] italic text-gray-500 border-l-2"
-                          style={{ 
-                            borderColor: accentColor,
-                            backgroundColor: `${accentColor}05`
-                          }}
-                        >
-                          {exp.achievements}
-                        </div>
                       )}
                     </div>
                   </div>
@@ -526,24 +496,22 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
             </section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────────
-              CERTIFICATIONS
-          ───────────────────────────────────────────────────────────────── */}
+          {/* CERTIFICATIONS */}
           {certifications && certifications.length > 0 && (
-            <section className="mb-6">
-              <div className="flex items-center gap-3 mb-4">
+            <section className="mb-3">
+              <div className="flex items-center gap-2 mb-2">
                 <div 
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ 
                     background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
                     boxShadow: `0 3px 12px ${accentColor}40`
                   }}
                 >
-                  <Award className="w-4 h-4 text-white" />
+                  <Award className="w-3 h-3 text-white" />
                 </div>
                 <div className="min-w-0">
                   <h2 
-                    className="text-[15px] font-semibold"
+                    className="text-[11px] font-semibold"
                     style={{ fontFamily: headerFont, color: primaryColor }}
                   >
                     CERTIFICATIONS
@@ -554,84 +522,67 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
                   />
                 </div>
               </div>
-
-              <div className="space-y-2">
+              
+              <div className="flex flex-wrap gap-1.5">
                 {certifications.map((cert, index) => (
                   <div 
                     key={index}
-                    className="flex items-center gap-3 bg-white rounded-lg px-3 py-2 border border-gray-100"
+                    className="px-2 py-1 rounded-lg text-[9px] font-medium bg-white border border-gray-100"
+                    style={{ boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}
                   >
-                    <div 
-                      className="w-7 h-7 rounded flex items-center justify-center flex-shrink-0"
-                      style={{ backgroundColor: `${accentColor}12` }}
-                    >
-                      <Award className="w-3.5 h-3.5" style={{ color: accentColor }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-[10px] text-gray-800 truncate">
-                        {cert.name}
-                      </h4>
-                      {cert.issuer && (
-                        <p className="text-gray-400 text-[9px] truncate">{cert.issuer}</p>
-                      )}
-                    </div>
+                    <span style={{ color: accentColor }}>{cert.name}</span>
+                    {cert.issuer && <span className="text-gray-400 ml-1">• {cert.issuer}</span>}
                   </div>
                 ))}
               </div>
             </section>
           )}
 
-          {/* ─────────────────────────────────────────────────────────────────
-              PROJECTS
-          ───────────────────────────────────────────────────────────────── */}
+          {/* PROJECTS */}
           {projects && projects.length > 0 && (
             <section>
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 mb-2">
                 <div 
-                  className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                  className="w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0"
                   style={{ 
                     background: `linear-gradient(135deg, ${accentColor}, ${accentLight})`,
                     boxShadow: `0 3px 12px ${accentColor}40`
                   }}
                 >
-                  <Target className="w-4 h-4 text-white" />
+                  <Target className="w-3 h-3 text-white" />
                 </div>
                 <div className="min-w-0">
                   <h2 
-                    className="text-[15px] font-semibold"
+                    className="text-[11px] font-semibold"
                     style={{ fontFamily: headerFont, color: primaryColor }}
                   >
                     PROJECTS
                   </h2>
                   <div 
-                    className="h-0.5 w-10 mt-0.5 rounded-full"
+                    className="h-0.5 w-8 mt-0.5 rounded-full"
                     style={{ background: `linear-gradient(90deg, ${accentColor}, ${accentLight})` }}
                   />
                 </div>
               </div>
-
+              
               <div className="space-y-2">
                 {projects.map((project, index) => (
                   <div 
                     key={index}
                     className="bg-white rounded-lg p-3 border border-gray-100"
+                    style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}
                   >
-                    <h4 className="font-semibold text-[11px] text-gray-800">
-                      {project.name}
-                    </h4>
+                    <h3 className="font-bold text-[11px] text-gray-800">{project.name}</h3>
                     {project.description && (
-                      <p className="text-gray-500 text-[10px] mt-1 leading-relaxed">{project.description}</p>
+                      <p className="text-gray-500 text-[9px] mt-1 leading-relaxed">{project.description}</p>
                     )}
                     {project.technologies && project.technologies.length > 0 && (
                       <div className="flex flex-wrap gap-1 mt-2">
                         {project.technologies.map((tech, techIndex) => (
                           <span 
                             key={techIndex}
-                            className="px-2 py-0.5 text-[8px] rounded font-medium"
-                            style={{ 
-                              backgroundColor: `${accentColor}12`,
-                              color: accentColor
-                            }}
+                            className="px-1.5 py-0.5 rounded text-[8px] font-medium"
+                            style={{ backgroundColor: `${accentColor}12`, color: accentColor }}
                           >
                             {tech}
                           </span>
