@@ -65,7 +65,8 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
       <div 
         className="grid h-full"
         style={{ 
-          gridTemplateColumns: forExport ? '180px 1fr' : '260px 1fr'
+          gridTemplateColumns: forExport ? '200px 1fr' : '300px 1fr',
+          columnGap: forExport ? '0' : '0'
         }}
       >
         {/* ═══════════════════════════════════════════════════════════════════
@@ -94,7 +95,7 @@ export default function ProfessionalTemplate({ data, forExport = false }) {
             }}
           />
           
-          <div className="relative z-10" style={{ padding: forExport ? '12px' : '24px' }}>
+          <div className="relative z-10" style={{ padding: forExport ? '16px' : '28px' }}>
             {/* ─────────────────────────────────────────────────────────────────
                 PHOTO + NAME HEADER
             ───────────────────────────────────────────────────────────────── */}
