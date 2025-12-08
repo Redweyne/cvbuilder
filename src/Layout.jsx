@@ -14,7 +14,8 @@ import {
   Home,
   CreditCard,
   ChevronDown,
-  Target
+  Target,
+  PenTool
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +29,7 @@ import { cn } from '@/lib/utils';
 
 const navItems = [
   { name: 'Dashboard', page: 'Dashboard', icon: Home },
+  { name: 'Design your CV', page: 'CVDesigner', icon: PenTool },
   { name: 'My CVs', page: 'MyCVs', icon: FileText },
   { name: 'Job Offers', page: 'JobOffers', icon: Briefcase },
   { name: 'AI Tailor', page: 'TailorCV', icon: Target },

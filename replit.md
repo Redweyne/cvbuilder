@@ -256,3 +256,89 @@ Located in `src/index.css`:
 - Mobile-responsive design
 - Using Google Gemini Flash (gemini-2.5-flash) for all AI features
 - Stay within Gemini API free tier limits (15 req/min, 1,500 req/day, 1M tokens/min)
+
+---
+
+## DRAG-AND-DROP CV DESIGNER - PROJECT ROADMAP
+
+### Overview
+Building a full drag-and-drop CV design builder where users can freely create their own CV layouts from scratch, similar to a graphic design tool.
+
+### Session Roadmap
+
+#### Session 1: The Canvas Foundation ✅ IN PROGRESS
+**Goal:** Create the basic design workspace
+- [x] Create new CVDesigner page with route
+- [x] Add navigation link in Dashboard under "Design your CV"
+- [ ] Build canvas component with A4 paper dimensions
+- [ ] Implement zoom controls (zoom in/out, fit to screen)
+- [ ] Add grid overlay for alignment
+- [ ] Set up basic document state management
+
+**Status:** STARTED - Created page and route
+
+#### Session 2: Draggable Elements (PENDING)
+**Goal:** Make elements interactive
+- [ ] Create draggable text box component
+- [ ] Implement resize handles on elements
+- [ ] Add z-index/layering controls
+- [ ] Set up undo/redo system
+- [ ] Keyboard navigation (arrow keys, delete)
+
+#### Session 3: Design Tools & Styling (PENDING)
+**Goal:** Build the design toolbar
+- [ ] Sidebar with element library (text, shapes, lines, icons, images)
+- [ ] Style panel (fonts, colors, borders, backgrounds)
+- [ ] Alignment tools (center, distribute)
+- [ ] Layer panel to manage element order
+
+#### Session 4: Save & Load Designs (PENDING)
+**Goal:** Persistence and data management
+- [ ] Save designs to database
+- [ ] Load and continue editing
+- [ ] Import from existing CV data
+- [ ] Starter templates for quick start
+
+#### Session 5: Export to PDF (PENDING)
+**Goal:** High-quality output
+- [ ] Render canvas to PDF
+- [ ] Font embedding
+- [ ] Print-ready A4 output
+
+#### Session 6: Polish & Advanced Features (PENDING)
+**Goal:** Professional finish
+- [ ] Multi-page support
+- [ ] Smart guides (snap to other elements)
+- [ ] Image upload for photos/logos
+- [ ] Performance optimizations
+
+### Current Progress
+- **Last Updated:** December 8, 2025
+- **Current Session:** Session 1 - Canvas Foundation
+- **Status:** COMPLETED - Canvas workspace with drag-and-drop elements built
+
+#### Session 1 Completed Items:
+1. Created DesignContext for state management (src/context/DesignContext.jsx)
+2. Created Canvas component with A4 dimensions (src/components/designer/Canvas.jsx)
+3. Created Toolbar with zoom, grid, and element controls (src/components/designer/Toolbar.jsx)
+4. Created CVDesigner page (src/pages/CVDesigner.jsx)
+5. Added Tooltip UI component (src/components/ui/tooltip.jsx)
+6. Added route in App.jsx
+7. Added "Design your CV" navigation link in Layout.jsx sidebar
+
+#### What's Working:
+- A4-sized canvas (794 x 1123 px)
+- Zoom controls (25% to 200%)
+- Grid overlay with toggle
+- Add text, shape, and line elements
+- Drag elements to reposition
+- Select elements with visual indicators
+- Delete selected elements
+- Undo/Redo system (history up to 50 states)
+- Grid snapping when dragging
+
+#### Next Session (Session 2) - Resize handles and more:
+- Functional resize handles on elements
+- Inline text editing
+- Keyboard shortcuts (Delete, Ctrl+Z, Ctrl+Y)
+- Z-index layer controls

@@ -21,6 +21,7 @@ import CareerMentor from './pages/CareerMentor';
 import SuccessRoadmap from './pages/SuccessRoadmap';
 import TemplatePreview from './pages/TemplatePreview';
 import CVExport from './pages/CVExport';
+import CVDesigner from './pages/CVDesigner';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,6 +143,13 @@ function AppRoutes() {
       <Route path="/SuccessRoadmap" element={
         <ProtectedRoute>
           <Layout currentPageName="SuccessRoadmap"><SuccessRoadmap /></Layout>
+        </ProtectedRoute>
+      } />
+      
+      {/* CV Designer - drag and drop builder */}
+      <Route path="/CVDesigner" element={
+        <ProtectedRoute>
+          <CVDesigner />
         </ProtectedRoute>
       } />
       
