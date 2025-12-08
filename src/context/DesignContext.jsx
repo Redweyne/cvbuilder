@@ -30,6 +30,7 @@ export function DesignProvider({ children }) {
   const [selectedElementId, setSelectedElementId] = useState(null);
   const [history, setHistory] = useState([initialDocument]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [documentName, setDocumentName] = useState('Untitled Design');
 
   const currentPage = document.pages[document.currentPageIndex];
   const elements = currentPage?.elements || [];
@@ -69,6 +70,7 @@ export function DesignProvider({ children }) {
         fontSize: 16,
         fontFamily: 'Inter',
         fontWeight: 'normal',
+        fontStyle: 'normal',
         color: '#1e293b',
         textAlign: 'left',
         backgroundColor: 'transparent',
@@ -145,6 +147,116 @@ export function DesignProvider({ children }) {
     }
   }, [selectedElementId, pushToHistory]);
 
+  const duplicateElement = useCallback((elementId) => {
+    const element = elements.find(el => el.id === elementId);
+    if (element) {
+      const newElement = {
+        ...element,
+        id: uuidv4(),
+        x: element.x + 20,
+        y: element.y + 20,
+        zIndex: elements.length,
+      };
+      setDocument(prev => {
+        const newDoc = {
+          ...prev,
+          pages: prev.pages.map((page, idx) =>
+            idx === prev.currentPageIndex
+              ? { ...page, elements: [...page.elements, newElement] }
+              : page
+          ),
+        };
+        pushToHistory(newDoc);
+        return newDoc;
+      });
+      setSelectedElementId(newElement.id);
+    }
+  }, [elements, pushToHistory]);
+
+  const bringForward = useCallback((elementId) => {
+    setDocument(prev => {
+      const page = prev.pages[prev.currentPageIndex];
+      const elementIndex = page.elements.findIndex(el => el.id === elementId);
+      if (elementIndex < page.elements.length - 1) {
+        const newElements = [...page.elements];
+        const temp = newElements[elementIndex].zIndex;
+        newElements[elementIndex] = { ...newElements[elementIndex], zIndex: newElements[elementIndex + 1].zIndex };
+        newElements[elementIndex + 1] = { ...newElements[elementIndex + 1], zIndex: temp };
+        [newElements[elementIndex], newElements[elementIndex + 1]] = [newElements[elementIndex + 1], newElements[elementIndex]];
+        const newDoc = {
+          ...prev,
+          pages: prev.pages.map((p, idx) =>
+            idx === prev.currentPageIndex ? { ...p, elements: newElements } : p
+          ),
+        };
+        pushToHistory(newDoc);
+        return newDoc;
+      }
+      return prev;
+    });
+  }, [pushToHistory]);
+
+  const sendBackward = useCallback((elementId) => {
+    setDocument(prev => {
+      const page = prev.pages[prev.currentPageIndex];
+      const elementIndex = page.elements.findIndex(el => el.id === elementId);
+      if (elementIndex > 0) {
+        const newElements = [...page.elements];
+        const temp = newElements[elementIndex].zIndex;
+        newElements[elementIndex] = { ...newElements[elementIndex], zIndex: newElements[elementIndex - 1].zIndex };
+        newElements[elementIndex - 1] = { ...newElements[elementIndex - 1], zIndex: temp };
+        [newElements[elementIndex], newElements[elementIndex - 1]] = [newElements[elementIndex - 1], newElements[elementIndex]];
+        const newDoc = {
+          ...prev,
+          pages: prev.pages.map((p, idx) =>
+            idx === prev.currentPageIndex ? { ...p, elements: newElements } : p
+          ),
+        };
+        pushToHistory(newDoc);
+        return newDoc;
+      }
+      return prev;
+    });
+  }, [pushToHistory]);
+
+  const loadTemplate = useCallback((templateElements) => {
+    const newElements = templateElements.map((el, index) => ({
+      ...el,
+      id: uuidv4(),
+      zIndex: index,
+    }));
+    
+    setDocument(prev => {
+      const newDoc = {
+        ...prev,
+        pages: prev.pages.map((page, idx) =>
+          idx === prev.currentPageIndex
+            ? { ...page, elements: newElements }
+            : page
+        ),
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+    setSelectedElementId(null);
+  }, [pushToHistory]);
+
+  const clearCanvas = useCallback(() => {
+    setDocument(prev => {
+      const newDoc = {
+        ...prev,
+        pages: prev.pages.map((page, idx) =>
+          idx === prev.currentPageIndex
+            ? { ...page, elements: [] }
+            : page
+        ),
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+    setSelectedElementId(null);
+  }, [pushToHistory]);
+
   const undo = useCallback(() => {
     if (historyIndex > 0) {
       setHistoryIndex(prev => prev - 1);
@@ -180,7 +292,14 @@ export function DesignProvider({ children }) {
     updateElement,
     commitElementChange,
     deleteElement,
+    duplicateElement,
+    bringForward,
+    sendBackward,
+    loadTemplate,
+    clearCanvas,
     getSelectedElement,
+    documentName,
+    setDocumentName,
     undo,
     redo,
     canUndo: historyIndex > 0,
