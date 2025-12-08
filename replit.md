@@ -1,253 +1,7 @@
 # CVForge - AI-Powered CV Builder
 
 ## Overview
-CVForge is a revolutionary, breathtaking AI-powered CV builder designed to inspire job seekers and deliver on the promise of career transformation. The application features a visually stunning, motivational user experience that actively encourages users to pursue their dream jobs.
-
-## Project Structure
-- **Frontend Framework**: React 18 with Vite
-- **Backend**: Express.js with SQLite database
-- **Routing**: React Router v6
-- **State Management**: TanStack React Query
-- **Styling**: Tailwind CSS with custom animations
-- **Animations**: Framer Motion
-- **UI Components**: Custom components in `src/components/ui/`
-- **Icons**: Lucide React
-- **AI**: Google Gemini Flash (gemini-2.5-flash model)
-
-## Key Features
-- CV creation and editing with live preview
-- **CV Import**: Upload existing PDF/DOCX CVs and AI auto-parses content to populate form
-- Job offer tracking and management
-- AI-powered CV tailoring with Gemini
-- Multiple professional templates
-- ATS optimization scoring
-- PDF export functionality
-- User subscription management
-- Achievement/badge system
-- Career momentum tracking
-
-## Design Philosophy
-The application emphasizes:
-- **Inspirational Messaging**: Career transformation language throughout
-- **Micro-interactions**: Delightful animations and feedback
-- **Celebration Moments**: Confetti effects on achievements
-- **Visual Hierarchy**: Gradient-based design with glassmorphism effects
-- **Motivational Elements**: Daily quotes, achievement badges, momentum tracking
-
-## Directory Structure
-```
-src/
-├── api/              # API client for backend communication
-├── components/
-│   ├── cv/          # CV-specific components (Editor, Preview, Forms)
-│   └── ui/          # Reusable UI components (Button, Card, Input, etc.)
-├── context/         # React contexts (AuthContext)
-├── lib/             # Utility functions
-├── pages/           # Application pages
-├── App.jsx          # Main app component with routing
-├── Layout.jsx       # Protected layout wrapper
-├── main.jsx         # Entry point
-└── index.css        # Global styles with custom animations
-
-server/
-├── index.js         # Express server with API routes
-├── db.js            # SQLite database layer
-├── ai.js            # Gemini AI integration
-└── pdf.js           # PDF generation
-```
-
-## Pages
-
-### Public Pages
-- **Home**: Cinematic landing with floating particles, typing animation, success stats, testimonials
-- **Login**: Beautiful auth page with floating orb animations and inspirational messaging
-- **Register**: Career transformation journey onboarding
-
-### Protected Pages
-- **Dashboard**: Career momentum bar, daily quotes, achievements, quick actions, AI Career Coaching section
-- **My CVs**: CV management with creation and editing
-- **CV Editor**: Multi-step form with live preview
-- **Job Offers**: Job tracking with status management
-- **Templates**: CV template gallery
-- **Tailor CV**: AI-powered CV customization with score rings
-- **Settings**: User preferences
-- **Billing**: Subscription management
-
-### Revolutionary AI Career Coaching Pages
-- **CareerDiscovery**: Immersive 5-question career story discovery experience with multi-step reflection questions, AI analysis of user responses to uncover golden threads, hidden superpowers, and professional identity
-- **InterviewSimulator**: AI-powered mock interview system with real-time feedback, 5-question interview sessions, scoring on confidence/communication/relevance, personalized action plans
-- **CareerMentor**: 24/7 conversational AI career coach with quick prompts, contextual advice, action items, and emotional support for job seekers
-- **SuccessRoadmap**: Personalized career journey mapping with phased milestones, skill development tracking, celebration moments, and motivational guidance
-
-## Custom CSS Animations
-Located in `src/index.css`:
-- `animate-shimmer`: Subtle shine effect
-- `animate-float`: Floating particle movement
-- `animate-gradient`: Background gradient animation
-- `animate-pulse-glow`: Pulsing glow effect
-- `text-gradient`: Gradient text effect
-- `hero-gradient`: Background gradient patterns
-- `glass`: Glassmorphism effect
-- `card-hover`: Hover lift animation
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/auth/me` - Get current user
-- `POST /api/auth/logout` - Logout
-
-### CVs
-- `GET /api/cvs` - List user CVs
-- `POST /api/cvs` - Create CV
-- `PUT /api/cvs/:id` - Update CV
-- `DELETE /api/cvs/:id` - Delete CV
-
-### AI Features
-- `POST /api/ai/enhance-cv` - AI CV enhancement
-- `POST /api/ai/tailor-cv` - Tailor CV for job
-- `POST /api/ai/analyze-job` - Analyze job description
-- `POST /api/ai/ats-score` - Calculate ATS score
-- `POST /api/ai/discover-story` - Career story discovery from user reflections
-- `POST /api/ai/mock-interview` - Conduct AI mock interview questions with feedback
-- `POST /api/ai/interview-summary` - Generate comprehensive interview performance summary
-- `POST /api/ai/mentor-chat` - Conversational AI career mentor chat
-- `POST /api/ai/application-readiness` - Analyze job application readiness
-- `POST /api/ai/success-roadmap` - Generate personalized career success roadmap
-
-### Export
-- `POST /api/export/cv-pdf` - Export CV to PDF
-
-## Development
-- **Dev Server**: `npm run dev` (frontend on 0.0.0.0:5000, backend on 3001)
-- **Build**: `npm run build`
-- **Preview**: `npm run preview`
-
-## Environment Variables
-- `GEMINI_API_KEY`: Google Gemini API key for AI features
-
-## Recent Changes (December 3, 2025)
-
-### Revolutionary AI Career Coaching Suite
-1. **CareerDiscovery Page**: Immersive career story discovery experience
-   - 5 carefully crafted reflection questions with themed gradients
-   - Animated floating orbs and progress indicators
-   - AI-powered analysis to uncover golden thread, hidden superpowers, professional identity
-   - Beautiful phased reveal of discovered insights with animation
-   - Generates unique value proposition and breakthrough insights
-
-2. **InterviewSimulator Page**: AI-powered mock interview system
-   - Select CV and target job for personalized questions
-   - Real-time AI interviewer with thinking animations
-   - Instant feedback on each answer with what worked well and areas to improve
-   - 5-question interview sessions with STAR method tips
-   - Comprehensive summary with scores for confidence, communication, relevance
-   - Personalized action plan and readiness assessment
-
-3. **CareerMentor Page**: 24/7 AI career coach
-   - Conversational chat interface with mentor avatar
-   - Quick prompt suggestions for common career concerns
-   - Contextual advice based on user's CVs and job applications
-   - Action items and encouragement in responses
-   - Support for emotional wellbeing during job search
-
-4. **SuccessRoadmap Page**: Personalized career journey mapping
-   - Goal input with common goal suggestions
-   - AI-generated phased roadmap with milestones
-   - Skills to develop and potential challenges per phase
-   - Quick wins to start today
-   - Celebration milestones and inspiring closing messages
-
-### Dashboard Enhancement
-- New AI Career Coaching section with 4 feature cards
-- Links to CareerDiscovery, InterviewSimulator, CareerMentor, SuccessRoadmap
-- Beautiful gradient cards with hover animations
-
-### AI Functions Added (server/ai.js)
-- `discoverCareerStory()` - Analyzes reflection responses
-- `conductMockInterview()` - Generates interview questions and feedback
-- `generateInterviewSummary()` - Creates comprehensive interview performance report
-- `careerMentorChat()` - Conversational career coaching
-- `analyzeApplicationReadiness()` - Assesses job application readiness
-- `generateSuccessRoadmap()` - Creates personalized career roadmap
-
-### UI Transformation (Previous)
-1. **Home Page**: Complete redesign with cinematic hero, floating particles, mouse-following gradients, typing animation for inspirational phrases, success stats, feature cards, testimonials section
-
-2. **Dashboard**: Career momentum bar with levels (Ready to Begin → On Fire!), daily motivational quotes, achievement/badge system, improved stats cards, quick action cards
-
-3. **Login/Register**: Floating orb animations, gradient accents, inspirational messaging, beautiful form styling with enhanced inputs
-
-4. **TailorCV**: Step indicator visualization, animated score rings (SVG), celebration effects, beautiful result cards
-
-### Technical Improvements
-1. **AI Migration**: Switched from OpenAI to Google Gemini Flash
-2. **Confetti System**: Proper cleanup with useState/useEffect pattern
-3. **Performance**: Optimized animations and reduced DOM operations
-
-## Recent Changes (December 4, 2025)
-
-### CV Import Feature
-1. **File Upload API**: `POST /api/ai/parse-cv` accepts PDF and DOCX files (max 10MB)
-2. **Text Extraction**: Uses pdf-parse for PDFs and mammoth for DOCX files
-3. **AI Parsing**: Gemini AI extracts structured CV data (personal info, experience, education, skills)
-4. **Frontend Integration**: CVEditor shows upload interface when accessed via ?upload=true
-5. **Error Handling**: Comprehensive validation for file types, size, and content quality
-
-### Technical Details
-- PDF parsing: pdf-parse v2 library using PDFParse class with `{ data: buffer }` option and `getText()` method
-- DOCX parsing: mammoth library for extracting plain text
-- Supported formats: .pdf, .docx (old .doc format gracefully rejected with helpful message)
-- Minimum content: 50 characters required to prevent empty/corrupted file processing
-- AI Credits: Uses existing credit system (decrements on successful parse)
-
-### CV Import Fix (December 4, 2025)
-- Fixed PDF parsing by updating to pdf-parse v2 API (class-based instead of function-based)
-- The PDFParse class is instantiated with `new PDFParse({ data: buffer })` and `getText()` is called to extract text
-
-### Professional CV Templates (December 4, 2025)
-**8 ATS-Optimized Professional Templates:**
-1. **Professional** - Clean corporate design with traditional serif fonts, blue accent color
-2. **Minimal** - Elegant simplicity with centered header, maximum whitespace
-3. **Executive** - Sophisticated design with gold accents for senior roles
-4. **Modern** - Contemporary layout with bold indigo-purple gradients
-5. **Tech** - Developer-focused with code-style formatting (comments, syntax)
-6. **Creative** - Eye-catching pink-purple design for creative industries
-7. **Academic** - Scholarly design with purple accents for research/education
-8. **Compact** - Space-efficient design fitting more content on single page
-
-**Technical Implementation:**
-- CVTemplateRenderer component for dynamic template switching
-- Inline template selector in CV Editor with visual preview chips
-- PDF export with template-specific colors and proper multi-page pagination
-- PDFBuilder class handles page management, spacing, and consistent styling
-
-## Recent Changes (December 5, 2025)
-
-### Pixel-Perfect PDF Export with Puppeteer (Fixed)
-**Problem solved**: Exported PDFs now exactly match the live preview.
-
-**Implementation:**
-1. **CVExport.jsx** - Dedicated export route at `/cv-export` that renders CV templates
-   - Uses shared `CVTemplateRenderer` component (same as preview)
-   - Dynamically loads Google Fonts (Cormorant Garamond, Playfair Display, Inter, Fira Code)
-   - Waits for fonts.ready before rendering with additional delay
-   - Fixed A4 dimensions (210mm x 297mm)
-   
-2. **server/pdf.js** - Puppeteer-based PDF generation
-   - Uses Puppeteer's bundled Chrome (no hardcoded path)
-   - Renders actual React templates in headless browser
-   - A4 viewport with deviceScaleFactor=2 for crisp output
-   - Waits for networkidle0, #cv-export-container, and document.fonts.ready
-   - Extra 1.5s delay ensures fonts fully render before PDF capture
-   - Prints with backgrounds and zero margins
-
-**Technical Notes:**
-- Puppeteer renders the actual frontend React components
-- CVExport uses the same CVTemplateRenderer as the preview - no duplicate template code
-- Same CSS, fonts, and styles as the live preview
-- Result: Pixel-perfect match between preview and PDF
+CVForge is an AI-powered CV builder designed to inspire job seekers and facilitate career transformation. It offers a visually engaging and motivational user experience to help users create, manage, and optimize their CVs, track job offers, and access AI-driven career coaching. The project aims to empower users to pursue and achieve their dream jobs through advanced AI integration and user-centric design.
 
 ## User Preferences
 - Clean, modern design with gradient accents
@@ -257,88 +11,46 @@ Located in `src/index.css`:
 - Using Google Gemini Flash (gemini-2.5-flash) for all AI features
 - Stay within Gemini API free tier limits (15 req/min, 1,500 req/day, 1M tokens/min)
 
----
+## System Architecture
+The application is built with a React 18 frontend using Vite, TanStack React Query for state management, Tailwind CSS with Framer Motion for styling and animations, and Lucide React for icons. The backend is an Express.js server interacting with an SQLite database.
 
-## DRAG-AND-DROP CV DESIGNER - PROJECT ROADMAP
+**Key Features:**
+- CV creation, editing with live preview, and PDF export.
+- AI-powered CV import from PDF/DOCX, parsing content to populate forms.
+- AI-driven CV tailoring for specific job descriptions and ATS optimization scoring.
+- Comprehensive job offer tracking.
+- Multiple professional CV templates.
+- User subscription management and an achievement/badge system.
+- Career momentum tracking.
+- Revolutionary AI Career Coaching Suite including:
+    - **CareerDiscovery**: Immersive career story discovery with AI analysis.
+    - **InterviewSimulator**: AI-powered mock interviews with real-time feedback and action plans.
+    - **CareerMentor**: 24/7 conversational AI career coach.
+    - **SuccessRoadmap**: Personalized career journey mapping with milestones and skill development tracking.
 
-### Overview
-Building a full drag-and-drop CV design builder where users can freely create their own CV layouts from scratch, similar to a graphic design tool.
+**Design Philosophy:**
+The design emphasizes inspirational messaging, delightful micro-interactions, celebration moments (e.g., confetti effects), strong visual hierarchy with gradients and glassmorphism, and motivational elements like daily quotes and achievement badges.
 
-### Session Roadmap
+**UI/UX Decisions:**
+- **Inspirational Messaging:** Language throughout the application promotes career transformation.
+- **Micro-interactions & Celebration Moments:** Delightful animations and feedback, including confetti effects for achievements.
+- **Visual Hierarchy:** Gradient-based design with glassmorphism effects for a modern look.
+- **Custom Animations:** `animate-shimmer`, `animate-float`, `animate-gradient`, `animate-pulse-glow`, `text-gradient`, `hero-gradient`, `glass`, `card-hover` are used for dynamic and engaging UI elements.
+- **PDF Export:** Pixel-perfect PDF generation using Puppeteer, rendering actual React templates in a headless browser to ensure consistency with the live preview.
 
-#### Session 1: The Canvas Foundation ✅ IN PROGRESS
-**Goal:** Create the basic design workspace
-- [x] Create new CVDesigner page with route
-- [x] Add navigation link in Dashboard under "Design your CV"
-- [ ] Build canvas component with A4 paper dimensions
-- [ ] Implement zoom controls (zoom in/out, fit to screen)
-- [ ] Add grid overlay for alignment
-- [ ] Set up basic document state management
+**Core Pages:**
+- **Public:** Home, Login, Register, designed with cinematic elements, floating particles, and inspirational messaging.
+- **Protected:** Dashboard, My CVs, CV Editor, Job Offers, Templates, Tailor CV, Settings, Billing, and the AI Career Coaching pages (CareerDiscovery, InterviewSimulator, CareerMentor, SuccessRoadmap).
 
-**Status:** STARTED - Created page and route
+**API Endpoints:**
+- **Authentication:** `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`.
+- **CVs:** `GET /api/cvs`, `POST /api/cvs`, `PUT /api/cvs/:id`, `DELETE /api/cvs/:id`.
+- **AI Features:** `POST /api/ai/enhance-cv`, `POST /api/ai/tailor-cv`, `POST /api/ai/analyze-job`, `POST /api/ai/ats-score`, `POST /api/ai/discover-story`, `POST /api/ai/mock-interview`, `POST /api/ai/interview-summary`, `POST /api/ai/mentor-chat`, `POST /api/ai/application-readiness`, `POST /api/ai/success-roadmap`, `POST /api/ai/parse-cv`.
+- **Export:** `POST /api/export/cv-pdf`.
 
-#### Session 2: Draggable Elements (PENDING)
-**Goal:** Make elements interactive
-- [ ] Create draggable text box component
-- [ ] Implement resize handles on elements
-- [ ] Add z-index/layering controls
-- [ ] Set up undo/redo system
-- [ ] Keyboard navigation (arrow keys, delete)
-
-#### Session 3: Design Tools & Styling (PENDING)
-**Goal:** Build the design toolbar
-- [ ] Sidebar with element library (text, shapes, lines, icons, images)
-- [ ] Style panel (fonts, colors, borders, backgrounds)
-- [ ] Alignment tools (center, distribute)
-- [ ] Layer panel to manage element order
-
-#### Session 4: Save & Load Designs (PENDING)
-**Goal:** Persistence and data management
-- [ ] Save designs to database
-- [ ] Load and continue editing
-- [ ] Import from existing CV data
-- [ ] Starter templates for quick start
-
-#### Session 5: Export to PDF (PENDING)
-**Goal:** High-quality output
-- [ ] Render canvas to PDF
-- [ ] Font embedding
-- [ ] Print-ready A4 output
-
-#### Session 6: Polish & Advanced Features (PENDING)
-**Goal:** Professional finish
-- [ ] Multi-page support
-- [ ] Smart guides (snap to other elements)
-- [ ] Image upload for photos/logos
-- [ ] Performance optimizations
-
-### Current Progress
-- **Last Updated:** December 8, 2025
-- **Current Session:** Session 1 - Canvas Foundation
-- **Status:** COMPLETED - Canvas workspace with drag-and-drop elements built
-
-#### Session 1 Completed Items:
-1. Created DesignContext for state management (src/context/DesignContext.jsx)
-2. Created Canvas component with A4 dimensions (src/components/designer/Canvas.jsx)
-3. Created Toolbar with zoom, grid, and element controls (src/components/designer/Toolbar.jsx)
-4. Created CVDesigner page (src/pages/CVDesigner.jsx)
-5. Added Tooltip UI component (src/components/ui/tooltip.jsx)
-6. Added route in App.jsx
-7. Added "Design your CV" navigation link in Layout.jsx sidebar
-
-#### What's Working:
-- A4-sized canvas (794 x 1123 px)
-- Zoom controls (25% to 200%)
-- Grid overlay with toggle
-- Add text, shape, and line elements
-- Drag elements to reposition
-- Select elements with visual indicators
-- Delete selected elements
-- Undo/Redo system (history up to 50 states)
-- Grid snapping when dragging
-
-#### Next Session (Session 2) - Resize handles and more:
-- Functional resize handles on elements
-- Inline text editing
-- Keyboard shortcuts (Delete, Ctrl+Z, Ctrl+Y)
-- Z-index layer controls
+## External Dependencies
+- **AI:** Google Gemini Flash (specifically `gemini-2.5-flash` model) for all AI-powered features.
+- **Database:** SQLite for backend data storage.
+- **PDF Parsing:** `pdf-parse` library for extracting text from PDF files.
+- **DOCX Parsing:** `mammoth` library for extracting text from DOCX files.
+- **PDF Generation:** Puppeteer for headless browser-based pixel-perfect PDF export.
