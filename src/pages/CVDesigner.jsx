@@ -22,7 +22,8 @@ import {
   Star,
   Plus,
   Trash2,
-  Edit2
+  Edit2,
+  Palette
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
@@ -490,6 +491,13 @@ export default function CVDesigner() {
               <TabsTrigger value="templates">Templates</TabsTrigger>
               <TabsTrigger value="edit">Edit CV</TabsTrigger>
             </TabsList>
+            
+            <Link to="/FreeformDesigner" className="mx-2 mb-2">
+              <Button variant="outline" size="sm" className="w-full border-dashed border-indigo-300 text-indigo-600 hover:bg-indigo-50">
+                <Palette className="w-4 h-4 mr-2" />
+                Open Freeform Designer
+              </Button>
+            </Link>
             
             <TabsContent value="templates" className="flex-1 overflow-y-auto p-2 m-0">
               <div className="space-y-2">

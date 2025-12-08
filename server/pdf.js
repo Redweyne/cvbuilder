@@ -180,6 +180,110 @@ export async function generateCoverLetterPdf(coverLetterContent, applicantName) 
   }
 }
 
+export async function generateDesignPdf(elements, name, width = 794, height = 1123) {
+  let browser = null;
+  let context = null;
+  let page = null;
+  
+  try {
+    browser = await getBrowser();
+    context = await browser.newContext({
+      viewport: { width: 794, height: 1123 },
+      deviceScaleFactor: 2
+    });
+    page = await context.newPage();
+    
+    const renderElement = (el) => {
+      const style = el.style || {};
+      let css = `
+        position: absolute;
+        left: ${el.x}px;
+        top: ${el.y}px;
+        width: ${el.width}px;
+        height: ${el.height}px;
+      `;
+      
+      if (el.type === 'text') {
+        css += `
+          font-size: ${style.fontSize || 14}px;
+          font-family: ${style.fontFamily || 'Inter'}, sans-serif;
+          font-weight: ${style.fontWeight || 'normal'};
+          font-style: ${style.fontStyle || 'normal'};
+          color: ${style.color || '#1e293b'};
+          text-align: ${style.textAlign || 'left'};
+          background-color: ${style.backgroundColor || 'transparent'};
+          padding: ${style.padding || 0}px;
+          white-space: pre-wrap;
+          word-wrap: break-word;
+        `;
+        return `<div style="${css}">${(el.content || '').replace(/\n/g, '<br>')}</div>`;
+      } else if (el.type === 'shape') {
+        css += `
+          background-color: ${style.backgroundColor || '#6366f1'};
+          border-radius: ${style.borderRadius || 0}px;
+        `;
+        return `<div style="${css}"></div>`;
+      } else if (el.type === 'line') {
+        css += `
+          background-color: ${style.color || '#e2e8f0'};
+        `;
+        return `<div style="${css}"></div>`;
+      }
+      return '';
+    };
+    
+    const sortedElements = [...elements].sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0));
+    const elementsHtml = sortedElements.map(renderElement).join('');
+    
+    const html = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="UTF-8">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Georgia&family=Helvetica&display=swap" rel="stylesheet">
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { 
+            margin: 0; 
+            padding: 0;
+            background: white;
+          }
+          .canvas {
+            position: relative;
+            width: 794px;
+            height: 1123px;
+            background: white;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="canvas">
+          ${elementsHtml}
+        </div>
+      </body>
+      </html>
+    `;
+    
+    await page.setContent(html, { waitUntil: 'networkidle' });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(500);
+    
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      printBackground: true,
+      margin: { top: '0', right: '0', bottom: '0', left: '0' }
+    });
+    
+    return pdfBuffer;
+  } catch (error) {
+    console.error('Design PDF generation error:', error);
+    throw error;
+  } finally {
+    if (page) await page.close().catch(() => {});
+    if (context) await context.close().catch(() => {});
+  }
+}
+
 process.on('exit', async () => {
   if (browserInstance) {
     await browserInstance.close();

@@ -26,7 +26,7 @@ import {
   generateSuccessRoadmap,
   parseUploadedCV
 } from './ai.js';
-import { generateCVPdf, generateCoverLetterPdf } from './pdf.js';
+import { generateCVPdf, generateCoverLetterPdf, generateDesignPdf } from './pdf.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -612,6 +612,20 @@ app.post('/api/export/cover-letter-pdf', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Cover letter PDF export error:', error);
     res.status(500).json({ error: 'Failed to export cover letter PDF' });
+  }
+});
+
+app.post('/api/export/design-pdf', authMiddleware, async (req, res) => {
+  try {
+    const { elements, name, width, height } = req.body;
+    const pdfBytes = await generateDesignPdf(elements || [], name, width, height);
+    
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${name || 'design'}.pdf"`);
+    res.send(Buffer.from(pdfBytes));
+  } catch (error) {
+    console.error('Design PDF export error:', error);
+    res.status(500).json({ error: 'Failed to export design PDF' });
   }
 });
 
