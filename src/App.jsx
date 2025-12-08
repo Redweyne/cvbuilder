@@ -22,7 +22,6 @@ import SuccessRoadmap from './pages/SuccessRoadmap';
 import TemplatePreview from './pages/TemplatePreview';
 import CVExport from './pages/CVExport';
 import CVDesigner from './pages/CVDesigner';
-import FreeformDesigner from './pages/FreeformDesigner';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -147,17 +146,10 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* CV Designer - template based editor */}
+      {/* CV Designer - freeform drag and drop canvas builder */}
       <Route path="/CVDesigner" element={
         <ProtectedRoute>
           <CVDesigner />
-        </ProtectedRoute>
-      } />
-      
-      {/* Freeform Designer - drag and drop canvas builder */}
-      <Route path="/FreeformDesigner" element={
-        <ProtectedRoute>
-          <FreeformDesigner />
         </ProtectedRoute>
       } />
       
