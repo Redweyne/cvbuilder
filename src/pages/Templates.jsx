@@ -203,7 +203,7 @@ export default function Templates() {
                   
                   {/* Hover Actions */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
-                    <Link to={createPageUrl('CVEditor') + `?template=${template.id}`}>
+                    <Link to={`/FreeformDesigner?template=${template.id}`}>
                       <Button className="w-full bg-white text-slate-900 hover:bg-slate-100">
                         <Sparkles className="w-4 h-4 mr-2" />
                         Use This Template
@@ -260,7 +260,7 @@ export default function Templates() {
               <Button variant="outline" onClick={() => setSelectedTemplate(null)}>
                 Cancel
               </Button>
-              <Link to={createPageUrl('CVEditor') + `?template=${selectedTemplate}`}>
+              <Link to={`/FreeformDesigner?template=${selectedTemplate}`}>
                 <Button className="bg-indigo-600 hover:bg-indigo-700">
                   Create CV with this Template
                   <ArrowRight className="w-4 h-4 ml-2" />

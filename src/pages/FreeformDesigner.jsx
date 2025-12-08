@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { DesignProvider, useDesign } from '@/context/DesignContext';
 import Canvas from '@/components/designer/Canvas';
 import Toolbar from '@/components/designer/Toolbar';
@@ -9,12 +9,32 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ArrowLeft, Download, Save, Loader2, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
 
 function DesignerContent() {
-  const { elements, documentName, setDocumentName, A4_WIDTH_PX, A4_HEIGHT_PX } = useDesign();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { elements, documentName, setDocumentName, loadTemplate, clearCanvas, A4_WIDTH_PX, A4_HEIGHT_PX } = useDesign();
   const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showSaved, setShowSaved] = useState(false);
+  const [templateLoaded, setTemplateLoaded] = useState(false);
+
+  useEffect(() => {
+    const templateId = searchParams.get('template');
+    if (templateId && !templateLoaded) {
+      const template = getTemplateById(templateId);
+      if (template && loadTemplate) {
+        clearCanvas();
+        setTimeout(() => {
+          loadTemplate(template.elements);
+          setDocumentName(template.name + ' CV');
+          setTemplateLoaded(true);
+          toast.success(`${template.name} template loaded! Now customize it freely.`);
+        }, 100);
+      }
+    }
+  }, [searchParams, templateLoaded, loadTemplate, clearCanvas, setDocumentName]);
 
   const handleSave = async () => {
     setIsSaving(true);
