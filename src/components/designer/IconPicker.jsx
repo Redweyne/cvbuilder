@@ -81,7 +81,9 @@ export default function IconPicker({ onSelectIcon, trigger }) {
     return iconCategories[activeCategory]?.icons || [];
   }, [searchTerm, activeCategory, allIcons]);
 
-  const handleSelectIcon = (iconName) => {
+  const handleSelectIcon = (e, iconName) => {
+    e.stopPropagation();
+    e.preventDefault();
     onSelectIcon(iconName);
     setOpen(false);
     setSearchTerm('');
@@ -149,9 +151,10 @@ export default function IconPicker({ onSelectIcon, trigger }) {
               return (
                 <button
                   key={iconName}
-                  onClick={() => handleSelectIcon(iconName)}
+                  onClick={(e) => handleSelectIcon(e, iconName)}
                   className="p-3 rounded-lg border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 transition-all flex flex-col items-center gap-1 group"
                   title={iconName}
+                  type="button"
                 >
                   <IconComponent className="w-5 h-5 text-slate-600 group-hover:text-indigo-600" />
                   <span className="text-[9px] text-slate-400 truncate w-full text-center">

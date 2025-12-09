@@ -107,7 +107,9 @@ export default function FontPicker({ value, onChange, trigger }) {
 
   const categories = ['all', 'Sans-serif', 'Serif', 'Display', 'Monospace'];
 
-  const handleSelectFont = async (fontName, isSystem) => {
+  const handleSelectFont = async (e, fontName, isSystem) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (!isSystem) {
       await loadGoogleFont(fontName);
     }
@@ -161,7 +163,8 @@ export default function FontPicker({ value, onChange, trigger }) {
           {filteredFonts.map((font) => (
             <button
               key={font.name}
-              onClick={() => handleSelectFont(font.name, font.system)}
+              type="button"
+              onClick={(e) => handleSelectFont(e, font.name, font.system)}
               onMouseEnter={() => !font.system && loadGoogleFont(font.name)}
               className={`w-full p-3 rounded-lg border text-left transition-all flex items-center justify-between group ${
                 value === font.name 

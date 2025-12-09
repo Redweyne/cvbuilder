@@ -294,14 +294,21 @@ export default function Toolbar() {
               <TooltipContent>Add Line</TooltipContent>
             </Tooltip>
 
-            <IconPicker
-              onSelectIcon={handleAddIcon}
-              trigger={
-                <Button variant="ghost" size="icon" className="h-9 w-9">
-                  <Smile className="w-4 h-4" />
-                </Button>
-              }
-            />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span>
+                  <IconPicker
+                    onSelectIcon={handleAddIcon}
+                    trigger={
+                      <Button variant="ghost" size="icon" className="h-9 w-9">
+                        <Smile className="w-4 h-4" />
+                      </Button>
+                    }
+                  />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>Add Icon</TooltipContent>
+            </Tooltip>
 
             <Tooltip>
               <TooltipTrigger asChild>

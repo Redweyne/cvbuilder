@@ -3,6 +3,7 @@ import { useDesign } from '@/context/DesignContext';
 import { motion } from 'framer-motion';
 import { calculateSnapGuides, getGuideColor } from '@/utils/smartGuides';
 import * as LucideIcons from 'lucide-react';
+import { isDialogOpen } from '@/components/ui/dialog';
 
 export default function Canvas() {
   const {
@@ -319,7 +320,7 @@ export default function Canvas() {
                            target.tagName === 'TEXTAREA' || 
                            target.isContentEditable;
       
-      if (editingElementId) return;
+      if (editingElementId || isDialogOpen()) return;
       
       if (e.key === 'a' && (e.metaKey || e.ctrlKey) && !isInputField) {
         e.preventDefault();
