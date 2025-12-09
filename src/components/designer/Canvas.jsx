@@ -20,6 +20,8 @@ export default function Canvas() {
     updateElement,
     commitElementChange,
     deleteElement,
+    pageMargins,
+    showMarginGuides,
     A4_WIDTH_PX,
     A4_HEIGHT_PX,
   } = useDesign();
@@ -495,6 +497,51 @@ export default function Canvas() {
           </div>
         )}
         {element.type === 'progressBar' && renderProgressBar(element)}
+        {element.type === 'section' && (
+          <div
+            className="w-full h-full flex flex-col"
+            style={{
+              backgroundColor: element.style?.backgroundColor || '#f8fafc',
+              borderWidth: element.style?.borderWidth || 1,
+              borderColor: element.style?.borderColor || '#e2e8f0',
+              borderStyle: 'solid',
+              borderRadius: element.style?.borderRadius || 8,
+              padding: element.style?.padding || 16,
+            }}
+          >
+            {element.showTitle && element.sectionTitle && (
+              <div 
+                className="text-sm font-semibold text-slate-700 mb-2 pb-2 border-b border-slate-200"
+              >
+                {element.sectionTitle}
+              </div>
+            )}
+            <div className="flex-1 relative">
+              <div className="absolute inset-0 flex items-center justify-center text-slate-400 text-xs">
+                Drop elements here
+              </div>
+            </div>
+          </div>
+        )}
+        {element.type === 'columns' && (
+          <div
+            className="w-full h-full flex"
+            style={{
+              backgroundColor: element.style?.backgroundColor || 'transparent',
+              gap: element.gap || 16,
+            }}
+          >
+            {Array.from({ length: element.columns || 2 }).map((_, idx) => (
+              <div 
+                key={idx}
+                className="flex-1 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center"
+                style={{ minHeight: '100%' }}
+              >
+                <span className="text-slate-400 text-xs">Column {idx + 1}</span>
+              </div>
+            ))}
+          </div>
+        )}
 
         {isSelected && !isEditing && (
           <>
@@ -625,6 +672,73 @@ export default function Canvas() {
     );
   };
 
+  const renderMarginGuides = () => {
+    if (!showMarginGuides || !pageMargins) return null;
+
+    const { top, right, bottom, left } = pageMargins;
+    
+    return (
+      <svg
+        className="absolute inset-0 pointer-events-none"
+        width={A4_WIDTH_PX}
+        height={A4_HEIGHT_PX}
+        style={{ zIndex: 1 }}
+      >
+        <rect
+          x={left}
+          y={top}
+          width={A4_WIDTH_PX - left - right}
+          height={A4_HEIGHT_PX - top - bottom}
+          fill="none"
+          stroke="#93c5fd"
+          strokeWidth="1"
+          strokeDasharray="4,4"
+          opacity="0.6"
+        />
+        {left > 0 && (
+          <rect
+            x={0}
+            y={0}
+            width={left}
+            height={A4_HEIGHT_PX}
+            fill="#dbeafe"
+            opacity="0.3"
+          />
+        )}
+        {right > 0 && (
+          <rect
+            x={A4_WIDTH_PX - right}
+            y={0}
+            width={right}
+            height={A4_HEIGHT_PX}
+            fill="#dbeafe"
+            opacity="0.3"
+          />
+        )}
+        {top > 0 && (
+          <rect
+            x={left}
+            y={0}
+            width={A4_WIDTH_PX - left - right}
+            height={top}
+            fill="#dbeafe"
+            opacity="0.3"
+          />
+        )}
+        {bottom > 0 && (
+          <rect
+            x={left}
+            y={A4_HEIGHT_PX - bottom}
+            width={A4_WIDTH_PX - left - right}
+            height={bottom}
+            fill="#dbeafe"
+            opacity="0.3"
+          />
+        )}
+      </svg>
+    );
+  };
+
   return (
     <div
       ref={containerRef}
@@ -655,6 +769,7 @@ export default function Canvas() {
             onClick={handleCanvasClick}
           >
             {renderGrid()}
+            {renderMarginGuides()}
             {renderSmartGuides()}
             {elements
               .slice()

@@ -24,6 +24,8 @@ import {
   AlignEndVertical,
   AlignHorizontalDistributeCenter,
   AlignVerticalDistributeCenter,
+  LayoutGrid,
+  Columns,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -125,6 +127,44 @@ export default function Toolbar() {
         showPercentage: true,
         labelColor: '#1e293b',
         labelFontSize: 12,
+      },
+    });
+  };
+
+  const handleAddSection = () => {
+    addElement({
+      type: 'section',
+      width: 300,
+      height: 200,
+      style: {
+        backgroundColor: '#f8fafc',
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        borderRadius: 8,
+        padding: 16,
+        paddingTop: 16,
+        paddingRight: 16,
+        paddingBottom: 16,
+        paddingLeft: 16,
+      },
+      sectionTitle: 'Section Title',
+      showTitle: true,
+    });
+  };
+
+  const handleAddColumns = () => {
+    addElement({
+      type: 'columns',
+      width: 400,
+      height: 150,
+      columns: 2,
+      gap: 16,
+      style: {
+        backgroundColor: 'transparent',
+        borderColor: '#e2e8f0',
+        borderWidth: 0,
+        borderRadius: 0,
+        padding: 0,
       },
     });
   };
@@ -315,6 +355,36 @@ export default function Toolbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Add Skill Bar</TooltipContent>
+            </Tooltip>
+
+            <div className="w-px h-6 bg-slate-200 mx-1" />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleAddSection}
+                  className="h-9 w-9"
+                >
+                  <LayoutGrid className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Section Container</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleAddColumns}
+                  className="h-9 w-9"
+                >
+                  <Columns className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Column Layout</TooltipContent>
             </Tooltip>
 
             <Tooltip>

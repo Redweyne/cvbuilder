@@ -10,6 +10,13 @@ const MM_TO_PX = 3.78;
 export const A4_WIDTH_PX = Math.round(A4_WIDTH_MM * MM_TO_PX);
 export const A4_HEIGHT_PX = Math.round(A4_HEIGHT_MM * MM_TO_PX);
 
+const DEFAULT_PAGE_MARGINS = {
+  top: 40,
+  right: 40,
+  bottom: 40,
+  left: 40,
+};
+
 const initialDocument = {
   id: null,
   name: 'Untitled Design',
@@ -24,6 +31,8 @@ const initialDocument = {
   showGrid: true,
   gridSize: 20,
   smartSnapping: true,
+  pageMargins: DEFAULT_PAGE_MARGINS,
+  showMarginGuides: true,
 };
 
 export function DesignProvider({ children }) {
@@ -62,6 +71,102 @@ export function DesignProvider({ children }) {
   const toggleSmartSnapping = useCallback(() => {
     setDocument(prev => ({ ...prev, smartSnapping: !prev.smartSnapping }));
   }, []);
+
+  const setPageMargins = useCallback((margins) => {
+    setDocument(prev => {
+      const newDoc = { ...prev, pageMargins: { ...prev.pageMargins, ...margins } };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+  }, [pushToHistory]);
+
+  const toggleMarginGuides = useCallback(() => {
+    setDocument(prev => ({ ...prev, showMarginGuides: !prev.showMarginGuides }));
+  }, []);
+
+  const addPage = useCallback(() => {
+    const newPage = {
+      id: `page-${uuidv4()}`,
+      elements: []
+    };
+    setDocument(prev => {
+      const newDoc = {
+        ...prev,
+        pages: [...prev.pages, newPage],
+        currentPageIndex: prev.pages.length,
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+  }, [pushToHistory]);
+
+  const deletePage = useCallback((pageIndex) => {
+    setDocument(prev => {
+      if (prev.pages.length <= 1) return prev;
+      const newPages = prev.pages.filter((_, idx) => idx !== pageIndex);
+      const newCurrentIndex = Math.min(prev.currentPageIndex, newPages.length - 1);
+      const newDoc = {
+        ...prev,
+        pages: newPages,
+        currentPageIndex: newCurrentIndex,
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+  }, [pushToHistory]);
+
+  const duplicatePage = useCallback((pageIndex) => {
+    setDocument(prev => {
+      const pageToDuplicate = prev.pages[pageIndex];
+      const newPage = {
+        id: `page-${uuidv4()}`,
+        elements: pageToDuplicate.elements.map(el => ({
+          ...el,
+          id: uuidv4(),
+        })),
+      };
+      const newPages = [...prev.pages];
+      newPages.splice(pageIndex + 1, 0, newPage);
+      const newDoc = {
+        ...prev,
+        pages: newPages,
+        currentPageIndex: pageIndex + 1,
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+  }, [pushToHistory]);
+
+  const goToPage = useCallback((pageIndex) => {
+    setDocument(prev => {
+      if (pageIndex < 0 || pageIndex >= prev.pages.length) return prev;
+      return { ...prev, currentPageIndex: pageIndex };
+    });
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+  }, []);
+
+  const movePage = useCallback((fromIndex, toIndex) => {
+    setDocument(prev => {
+      if (fromIndex === toIndex || toIndex < 0 || toIndex >= prev.pages.length) return prev;
+      const newPages = [...prev.pages];
+      const [movedPage] = newPages.splice(fromIndex, 1);
+      newPages.splice(toIndex, 0, movedPage);
+      const newDoc = {
+        ...prev,
+        pages: newPages,
+        currentPageIndex: toIndex,
+      };
+      pushToHistory(newDoc);
+      return newDoc;
+    });
+  }, [pushToHistory]);
 
   const addElement = useCallback((elementData) => {
     const newElement = {
@@ -329,6 +434,17 @@ export function DesignProvider({ children }) {
     setGridSize,
     smartSnapping: document.smartSnapping,
     toggleSmartSnapping,
+    pageMargins: document.pageMargins,
+    setPageMargins,
+    showMarginGuides: document.showMarginGuides,
+    toggleMarginGuides,
+    pages: document.pages,
+    currentPageIndex: document.currentPageIndex,
+    addPage,
+    deletePage,
+    duplicatePage,
+    goToPage,
+    movePage,
     addElement,
     updateElement,
     commitElementChange,

@@ -76,6 +76,8 @@ export default function PropertiesPanel() {
       case 'line': return 'Line';
       case 'icon': return 'Icon';
       case 'progressBar': return 'Skill Bar';
+      case 'section': return 'Section';
+      case 'columns': return 'Columns';
       default: return 'Element';
     }
   };
@@ -438,6 +440,84 @@ export default function PropertiesPanel() {
           </div>
         )}
 
+        {selectedElement.type === 'section' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Section Title</Label>
+              <Input
+                value={selectedElement.sectionTitle || ''}
+                onChange={(e) => handlePropertyChange('sectionTitle', e.target.value)}
+                placeholder="Section Title"
+                className="h-8"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selectedElement.showTitle !== false}
+                onChange={(e) => handlePropertyChange('showTitle', e.target.checked)}
+              />
+              <Label className="text-xs text-slate-600">Show Title</Label>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Border Radius</Label>
+              <input
+                type="range"
+                min="0"
+                max="24"
+                value={selectedElement.style?.borderRadius || 8}
+                onChange={(e) => handleStyleChange('borderRadius', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Padding</Label>
+              <input
+                type="range"
+                min="0"
+                max="48"
+                value={selectedElement.style?.padding || 16}
+                onChange={(e) => handleStyleChange('padding', parseInt(e.target.value))}
+                className="w-full"
+              />
+              <div className="text-xs text-slate-500 text-center">{selectedElement.style?.padding || 16}px</div>
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'columns' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Number of Columns</Label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4].map(num => (
+                  <Button
+                    key={num}
+                    variant={selectedElement.columns === num ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={() => handlePropertyChange('columns', num)}
+                    className="flex-1"
+                  >
+                    {num}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Column Gap</Label>
+              <input
+                type="range"
+                min="0"
+                max="48"
+                value={selectedElement.gap || 16}
+                onChange={(e) => handlePropertyChange('gap', parseInt(e.target.value))}
+                className="w-full"
+              />
+              <div className="text-xs text-slate-500 text-center">{selectedElement.gap || 16}px</div>
+            </div>
+          </>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <div>
             <Label className="text-xs text-slate-600 mb-2 block">Width</Label>
@@ -479,6 +559,120 @@ export default function PropertiesPanel() {
             />
           </div>
         </div>
+
+        {(selectedElement.type === 'text' || selectedElement.type === 'section' || selectedElement.type === 'shape') && (
+          <div className="pt-4 border-t border-slate-200">
+            <Label className="text-xs text-slate-600 mb-3 block font-medium">Spacing</Label>
+            <div className="space-y-3">
+              <div>
+                <Label className="text-xs text-slate-500 mb-1 block">Padding</Label>
+                <div className="grid grid-cols-4 gap-1">
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.paddingTop ?? selectedElement.style?.padding ?? 8}
+                      onChange={(e) => handleStyleChange('paddingTop', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Top"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">T</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.paddingRight ?? selectedElement.style?.padding ?? 8}
+                      onChange={(e) => handleStyleChange('paddingRight', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Right"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">R</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.paddingBottom ?? selectedElement.style?.padding ?? 8}
+                      onChange={(e) => handleStyleChange('paddingBottom', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Bottom"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">B</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.paddingLeft ?? selectedElement.style?.padding ?? 8}
+                      onChange={(e) => handleStyleChange('paddingLeft', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Left"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">L</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-slate-500 mb-1 block">Margin</Label>
+                <div className="grid grid-cols-4 gap-1">
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.marginTop ?? 0}
+                      onChange={(e) => handleStyleChange('marginTop', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Top"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">T</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.marginRight ?? 0}
+                      onChange={(e) => handleStyleChange('marginRight', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Right"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">R</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.marginBottom ?? 0}
+                      onChange={(e) => handleStyleChange('marginBottom', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Bottom"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">B</span>
+                  </div>
+                  <div>
+                    <Input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={selectedElement.style?.marginLeft ?? 0}
+                      onChange={(e) => handleStyleChange('marginLeft', parseInt(e.target.value) || 0)}
+                      className="h-7 text-xs text-center"
+                      title="Left"
+                    />
+                    <span className="text-[10px] text-slate-400 block text-center">L</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -5,9 +5,11 @@ import Canvas from '@/components/designer/Canvas';
 import Toolbar from '@/components/designer/Toolbar';
 import PropertiesPanel from '@/components/designer/PropertiesPanel';
 import TemplatePreview from '@/components/designer/TemplatePreview';
+import PageNavigator from '@/components/designer/PageNavigator';
+import PageSettings from '@/components/designer/PageSettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
@@ -203,6 +205,13 @@ function DesignerContent() {
         </div>
 
         <div className="flex items-center gap-2">
+          <PageSettings 
+            trigger={
+              <Button variant="ghost" size="icon" className="h-9 w-9" title="Page Settings">
+                <Settings2 className="w-4 h-4" />
+              </Button>
+            }
+          />
           <Button 
             variant="outline" 
             size="sm" 
@@ -303,8 +312,11 @@ function DesignerContent() {
           )}
         </div>
         
-        <div className="flex-1 overflow-auto">
-          <Canvas />
+        <div className="flex-1 flex flex-col overflow-hidden">
+          <div className="flex-1 overflow-auto">
+            <Canvas />
+          </div>
+          <PageNavigator />
         </div>
         
         <PropertiesPanel />
