@@ -8,7 +8,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Smile, Sparkles } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
@@ -55,6 +54,8 @@ const iconCategories = {
   }
 };
 
+const categoryKeys = Object.keys(iconCategories);
+
 export default function IconPicker({ onSelectIcon, trigger }) {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,14 +90,27 @@ export default function IconPicker({ onSelectIcon, trigger }) {
     setSearchTerm('');
   };
 
-  const renderIcon = (iconName) => {
-    const IconComponent = LucideIcons[iconName];
-    if (!IconComponent) return null;
-    return <IconComponent className="w-5 h-5" />;
+  const handleCategoryClick = (e, categoryKey) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setActiveCategory(categoryKey);
+  };
+
+  const handleSearchChange = (e) => {
+    e.stopPropagation();
+    setSearchTerm(e.target.value);
+  };
+
+  const handleDialogOpenChange = (newOpen) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      setSearchTerm('');
+      setActiveCategory('contact');
+    }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button variant="outline" size="sm" className="gap-2">
@@ -113,33 +127,52 @@ export default function IconPicker({ onSelectIcon, trigger }) {
           </DialogTitle>
         </DialogHeader>
         
-        <div className="relative mb-4">
+        <div className="relative mb-4" onClick={(e) => e.stopPropagation()}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
             placeholder="Search icons..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearchChange}
             className="pl-9"
+            onClick={(e) => e.stopPropagation()}
           />
         </div>
 
         {!searchTerm && (
-          <Tabs value={activeCategory} onValueChange={setActiveCategory} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid grid-cols-5 gap-1 mb-4 h-auto flex-wrap">
-              {Object.entries(iconCategories).slice(0, 5).map(([key, { label }]) => (
-                <TabsTrigger key={key} value={key} className="text-xs">
-                  {label}
-                </TabsTrigger>
+          <div className="flex flex-col gap-2 mb-4">
+            <div className="flex flex-wrap gap-1">
+              {categoryKeys.slice(0, 5).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={(e) => handleCategoryClick(e, key)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    activeCategory === key
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {iconCategories[key].label}
+                </button>
               ))}
-            </TabsList>
-            <TabsList className="grid grid-cols-5 gap-1 mb-4 h-auto">
-              {Object.entries(iconCategories).slice(5).map(([key, { label }]) => (
-                <TabsTrigger key={key} value={key} className="text-xs">
-                  {label}
-                </TabsTrigger>
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {categoryKeys.slice(5).map((key) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={(e) => handleCategoryClick(e, key)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                    activeCategory === key
+                      ? 'bg-indigo-100 text-indigo-700'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {iconCategories[key].label}
+                </button>
               ))}
-            </TabsList>
-          </Tabs>
+            </div>
+          </div>
         )}
 
         <div className="flex-1 overflow-y-auto">

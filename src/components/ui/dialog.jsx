@@ -53,11 +53,16 @@ const DialogTrigger = React.forwardRef(({ className, children, asChild, ...props
     props.onClick?.(e);
   };
 
+  const handleMouseDown = (e) => {
+    e.stopPropagation();
+  };
+
   if (asChild && React.isValidElement(children)) {
     return React.cloneElement(children, {
       ...props,
       ref,
       onClick: handleClick,
+      onMouseDown: handleMouseDown,
     });
   }
 
@@ -65,6 +70,7 @@ const DialogTrigger = React.forwardRef(({ className, children, asChild, ...props
     <button
       ref={ref}
       onClick={handleClick}
+      onMouseDown={handleMouseDown}
       className={className}
       {...props}
     >
@@ -77,6 +83,7 @@ DialogTrigger.displayName = "DialogTrigger";
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => {
   const { open, onOpenChange } = React.useContext(DialogContext);
   const wasOpenRef = React.useRef(false);
+  const contentRef = React.useRef(null);
   
   React.useEffect(() => {
     if (open && !wasOpenRef.current) {
@@ -95,6 +102,26 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
     };
   }, [open]);
 
+  React.useEffect(() => {
+    if (!open) return;
+    
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        onOpenChange(false);
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const target = e.target;
+        if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+          e.stopPropagation();
+        }
+      }
+    };
+    
+    document.addEventListener('keydown', handleKeyDown, true);
+    return () => document.removeEventListener('keydown', handleKeyDown, true);
+  }, [open, onOpenChange]);
+
   if (!open) return null;
 
   const handleBackdropClick = (e) => {
@@ -106,12 +133,21 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
     e.stopPropagation();
   };
 
+  const handleContentKeyDown = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleBackdropClick}>
       <div className="fixed inset-0 bg-black/50" />
       <div
-        ref={ref}
+        ref={(node) => {
+          contentRef.current = node;
+          if (typeof ref === 'function') ref(node);
+          else if (ref) ref.current = node;
+        }}
         onClick={handleContentClick}
+        onKeyDown={handleContentKeyDown}
         className={cn(
           "relative z-50 w-full max-w-lg rounded-lg border bg-white p-6 shadow-lg",
           className
@@ -121,6 +157,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
         <button
           onClick={(e) => { e.stopPropagation(); onOpenChange(false); }}
           className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          type="button"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
             <line x1="18" y1="6" x2="6" y2="18"></line>
