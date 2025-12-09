@@ -15,8 +15,10 @@ export default function Canvas() {
     selectedElementIds,
     selectElement,
     clearSelection,
+    selectAll,
     updateElement,
     commitElementChange,
+    deleteElement,
     A4_WIDTH_PX,
     A4_HEIGHT_PX,
   } = useDesign();
@@ -54,11 +56,22 @@ export default function Canvas() {
 
     if (isShiftHeld) {
       selectElement(element.id, true);
+      
+      const newSelectedIds = isAlreadySelected 
+        ? selectedElementIds.filter(id => id !== element.id)
+        : [...selectedElementIds, element.id];
+      
+      if (newSelectedIds.length > 1) {
+        setIsMultiDragging(true);
+        const positions = {};
+        elements.filter(el => newSelectedIds.includes(el.id)).forEach(el => {
+          positions[el.id] = { x: el.x, y: el.y };
+        });
+        setMultiDragStartPositions(positions);
+      }
     } else if (!isAlreadySelected) {
       selectElement(element.id, false);
-    }
-
-    if (selectedElementIds.length > 1 && isAlreadySelected) {
+    } else if (selectedElementIds.length > 1 && isAlreadySelected) {
       setIsMultiDragging(true);
       const positions = {};
       elements.filter(el => selectedElementIds.includes(el.id)).forEach(el => {
@@ -301,14 +314,31 @@ export default function Canvas() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+      const target = e.target;
+      const isInputField = target.tagName === 'INPUT' || 
+                           target.tagName === 'TEXTAREA' || 
+                           target.isContentEditable;
+      
+      if (editingElementId) return;
+      
+      if (e.key === 'a' && (e.metaKey || e.ctrlKey) && !isInputField) {
         e.preventDefault();
-        const { selectAll } = useDesign;
+        selectAll();
+      }
+      
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElementId && !isInputField) {
+        e.preventDefault();
+        deleteElement(selectedElementId);
+      }
+      
+      if (e.key === 'Escape') {
+        clearSelection();
       }
     };
+    
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [selectAll, deleteElement, selectedElementId, editingElementId, clearSelection]);
 
   const renderIcon = (iconName, color, size) => {
     const IconComponent = LucideIcons[iconName];

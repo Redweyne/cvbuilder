@@ -9,7 +9,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Smile } from 'lucide-react';
+import { Search, Smile, Sparkles } from 'lucide-react';
 import * as LucideIcons from 'lucide-react';
 
 const iconCategories = {
@@ -176,5 +176,3 @@ export default function IconPicker({ onSelectIcon, trigger }) {
     </Dialog>
   );
 }
-
-const Sparkles = LucideIcons.Sparkles;
