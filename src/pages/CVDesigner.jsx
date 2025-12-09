@@ -4,9 +4,10 @@ import { DesignProvider, useDesign } from '@/context/DesignContext';
 import Canvas from '@/components/designer/Canvas';
 import Toolbar from '@/components/designer/Toolbar';
 import PropertiesPanel from '@/components/designer/PropertiesPanel';
+import TemplatePreview from '@/components/designer/TemplatePreview';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, FileText, Crown, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
@@ -255,29 +256,29 @@ function DesignerContent() {
                 <button
                   key={template.id}
                   onClick={() => handleLoadTemplate(template.id)}
-                  className={`w-full p-3 rounded-lg text-left transition-all ${
+                  className={`w-full p-2 rounded-lg text-left transition-all ${
                     selectedTemplateId === template.id
                       ? 'bg-indigo-50 border-2 border-indigo-500'
                       : 'bg-slate-50 hover:bg-slate-100 border-2 border-transparent'
                   }`}
                 >
-                  <div className="flex items-start gap-3">
-                    <div 
-                      className="w-10 h-14 rounded flex items-center justify-center shrink-0"
-                      style={{ backgroundColor: template.color + '20' }}
-                    >
-                      <FileText className="w-5 h-5" style={{ color: template.color }} />
+                  <div className="flex items-start gap-2">
+                    <div className="shrink-0 rounded overflow-hidden shadow-sm">
+                      <TemplatePreview 
+                        templateId={template.id} 
+                        scale={0.075}
+                        showShadow={false}
+                      />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-medium text-slate-900 truncate">{template.name}</p>
+                    <div className="flex-1 min-w-0 py-1">
+                      <div className="flex items-center gap-1">
+                        <p className="text-xs font-medium text-slate-900 truncate">{template.name}</p>
                         {template.isPremium && (
                           <Crown className="w-3 h-3 text-amber-500 shrink-0" />
                         )}
                       </div>
-                      <p className="text-xs text-slate-500 truncate">{template.description}</p>
                       <div className="flex items-center gap-1 mt-1">
-                        <div className="w-16 h-1 bg-slate-200 rounded-full overflow-hidden">
+                        <div className="w-12 h-1 bg-slate-200 rounded-full overflow-hidden">
                           <div 
                             className="h-full rounded-full"
                             style={{ 
@@ -286,7 +287,7 @@ function DesignerContent() {
                             }}
                           />
                         </div>
-                        <span className="text-[10px] text-slate-400">ATS {template.atsScore}%</span>
+                        <span className="text-[10px] text-slate-400">{template.atsScore}%</span>
                       </div>
                     </div>
                   </div>

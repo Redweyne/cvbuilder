@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useDesign } from '@/context/DesignContext';
 import { motion } from 'framer-motion';
+import { calculateSnapGuides, getGuideColor } from '@/utils/smartGuides';
 
 export default function Canvas() {
   const {
@@ -8,6 +9,7 @@ export default function Canvas() {
     zoom,
     showGrid,
     gridSize,
+    smartSnapping,
     selectedElementId,
     setSelectedElementId,
     updateElement,
@@ -27,6 +29,7 @@ export default function Canvas() {
   const [editingElementId, setEditingElementId] = useState(null);
   const [editText, setEditText] = useState('');
   const [hasMoved, setHasMoved] = useState(false);
+  const [activeGuides, setActiveGuides] = useState({ vertical: [], horizontal: [] });
 
   const handleCanvasClick = (e) => {
     if (e.target === canvasRef.current) {
@@ -97,13 +100,41 @@ export default function Canvas() {
       let newX = elementStart.x + dx;
       let newY = elementStart.y + dy;
 
-      if (showGrid) {
-        newX = Math.round(newX / gridSize) * gridSize;
-        newY = Math.round(newY / gridSize) * gridSize;
-      }
-
       const elementWidth = draggedElement.width || 100;
       const elementHeight = draggedElement.height || 50;
+
+      if (smartSnapping && !e.altKey) {
+        const movingElement = {
+          x: newX,
+          y: newY,
+          width: elementWidth,
+          height: elementHeight,
+        };
+
+        const { guides, snapPositions } = calculateSnapGuides(
+          movingElement,
+          elements,
+          A4_WIDTH_PX,
+          A4_HEIGHT_PX,
+          selectedElementId
+        );
+
+        setActiveGuides(guides);
+
+        if (snapPositions.x !== null) {
+          newX = snapPositions.x;
+        }
+        if (snapPositions.y !== null) {
+          newY = snapPositions.y;
+        }
+      } else if (showGrid) {
+        newX = Math.round(newX / gridSize) * gridSize;
+        newY = Math.round(newY / gridSize) * gridSize;
+        setActiveGuides({ vertical: [], horizontal: [] });
+      } else {
+        setActiveGuides({ vertical: [], horizontal: [] });
+      }
+
       newX = Math.max(0, Math.min(A4_WIDTH_PX - elementWidth, newX));
       newY = Math.max(0, Math.min(A4_HEIGHT_PX - elementHeight, newY));
 
@@ -146,21 +177,61 @@ export default function Canvas() {
         }
       }
 
-      newX = Math.max(0, newX);
-      newY = Math.max(0, newY);
-      
-      if (showGrid) {
-        newWidth = Math.max(MIN_WIDTH, Math.round(newWidth / gridSize) * gridSize);
-        newHeight = Math.max(MIN_HEIGHT, Math.round(newHeight / gridSize) * gridSize);
+      if (smartSnapping && !e.altKey) {
+        const movingElement = {
+          x: newX,
+          y: newY,
+          width: newWidth,
+          height: newHeight,
+        };
+
+        const { guides, snapPositions } = calculateSnapGuides(
+          movingElement,
+          elements,
+          A4_WIDTH_PX,
+          A4_HEIGHT_PX,
+          selectedElementId
+        );
+
+        setActiveGuides(guides);
+
+        if (resizeHandle.includes('e') && snapPositions.x !== null) {
+          const snappedRight = snapPositions.x + newWidth;
+          newWidth = snappedRight - newX;
+        }
+        if (resizeHandle.includes('w') && snapPositions.x !== null) {
+          const delta = newX - snapPositions.x;
+          newX = snapPositions.x;
+          newWidth = newWidth + delta;
+        }
+        if (resizeHandle.includes('s') && snapPositions.y !== null) {
+          const snappedBottom = snapPositions.y + newHeight;
+          newHeight = snappedBottom - newY;
+        }
+        if (resizeHandle.includes('n') && snapPositions.y !== null) {
+          const delta = newY - snapPositions.y;
+          newY = snapPositions.y;
+          newHeight = newHeight + delta;
+        }
+      } else {
+        setActiveGuides({ vertical: [], horizontal: [] });
+        if (showGrid) {
+          newWidth = Math.max(MIN_WIDTH, Math.round(newWidth / gridSize) * gridSize);
+          newHeight = Math.max(MIN_HEIGHT, Math.round(newHeight / gridSize) * gridSize);
+        }
       }
 
+      newX = Math.max(0, newX);
+      newY = Math.max(0, newY);
       newWidth = Math.min(newWidth, A4_WIDTH_PX - newX);
       newHeight = Math.min(newHeight, A4_HEIGHT_PX - newY);
+      newWidth = Math.max(MIN_WIDTH, newWidth);
+      newHeight = Math.max(MIN_HEIGHT, newHeight);
 
       updateElement(selectedElementId, { x: newX, y: newY, width: newWidth, height: newHeight });
       setHasMoved(true);
     }
-  }, [isDragging, isResizing, selectedElementId, dragStart, elementStart, zoom, showGrid, gridSize, resizeHandle, draggedElement, A4_WIDTH_PX, A4_HEIGHT_PX, updateElement]);
+  }, [isDragging, isResizing, selectedElementId, dragStart, elementStart, zoom, showGrid, gridSize, resizeHandle, draggedElement, A4_WIDTH_PX, A4_HEIGHT_PX, updateElement, elements, smartSnapping]);
 
   const handleMouseUp = useCallback(() => {
     if ((isDragging || isResizing) && selectedElementId && hasMoved) {
@@ -171,6 +242,7 @@ export default function Canvas() {
     setResizeHandle(null);
     setDraggedElement(null);
     setHasMoved(false);
+    setActiveGuides({ vertical: [], horizontal: [] });
   }, [isDragging, isResizing, selectedElementId, hasMoved, commitElementChange]);
 
   useEffect(() => {
@@ -331,6 +403,75 @@ export default function Canvas() {
     );
   };
 
+  const renderSmartGuides = () => {
+    if (activeGuides.vertical.length === 0 && activeGuides.horizontal.length === 0) {
+      return null;
+    }
+
+    return (
+      <svg
+        className="absolute inset-0 pointer-events-none"
+        width={A4_WIDTH_PX}
+        height={A4_HEIGHT_PX}
+        style={{ zIndex: 9999 }}
+      >
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        
+        {activeGuides.vertical.map((guide, index) => (
+          <g key={`v-${index}-${guide.position}`}>
+            <line
+              x1={guide.position}
+              y1={0}
+              x2={guide.position}
+              y2={A4_HEIGHT_PX}
+              stroke={getGuideColor(guide.sourceType)}
+              strokeWidth="1"
+              strokeDasharray={guide.sourceType === 'canvas-center' ? '8,4' : 'none'}
+              opacity="0.8"
+              filter="url(#glow)"
+            />
+            <circle
+              cx={guide.position}
+              cy={A4_HEIGHT_PX / 2}
+              r="3"
+              fill={getGuideColor(guide.sourceType)}
+            />
+          </g>
+        ))}
+        
+        {activeGuides.horizontal.map((guide, index) => (
+          <g key={`h-${index}-${guide.position}`}>
+            <line
+              x1={0}
+              y1={guide.position}
+              x2={A4_WIDTH_PX}
+              y2={guide.position}
+              stroke={getGuideColor(guide.sourceType)}
+              strokeWidth="1"
+              strokeDasharray={guide.sourceType === 'canvas-center' ? '8,4' : 'none'}
+              opacity="0.8"
+              filter="url(#glow)"
+            />
+            <circle
+              cx={A4_WIDTH_PX / 2}
+              cy={guide.position}
+              r="3"
+              fill={getGuideColor(guide.sourceType)}
+            />
+          </g>
+        ))}
+      </svg>
+    );
+  };
+
   return (
     <div
       ref={containerRef}
@@ -361,6 +502,7 @@ export default function Canvas() {
             onClick={handleCanvasClick}
           >
             {renderGrid()}
+            {renderSmartGuides()}
             {elements
               .slice()
               .sort((a, b) => (a.zIndex || 0) - (b.zIndex || 0))

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '../utils';
 import { motion } from 'framer-motion';
 import { 
   LayoutTemplate, 
   Check, 
   Crown,
   Sparkles,
-  Eye,
   ArrowRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,10 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import {
   Tabs,
-  TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import TemplatePreview from '@/components/designer/TemplatePreview';
 
 const templates = [
   {
@@ -26,7 +24,6 @@ const templates = [
     name: 'Professional',
     description: 'Clean and modern design perfect for corporate roles',
     category: 'professional',
-    preview: 'https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=500&fit=crop',
     color: '#4F46E5',
     isPremium: false,
     atsScore: 95,
@@ -37,7 +34,6 @@ const templates = [
     name: 'Minimal',
     description: 'Simple and elegant with focus on content',
     category: 'minimal',
-    preview: 'https://images.unsplash.com/photo-1554774853-aae0a22c8aa4?w=400&h=500&fit=crop',
     color: '#1F2937',
     isPremium: false,
     atsScore: 98
@@ -47,7 +43,6 @@ const templates = [
     name: 'Creative',
     description: 'Stand out with unique layouts and colors',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1517842645767-c639042777db?w=400&h=500&fit=crop',
     color: '#EC4899',
     isPremium: true,
     atsScore: 85
@@ -57,7 +52,6 @@ const templates = [
     name: 'Executive',
     description: 'Sophisticated design for senior positions',
     category: 'professional',
-    preview: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=500&fit=crop',
     color: '#0F172A',
     isPremium: true,
     atsScore: 94
@@ -67,7 +61,6 @@ const templates = [
     name: 'Tech Modern',
     description: 'Perfect for developers and IT professionals',
     category: 'professional',
-    preview: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=500&fit=crop',
     color: '#059669',
     isPremium: false,
     atsScore: 96
@@ -77,7 +70,6 @@ const templates = [
     name: 'Academic',
     description: 'Ideal for research and academic positions',
     category: 'academic',
-    preview: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&h=500&fit=crop',
     color: '#7C3AED',
     isPremium: false,
     atsScore: 92
@@ -87,7 +79,6 @@ const templates = [
     name: 'Designer',
     description: 'Showcase your creativity with this bold template',
     category: 'creative',
-    preview: 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=400&h=500&fit=crop',
     color: '#F59E0B',
     isPremium: true,
     atsScore: 80
@@ -97,7 +88,6 @@ const templates = [
     name: 'Compact',
     description: 'Fit more content in a single page',
     category: 'minimal',
-    preview: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=500&fit=crop',
     color: '#6366F1',
     isPremium: false,
     atsScore: 97
@@ -122,13 +112,11 @@ export default function Templates() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Templates</h1>
         <p className="text-slate-600 mt-1">Choose from stunning, ATS-optimized CV templates</p>
       </div>
 
-      {/* Category Tabs */}
       <Tabs value={selectedCategory} onValueChange={setSelectedCategory} className="mb-8">
         <TabsList className="bg-slate-100 p-1">
           {categories.map(cat => (
@@ -143,7 +131,6 @@ export default function Templates() {
         </TabsList>
       </Tabs>
 
-      {/* Templates Grid */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {filteredTemplates.map((template, index) => (
           <motion.div
@@ -159,18 +146,19 @@ export default function Templates() {
               onClick={() => setSelectedTemplate(template.id)}
             >
               <CardContent className="p-0">
-                {/* Preview Image */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-slate-100">
-                  <img 
-                    src={template.preview}
-                    alt={template.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
+                <div className="relative overflow-hidden bg-slate-50">
+                  <div className="p-4 flex justify-center">
+                    <div className="transition-transform duration-500 group-hover:scale-105">
+                      <TemplatePreview 
+                        templateId={template.id} 
+                        scale={0.22}
+                        className="rounded-sm"
+                      />
+                    </div>
+                  </div>
                   
-                  {/* Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   
-                  {/* Badges */}
                   <div className="absolute top-3 left-3 flex gap-2">
                     {template.isPremium && (
                       <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 border-0">
@@ -185,14 +173,12 @@ export default function Templates() {
                     )}
                   </div>
                   
-                  {/* ATS Score */}
                   <div className="absolute top-3 right-3">
                     <Badge variant="secondary" className="bg-white/90 backdrop-blur">
                       ATS: {template.atsScore}%
                     </Badge>
                   </div>
                   
-                  {/* Selected Check */}
                   {selectedTemplate === template.id && (
                     <div className="absolute bottom-3 right-3">
                       <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center">
@@ -201,7 +187,6 @@ export default function Templates() {
                     </div>
                   )}
                   
-                  {/* Hover Actions */}
                   <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform">
                     <Link to={`/CVDesigner?template=${template.id}`}>
                       <Button className="w-full bg-white text-slate-900 hover:bg-slate-100">
@@ -212,7 +197,6 @@ export default function Templates() {
                   </div>
                 </div>
                 
-                {/* Info */}
                 <div className="p-4">
                   <div className="flex items-center gap-2 mb-1">
                     <div 
@@ -229,7 +213,6 @@ export default function Templates() {
         ))}
       </div>
 
-      {/* CTA Section */}
       {selectedTemplate && (
         <motion.div 
           className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white border-t border-slate-200 p-4 shadow-lg"

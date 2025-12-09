@@ -23,6 +23,7 @@ const initialDocument = {
   zoom: 0.75,
   showGrid: true,
   gridSize: 20,
+  smartSnapping: true,
 };
 
 export function DesignProvider({ children }) {
@@ -55,6 +56,10 @@ export function DesignProvider({ children }) {
 
   const setGridSize = useCallback((size) => {
     setDocument(prev => ({ ...prev, gridSize: size }));
+  }, []);
+
+  const toggleSmartSnapping = useCallback(() => {
+    setDocument(prev => ({ ...prev, smartSnapping: !prev.smartSnapping }));
   }, []);
 
   const addElement = useCallback((elementData) => {
@@ -288,6 +293,8 @@ export function DesignProvider({ children }) {
     toggleGrid,
     gridSize: document.gridSize,
     setGridSize,
+    smartSnapping: document.smartSnapping,
+    toggleSmartSnapping,
     addElement,
     updateElement,
     commitElementChange,

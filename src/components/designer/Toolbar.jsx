@@ -13,6 +13,7 @@ import {
   Minus,
   Image,
   Trash2,
+  Magnet,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -27,6 +28,8 @@ export default function Toolbar() {
     setZoom,
     showGrid,
     toggleGrid,
+    smartSnapping,
+    toggleSmartSnapping,
     addElement,
     deleteElement,
     selectedElementId,
@@ -201,6 +204,20 @@ export default function Toolbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant={smartSnapping ? 'secondary' : 'ghost'}
+                size="icon"
+                onClick={toggleSmartSnapping}
+                className={`h-9 w-9 ${smartSnapping ? 'bg-indigo-100 text-indigo-600' : ''}`}
+              >
+                <Magnet className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Smart Snapping (Hold Alt to disable temporarily)</TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
