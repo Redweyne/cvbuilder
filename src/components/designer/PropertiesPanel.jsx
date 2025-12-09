@@ -15,16 +15,11 @@ import {
   ChevronUp,
   ChevronDown,
 } from 'lucide-react';
+import FontPicker from './FontPicker';
+import IconPicker from './IconPicker';
+import * as LucideIcons from 'lucide-react';
 
-const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32, 36, 48, 64];
-const FONT_FAMILIES = [
-  'Inter',
-  'Arial',
-  'Georgia',
-  'Times New Roman',
-  'Helvetica',
-  'Courier New',
-];
+const FONT_SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72];
 const PRESET_COLORS = [
   '#1e293b', '#475569', '#64748b', '#94a3b8',
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
@@ -55,6 +50,9 @@ export default function PropertiesPanel() {
         <p className="text-sm text-slate-500">
           Select an element to edit its properties
         </p>
+        <p className="text-xs text-slate-400 mt-2">
+          Hold Shift + Click to select multiple
+        </p>
       </div>
     );
   }
@@ -71,12 +69,29 @@ export default function PropertiesPanel() {
     commitElementChange();
   };
 
+  const getElementTypeLabel = () => {
+    switch (selectedElement.type) {
+      case 'text': return 'Text';
+      case 'shape': return 'Shape';
+      case 'line': return 'Line';
+      case 'icon': return 'Icon';
+      case 'progressBar': return 'Skill Bar';
+      default: return 'Element';
+    }
+  };
+
+  const renderIconPreview = () => {
+    const IconComponent = LucideIcons[selectedElement.iconName];
+    if (!IconComponent) return null;
+    return <IconComponent className="w-6 h-6" style={{ color: selectedElement.style?.color }} />;
+  };
+
   return (
     <div className="w-64 bg-white border-l border-slate-200 p-4 overflow-y-auto">
       <div className="space-y-6">
         <div>
           <h3 className="text-sm font-semibold text-slate-900 mb-3">
-            {selectedElement.type === 'text' ? 'Text' : selectedElement.type === 'shape' ? 'Shape' : 'Line'} Properties
+            {getElementTypeLabel()} Properties
           </h3>
           
           <div className="flex gap-2 mb-4">
@@ -136,15 +151,10 @@ export default function PropertiesPanel() {
 
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Font Family</Label>
-              <select
+              <FontPicker
                 value={selectedElement.style?.fontFamily || 'Inter'}
-                onChange={(e) => handleStyleChange('fontFamily', e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md"
-              >
-                {FONT_FAMILIES.map(font => (
-                  <option key={font} value={font}>{font}</option>
-                ))}
-              </select>
+                onChange={(font) => handleStyleChange('fontFamily', font)}
+              />
             </div>
 
             <div>
@@ -214,17 +224,141 @@ export default function PropertiesPanel() {
           </>
         )}
 
+        {selectedElement.type === 'icon' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Current Icon</Label>
+              <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg mb-2">
+                {renderIconPreview()}
+                <span className="text-sm text-slate-600">{selectedElement.iconName}</span>
+              </div>
+              <IconPicker
+                onSelectIcon={(iconName) => handlePropertyChange('iconName', iconName)}
+                trigger={
+                  <Button variant="outline" size="sm" className="w-full">
+                    Change Icon
+                  </Button>
+                }
+              />
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'progressBar' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Skill Label</Label>
+              <Input
+                value={selectedElement.label || ''}
+                onChange={(e) => handlePropertyChange('label', e.target.value)}
+                placeholder="e.g., JavaScript"
+                className="h-8"
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Progress: {selectedElement.progress || 75}%</Label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={selectedElement.progress || 75}
+                onChange={(e) => handlePropertyChange('progress', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Progress Color</Label>
+              <div className="grid grid-cols-8 gap-1 mb-2">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleStyleChange('progressColor', color)}
+                    className={`w-6 h-6 rounded border-2 ${
+                      selectedElement.style?.progressColor === color ? 'border-indigo-500' : 'border-slate-200'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Background Color</Label>
+              <div className="grid grid-cols-8 gap-1 mb-2">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleStyleChange('backgroundColor', color)}
+                    className={`w-6 h-6 rounded border-2 ${
+                      selectedElement.style?.backgroundColor === color ? 'border-indigo-500' : 'border-slate-200'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Border Radius</Label>
+              <input
+                type="range"
+                min="0"
+                max="20"
+                value={selectedElement.style?.borderRadius || 10}
+                onChange={(e) => handleStyleChange('borderRadius', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={selectedElement.style?.showLabel !== false}
+                  onChange={(e) => handleStyleChange('showLabel', e.target.checked)}
+                />
+                Show Label
+              </label>
+              <label className="flex items-center gap-2 text-xs">
+                <input
+                  type="checkbox"
+                  checked={selectedElement.style?.showPercentage !== false}
+                  onChange={(e) => handleStyleChange('showPercentage', e.target.checked)}
+                />
+                Show %
+              </label>
+            </div>
+          </>
+        )}
+
         <div>
           <Label className="text-xs text-slate-600 mb-2 block">
-            {selectedElement.type === 'text' ? 'Text Color' : selectedElement.type === 'line' ? 'Line Color' : 'Background Color'}
+            {selectedElement.type === 'text' ? 'Text Color' : 
+             selectedElement.type === 'line' ? 'Line Color' : 
+             selectedElement.type === 'icon' ? 'Icon Color' :
+             selectedElement.type === 'progressBar' ? 'Label Color' :
+             'Background Color'}
           </Label>
           <div className="grid grid-cols-8 gap-1 mb-2">
             {PRESET_COLORS.map(color => (
               <button
                 key={color}
-                onClick={() => handleStyleChange(selectedElement.type === 'text' ? 'color' : selectedElement.type === 'line' ? 'color' : 'backgroundColor', color)}
+                onClick={() => handleStyleChange(
+                  selectedElement.type === 'text' || selectedElement.type === 'line' || selectedElement.type === 'icon' 
+                    ? 'color' 
+                    : selectedElement.type === 'progressBar' 
+                      ? 'labelColor' 
+                      : 'backgroundColor', 
+                  color
+                )}
                 className={`w-6 h-6 rounded border-2 ${
-                  (selectedElement.type === 'text' ? selectedElement.style?.color : selectedElement.type === 'line' ? selectedElement.style?.color : selectedElement.style?.backgroundColor) === color
+                  (selectedElement.type === 'text' || selectedElement.type === 'line' || selectedElement.type === 'icon'
+                    ? selectedElement.style?.color 
+                    : selectedElement.type === 'progressBar'
+                      ? selectedElement.style?.labelColor
+                      : selectedElement.style?.backgroundColor) === color
                     ? 'border-indigo-500'
                     : 'border-slate-200'
                 }`}
@@ -234,8 +368,19 @@ export default function PropertiesPanel() {
           </div>
           <Input
             type="color"
-            value={(selectedElement.type === 'text' ? selectedElement.style?.color : selectedElement.type === 'line' ? selectedElement.style?.color : selectedElement.style?.backgroundColor) || '#1e293b'}
-            onChange={(e) => handleStyleChange(selectedElement.type === 'text' ? 'color' : selectedElement.type === 'line' ? 'color' : 'backgroundColor', e.target.value)}
+            value={(selectedElement.type === 'text' || selectedElement.type === 'line' || selectedElement.type === 'icon'
+              ? selectedElement.style?.color 
+              : selectedElement.type === 'progressBar'
+                ? selectedElement.style?.labelColor
+                : selectedElement.style?.backgroundColor) || '#1e293b'}
+            onChange={(e) => handleStyleChange(
+              selectedElement.type === 'text' || selectedElement.type === 'line' || selectedElement.type === 'icon'
+                ? 'color' 
+                : selectedElement.type === 'progressBar'
+                  ? 'labelColor'
+                  : 'backgroundColor', 
+              e.target.value
+            )}
             className="w-full h-8"
           />
         </div>

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { useDesign } from '@/context/DesignContext';
 import { motion } from 'framer-motion';
 import { calculateSnapGuides, getGuideColor } from '@/utils/smartGuides';
+import * as LucideIcons from 'lucide-react';
 
 export default function Canvas() {
   const {
@@ -11,7 +12,9 @@ export default function Canvas() {
     gridSize,
     smartSnapping,
     selectedElementId,
-    setSelectedElementId,
+    selectedElementIds,
+    selectElement,
+    clearSelection,
     updateElement,
     commitElementChange,
     A4_WIDTH_PX,
@@ -30,10 +33,12 @@ export default function Canvas() {
   const [editText, setEditText] = useState('');
   const [hasMoved, setHasMoved] = useState(false);
   const [activeGuides, setActiveGuides] = useState({ vertical: [], horizontal: [] });
+  const [isMultiDragging, setIsMultiDragging] = useState(false);
+  const [multiDragStartPositions, setMultiDragStartPositions] = useState({});
 
   const handleCanvasClick = (e) => {
     if (e.target === canvasRef.current) {
-      setSelectedElementId(null);
+      clearSelection();
       if (editingElementId) {
         finishEditing();
       }
@@ -43,7 +48,25 @@ export default function Canvas() {
   const handleElementMouseDown = (e, element) => {
     if (editingElementId === element.id) return;
     e.stopPropagation();
-    setSelectedElementId(element.id);
+
+    const isShiftHeld = e.shiftKey;
+    const isAlreadySelected = selectedElementIds.includes(element.id);
+
+    if (isShiftHeld) {
+      selectElement(element.id, true);
+    } else if (!isAlreadySelected) {
+      selectElement(element.id, false);
+    }
+
+    if (selectedElementIds.length > 1 && isAlreadySelected) {
+      setIsMultiDragging(true);
+      const positions = {};
+      elements.filter(el => selectedElementIds.includes(el.id)).forEach(el => {
+        positions[el.id] = { x: el.x, y: el.y };
+      });
+      setMultiDragStartPositions(positions);
+    }
+
     setIsDragging(true);
     setDragStart({ x: e.clientX, y: e.clientY });
     setElementStart({ x: element.x, y: element.y, width: element.width, height: element.height });
@@ -97,6 +120,24 @@ export default function Canvas() {
     const dy = (e.clientY - dragStart.y) / zoom;
 
     if (isDragging && !isResizing) {
+      if (isMultiDragging && selectedElementIds.length > 1) {
+        selectedElementIds.forEach(id => {
+          const startPos = multiDragStartPositions[id];
+          if (startPos) {
+            let newX = startPos.x + dx;
+            let newY = startPos.y + dy;
+            const el = elements.find(e => e.id === id);
+            if (el) {
+              newX = Math.max(0, Math.min(A4_WIDTH_PX - el.width, newX));
+              newY = Math.max(0, Math.min(A4_HEIGHT_PX - el.height, newY));
+              updateElement(id, { x: newX, y: newY });
+            }
+          }
+        });
+        setHasMoved(true);
+        return;
+      }
+
       let newX = elementStart.x + dx;
       let newY = elementStart.y + dy;
 
@@ -231,7 +272,7 @@ export default function Canvas() {
       updateElement(selectedElementId, { x: newX, y: newY, width: newWidth, height: newHeight });
       setHasMoved(true);
     }
-  }, [isDragging, isResizing, selectedElementId, dragStart, elementStart, zoom, showGrid, gridSize, resizeHandle, draggedElement, A4_WIDTH_PX, A4_HEIGHT_PX, updateElement, elements, smartSnapping]);
+  }, [isDragging, isResizing, selectedElementId, selectedElementIds, dragStart, elementStart, zoom, showGrid, gridSize, resizeHandle, draggedElement, A4_WIDTH_PX, A4_HEIGHT_PX, updateElement, elements, smartSnapping, isMultiDragging, multiDragStartPositions]);
 
   const handleMouseUp = useCallback(() => {
     if ((isDragging || isResizing) && selectedElementId && hasMoved) {
@@ -243,6 +284,8 @@ export default function Canvas() {
     setDraggedElement(null);
     setHasMoved(false);
     setActiveGuides({ vertical: [], horizontal: [] });
+    setIsMultiDragging(false);
+    setMultiDragStartPositions({});
   }, [isDragging, isResizing, selectedElementId, hasMoved, commitElementChange]);
 
   useEffect(() => {
@@ -256,8 +299,71 @@ export default function Canvas() {
     }
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'a' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        const { selectAll } = useDesign;
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const renderIcon = (iconName, color, size) => {
+    const IconComponent = LucideIcons[iconName];
+    if (!IconComponent) {
+      return <LucideIcons.HelpCircle style={{ width: size, height: size, color }} />;
+    }
+    return <IconComponent style={{ width: size, height: size, color }} />;
+  };
+
+  const renderProgressBar = (element) => {
+    const { progress = 75, label, style = {} } = element;
+    const {
+      backgroundColor = '#e2e8f0',
+      progressColor = '#6366f1',
+      borderRadius = 10,
+      showLabel = true,
+      showPercentage = true,
+      labelColor = '#1e293b',
+      labelFontSize = 12,
+    } = style;
+
+    return (
+      <div className="w-full h-full flex flex-col justify-center">
+        {showLabel && label && (
+          <div 
+            className="flex justify-between items-center mb-1"
+            style={{ fontSize: labelFontSize, color: labelColor }}
+          >
+            <span className="font-medium">{label}</span>
+            {showPercentage && <span>{progress}%</span>}
+          </div>
+        )}
+        <div
+          className="w-full overflow-hidden"
+          style={{
+            backgroundColor,
+            borderRadius,
+            height: showLabel ? 'calc(100% - 20px)' : '100%',
+          }}
+        >
+          <div
+            className="h-full transition-all duration-300"
+            style={{
+              width: `${progress}%`,
+              backgroundColor: progressColor,
+              borderRadius,
+            }}
+          />
+        </div>
+      </div>
+    );
+  };
+
   const renderElement = (element) => {
-    const isSelected = element.id === selectedElementId;
+    const isSelected = selectedElementIds.includes(element.id);
     const isEditing = element.id === editingElementId;
 
     const resizeHandles = [
@@ -342,6 +448,22 @@ export default function Canvas() {
             }}
           />
         )}
+        {element.type === 'icon' && (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{
+              backgroundColor: element.style?.backgroundColor || 'transparent',
+              borderRadius: element.style?.borderRadius || 0,
+            }}
+          >
+            {renderIcon(
+              element.iconName,
+              element.style?.color || '#1e293b',
+              Math.min(element.width, element.height) * 0.8
+            )}
+          </div>
+        )}
+        {element.type === 'progressBar' && renderProgressBar(element)}
 
         {isSelected && !isEditing && (
           <>

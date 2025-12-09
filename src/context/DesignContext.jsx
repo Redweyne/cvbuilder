@@ -29,6 +29,7 @@ const initialDocument = {
 export function DesignProvider({ children }) {
   const [document, setDocument] = useState(initialDocument);
   const [selectedElementId, setSelectedElementId] = useState(null);
+  const [selectedElementIds, setSelectedElementIds] = useState([]);
   const [history, setHistory] = useState([initialDocument]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [documentName, setDocumentName] = useState('Untitled Design');
@@ -280,6 +281,34 @@ export function DesignProvider({ children }) {
     return elements.find(el => el.id === selectedElementId) || null;
   }, [elements, selectedElementId]);
 
+  const selectElement = useCallback((elementId, addToSelection = false) => {
+    if (addToSelection) {
+      setSelectedElementIds(prev => {
+        if (prev.includes(elementId)) {
+          return prev.filter(id => id !== elementId);
+        }
+        return [...prev, elementId];
+      });
+      setSelectedElementId(elementId);
+    } else {
+      setSelectedElementId(elementId);
+      setSelectedElementIds(elementId ? [elementId] : []);
+    }
+  }, []);
+
+  const clearSelection = useCallback(() => {
+    setSelectedElementId(null);
+    setSelectedElementIds([]);
+  }, []);
+
+  const selectAll = useCallback(() => {
+    const allIds = elements.map(el => el.id);
+    setSelectedElementIds(allIds);
+    if (allIds.length > 0) {
+      setSelectedElementId(allIds[allIds.length - 1]);
+    }
+  }, [elements]);
+
   const value = {
     document,
     setDocument,
@@ -287,6 +316,11 @@ export function DesignProvider({ children }) {
     elements,
     selectedElementId,
     setSelectedElementId,
+    selectedElementIds,
+    setSelectedElementIds,
+    selectElement,
+    clearSelection,
+    selectAll,
     zoom: document.zoom,
     setZoom,
     showGrid: document.showGrid,

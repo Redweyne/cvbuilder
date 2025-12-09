@@ -14,6 +14,16 @@ import {
   Image,
   Trash2,
   Magnet,
+  Smile,
+  BarChart3,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignStartVertical,
+  AlignCenterVertical,
+  AlignEndVertical,
+  AlignHorizontalDistributeCenter,
+  AlignVerticalDistributeCenter,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -21,6 +31,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import IconPicker from './IconPicker';
 
 export default function Toolbar() {
   const {
@@ -33,10 +44,16 @@ export default function Toolbar() {
     addElement,
     deleteElement,
     selectedElementId,
+    selectedElementIds,
+    elements,
+    updateElement,
+    commitElementChange,
     undo,
     redo,
     canUndo,
     canRedo,
+    A4_WIDTH_PX,
+    A4_HEIGHT_PX,
   } = useDesign();
 
   const handleAddText = () => {
@@ -80,6 +97,38 @@ export default function Toolbar() {
     });
   };
 
+  const handleAddIcon = (iconName) => {
+    addElement({
+      type: 'icon',
+      iconName: iconName,
+      width: 40,
+      height: 40,
+      style: {
+        color: '#1e293b',
+        backgroundColor: 'transparent',
+      },
+    });
+  };
+
+  const handleAddProgressBar = () => {
+    addElement({
+      type: 'progressBar',
+      width: 200,
+      height: 20,
+      progress: 75,
+      label: 'Skill',
+      style: {
+        backgroundColor: '#e2e8f0',
+        progressColor: '#6366f1',
+        borderRadius: 10,
+        showLabel: true,
+        showPercentage: true,
+        labelColor: '#1e293b',
+        labelFontSize: 12,
+      },
+    });
+  };
+
   const handleDelete = () => {
     if (selectedElementId) {
       deleteElement(selectedElementId);
@@ -89,6 +138,114 @@ export default function Toolbar() {
   const zoomIn = () => setZoom(zoom + 0.1);
   const zoomOut = () => setZoom(zoom - 0.1);
   const fitToScreen = () => setZoom(0.75);
+
+  const selectedElements = elements.filter(el => selectedElementIds?.includes(el.id));
+  const hasMultipleSelected = selectedElements.length > 1;
+  const hasSingleSelected = selectedElements.length === 1;
+  const isDisabled = !hasSingleSelected && !hasMultipleSelected;
+
+  const getBounds = (els) => ({
+    minX: Math.min(...els.map(el => el.x)),
+    maxX: Math.max(...els.map(el => el.x + el.width)),
+    minY: Math.min(...els.map(el => el.y)),
+    maxY: Math.max(...els.map(el => el.y + el.height)),
+  });
+
+  const alignLeft = () => {
+    if (hasSingleSelected) {
+      updateElement(selectedElements[0].id, { x: 0 }, true);
+    } else if (hasMultipleSelected) {
+      const minX = Math.min(...selectedElements.map(el => el.x));
+      selectedElements.forEach(el => updateElement(el.id, { x: minX }));
+      commitElementChange();
+    }
+  };
+
+  const alignCenter = () => {
+    if (hasSingleSelected) {
+      const el = selectedElements[0];
+      updateElement(el.id, { x: (A4_WIDTH_PX - el.width) / 2 }, true);
+    } else if (hasMultipleSelected) {
+      const bounds = getBounds(selectedElements);
+      const centerX = bounds.minX + (bounds.maxX - bounds.minX) / 2;
+      selectedElements.forEach(el => updateElement(el.id, { x: centerX - el.width / 2 }));
+      commitElementChange();
+    }
+  };
+
+  const alignRight = () => {
+    if (hasSingleSelected) {
+      const el = selectedElements[0];
+      updateElement(el.id, { x: A4_WIDTH_PX - el.width }, true);
+    } else if (hasMultipleSelected) {
+      const maxX = Math.max(...selectedElements.map(el => el.x + el.width));
+      selectedElements.forEach(el => updateElement(el.id, { x: maxX - el.width }));
+      commitElementChange();
+    }
+  };
+
+  const alignTop = () => {
+    if (hasSingleSelected) {
+      updateElement(selectedElements[0].id, { y: 0 }, true);
+    } else if (hasMultipleSelected) {
+      const minY = Math.min(...selectedElements.map(el => el.y));
+      selectedElements.forEach(el => updateElement(el.id, { y: minY }));
+      commitElementChange();
+    }
+  };
+
+  const alignMiddle = () => {
+    if (hasSingleSelected) {
+      const el = selectedElements[0];
+      updateElement(el.id, { y: (A4_HEIGHT_PX - el.height) / 2 }, true);
+    } else if (hasMultipleSelected) {
+      const bounds = getBounds(selectedElements);
+      const centerY = bounds.minY + (bounds.maxY - bounds.minY) / 2;
+      selectedElements.forEach(el => updateElement(el.id, { y: centerY - el.height / 2 }));
+      commitElementChange();
+    }
+  };
+
+  const alignBottom = () => {
+    if (hasSingleSelected) {
+      const el = selectedElements[0];
+      updateElement(el.id, { y: A4_HEIGHT_PX - el.height }, true);
+    } else if (hasMultipleSelected) {
+      const maxY = Math.max(...selectedElements.map(el => el.y + el.height));
+      selectedElements.forEach(el => updateElement(el.id, { y: maxY - el.height }));
+      commitElementChange();
+    }
+  };
+
+  const distributeHorizontally = () => {
+    if (selectedElements.length < 3) return;
+    const sorted = [...selectedElements].sort((a, b) => a.x - b.x);
+    const bounds = getBounds(sorted);
+    const totalWidth = sorted.reduce((sum, el) => sum + el.width, 0);
+    const availableSpace = (bounds.maxX - bounds.minX) - totalWidth + sorted[sorted.length - 1].width;
+    const gap = availableSpace / (sorted.length - 1);
+    let currentX = bounds.minX;
+    sorted.forEach((el, index) => {
+      if (index > 0) updateElement(el.id, { x: currentX });
+      currentX += el.width + gap;
+    });
+    commitElementChange();
+  };
+
+  const distributeVertically = () => {
+    if (selectedElements.length < 3) return;
+    const sorted = [...selectedElements].sort((a, b) => a.y - b.y);
+    const bounds = getBounds(sorted);
+    const totalHeight = sorted.reduce((sum, el) => sum + el.height, 0);
+    const availableSpace = (bounds.maxY - bounds.minY) - totalHeight + sorted[sorted.length - 1].height;
+    const gap = availableSpace / (sorted.length - 1);
+    let currentY = bounds.minY;
+    sorted.forEach((el, index) => {
+      if (index > 0) updateElement(el.id, { y: currentY });
+      currentY += el.height + gap;
+    });
+    commitElementChange();
+  };
 
   return (
     <TooltipProvider>
@@ -135,6 +292,29 @@ export default function Toolbar() {
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Add Line</TooltipContent>
+            </Tooltip>
+
+            <IconPicker
+              onSelectIcon={handleAddIcon}
+              trigger={
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Smile className="w-4 h-4" />
+                </Button>
+              }
+            />
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleAddProgressBar}
+                  className="h-9 w-9"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Skill Bar</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -184,6 +364,75 @@ export default function Toolbar() {
             </Tooltip>
           </div>
 
+          <div className="flex items-center gap-0.5 px-4 border-r border-slate-200">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignLeft} disabled={isDisabled} className="h-8 w-8">
+                  <AlignLeft className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Left</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignCenter} disabled={isDisabled} className="h-8 w-8">
+                  <AlignCenter className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Center</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignRight} disabled={isDisabled} className="h-8 w-8">
+                  <AlignRight className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Right</TooltipContent>
+            </Tooltip>
+            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignTop} disabled={isDisabled} className="h-8 w-8">
+                  <AlignStartVertical className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Top</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignMiddle} disabled={isDisabled} className="h-8 w-8">
+                  <AlignCenterVertical className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Middle</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={alignBottom} disabled={isDisabled} className="h-8 w-8">
+                  <AlignEndVertical className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Align Bottom</TooltipContent>
+            </Tooltip>
+            <div className="w-px h-4 bg-slate-200 mx-1" />
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={distributeHorizontally} disabled={selectedElements.length < 3} className="h-8 w-8">
+                  <AlignHorizontalDistributeCenter className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Distribute Horizontally (3+)</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={distributeVertically} disabled={selectedElements.length < 3} className="h-8 w-8">
+                  <AlignVerticalDistributeCenter className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Distribute Vertically (3+)</TooltipContent>
+            </Tooltip>
+          </div>
+
           {selectedElementId && (
             <div className="flex items-center gap-1 px-4">
               <Tooltip>
@@ -204,6 +453,12 @@ export default function Toolbar() {
         </div>
 
         <div className="flex items-center gap-2">
+          {selectedElementIds.length > 1 && (
+            <span className="text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded">
+              {selectedElementIds.length} selected
+            </span>
+          )}
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
