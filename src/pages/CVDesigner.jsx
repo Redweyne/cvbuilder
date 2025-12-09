@@ -13,33 +13,25 @@ import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
 
 const DISPLAY_TEMPLATES = [
   {
-    id: 'modern',
-    name: 'Modern',
-    description: 'Clean and contemporary design',
-    color: '#6366F1',
-    isPremium: false,
-    atsScore: 94
-  },
-  {
-    id: 'classic',
-    name: 'Classic',
-    description: 'Traditional professional layout',
-    color: '#1F2937',
+    id: 'professional',
+    name: 'Professional',
+    description: 'Clean and modern design perfect for corporate roles',
+    color: '#4F46E5',
     isPremium: false,
     atsScore: 95
   },
   {
     id: 'minimal',
     name: 'Minimal',
-    description: 'Simple and elegant',
-    color: '#374151',
+    description: 'Simple and elegant with focus on content',
+    color: '#1F2937',
     isPremium: false,
     atsScore: 98
   },
   {
     id: 'creative',
     name: 'Creative',
-    description: 'Stand out with bold colors',
+    description: 'Stand out with unique layouts and colors',
     color: '#EC4899',
     isPremium: true,
     atsScore: 85
@@ -47,7 +39,7 @@ const DISPLAY_TEMPLATES = [
   {
     id: 'executive',
     name: 'Executive',
-    description: 'Sophisticated for senior roles',
+    description: 'Sophisticated design for senior positions',
     color: '#0F172A',
     isPremium: true,
     atsScore: 94
@@ -55,18 +47,34 @@ const DISPLAY_TEMPLATES = [
   {
     id: 'tech',
     name: 'Tech Modern',
-    description: 'Perfect for developers',
-    color: '#10B981',
+    description: 'Perfect for developers and IT professionals',
+    color: '#059669',
     isPremium: false,
     atsScore: 96
   },
   {
     id: 'academic',
     name: 'Academic',
-    description: 'For research & academia',
+    description: 'Ideal for research and academic positions',
     color: '#7C3AED',
     isPremium: false,
     atsScore: 92
+  },
+  {
+    id: 'designer',
+    name: 'Designer',
+    description: 'Showcase your creativity with this bold template',
+    color: '#F59E0B',
+    isPremium: true,
+    atsScore: 80
+  },
+  {
+    id: 'compact',
+    name: 'Compact',
+    description: 'Fit more content in a single page',
+    color: '#6366F1',
+    isPremium: false,
+    atsScore: 97
   }
 ];
 
@@ -86,7 +94,7 @@ function DesignerContent() {
       handleLoadTemplate(templateId);
       setTemplateLoaded(true);
     } else if (!templateLoaded && !templateId) {
-      handleLoadTemplate('modern');
+      handleLoadTemplate('professional');
       setTemplateLoaded(true);
     }
   }, [searchParams, templateLoaded]);
