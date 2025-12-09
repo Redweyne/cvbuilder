@@ -138,7 +138,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={handleBackdropClick}>
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center" onClick={handleBackdropClick}>
       <div className="fixed inset-0 bg-black/50" />
       <div
         ref={(node) => {
@@ -149,7 +149,7 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
         onClick={handleContentClick}
         onKeyDown={handleContentKeyDown}
         className={cn(
-          "relative z-50 w-full max-w-lg rounded-lg border bg-white p-6 shadow-lg",
+          "relative z-[10001] w-full max-w-lg rounded-lg border bg-white p-6 shadow-lg",
           className
         )}
         {...props}
