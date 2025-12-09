@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useDesign } from '@/context/DesignContext';
 import { Button } from '@/components/ui/button';
+import { CV_TEMPLATES } from '@/data/cvTemplates';
 import {
   FileText,
   Briefcase,
@@ -17,85 +18,6 @@ import {
   Square,
   Minus,
 } from 'lucide-react';
-
-const CV_TEMPLATES = [
-  {
-    id: 'modern',
-    name: 'Modern',
-    description: 'Clean and contemporary design',
-    elements: [
-      { type: 'shape', x: 0, y: 0, width: 250, height: 1122, style: { backgroundColor: '#1e293b', borderRadius: 0 } },
-      { type: 'text', x: 30, y: 40, width: 190, height: 40, content: 'Your Name', style: { fontSize: 28, fontWeight: 'bold', color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 90, width: 190, height: 24, content: 'Professional Title', style: { fontSize: 14, color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 30, y: 130, width: 190, height: 2, style: { color: '#475569' } },
-      { type: 'text', x: 30, y: 150, width: 190, height: 20, content: 'CONTACT', style: { fontSize: 12, fontWeight: 'bold', color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 175, width: 190, height: 80, content: 'email@example.com\n+1 234 567 890\nCity, Country', style: { fontSize: 12, color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 280, width: 190, height: 20, content: 'SKILLS', style: { fontSize: 12, fontWeight: 'bold', color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 305, width: 190, height: 120, content: 'Leadership\nCommunication\nProblem Solving\nTeam Management\nStrategic Planning', style: { fontSize: 12, color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 40, width: 480, height: 20, content: 'PROFILE', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 70, width: 480, height: 80, content: 'A brief summary of your professional background, key achievements, and career objectives. Highlight what makes you unique and what value you bring to potential employers.', style: { fontSize: 12, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 280, y: 165, width: 480, height: 2, style: { color: '#e2e8f0' } },
-      { type: 'text', x: 280, y: 180, width: 480, height: 20, content: 'EXPERIENCE', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 210, width: 480, height: 24, content: 'Job Title at Company Name', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 235, width: 480, height: 18, content: '2020 - Present', style: { fontSize: 11, color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 260, width: 480, height: 60, content: '• Key achievement or responsibility\n• Another important accomplishment\n• Measurable result or impact', style: { fontSize: 12, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 280, y: 500, width: 480, height: 2, style: { color: '#e2e8f0' } },
-      { type: 'text', x: 280, y: 515, width: 480, height: 20, content: 'EDUCATION', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 545, width: 480, height: 24, content: 'Degree in Field of Study', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 570, width: 480, height: 18, content: 'University Name | 2016 - 2020', style: { fontSize: 11, color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
-    ],
-  },
-  {
-    id: 'classic',
-    name: 'Classic',
-    description: 'Traditional professional layout',
-    elements: [
-      { type: 'text', x: 60, y: 50, width: 674, height: 45, content: 'YOUR NAME', style: { fontSize: 36, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'center' } },
-      { type: 'text', x: 60, y: 100, width: 674, height: 24, content: 'Professional Title', style: { fontSize: 16, color: '#64748b', fontFamily: 'Georgia', textAlign: 'center' } },
-      { type: 'line', x: 60, y: 140, width: 674, height: 3, style: { color: '#1e293b' } },
-      { type: 'text', x: 60, y: 155, width: 674, height: 20, content: 'email@example.com | +1 234 567 890 | City, Country', style: { fontSize: 11, color: '#64748b', fontFamily: 'Georgia', textAlign: 'center' } },
-      { type: 'text', x: 60, y: 200, width: 674, height: 24, content: 'PROFESSIONAL SUMMARY', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'line', x: 60, y: 225, width: 674, height: 1, style: { color: '#cbd5e1' } },
-      { type: 'text', x: 60, y: 235, width: 674, height: 70, content: 'Dedicated professional with extensive experience in your field. Proven track record of delivering results and driving success. Strong analytical and leadership skills with a passion for excellence.', style: { fontSize: 12, color: '#475569', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 320, width: 674, height: 24, content: 'WORK EXPERIENCE', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'line', x: 60, y: 345, width: 674, height: 1, style: { color: '#cbd5e1' } },
-      { type: 'text', x: 60, y: 360, width: 500, height: 24, content: 'Senior Position Title', style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 560, y: 360, width: 174, height: 24, content: '2020 - Present', style: { fontSize: 12, color: '#64748b', fontFamily: 'Georgia', textAlign: 'right' } },
-      { type: 'text', x: 60, y: 385, width: 674, height: 18, content: 'Company Name, Location', style: { fontSize: 12, fontStyle: 'italic', color: '#64748b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 410, width: 674, height: 80, content: '• Led cross-functional teams to achieve project objectives\n• Implemented strategic initiatives resulting in significant improvements\n• Collaborated with stakeholders to drive organizational success', style: { fontSize: 12, color: '#475569', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 550, width: 674, height: 24, content: 'EDUCATION', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'line', x: 60, y: 575, width: 674, height: 1, style: { color: '#cbd5e1' } },
-      { type: 'text', x: 60, y: 590, width: 500, height: 24, content: 'Master of Science in Your Field', style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 560, y: 590, width: 174, height: 24, content: '2016 - 2018', style: { fontSize: 12, color: '#64748b', fontFamily: 'Georgia', textAlign: 'right' } },
-      { type: 'text', x: 60, y: 615, width: 674, height: 18, content: 'University Name', style: { fontSize: 12, fontStyle: 'italic', color: '#64748b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 680, width: 674, height: 24, content: 'SKILLS', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Georgia', textAlign: 'left' } },
-      { type: 'line', x: 60, y: 705, width: 674, height: 1, style: { color: '#cbd5e1' } },
-      { type: 'text', x: 60, y: 720, width: 674, height: 50, content: 'Leadership & Management | Strategic Planning | Data Analysis | Project Management | Communication', style: { fontSize: 12, color: '#475569', fontFamily: 'Georgia', textAlign: 'left' } },
-    ],
-  },
-  {
-    id: 'minimal',
-    name: 'Minimal',
-    description: 'Simple and elegant',
-    elements: [
-      { type: 'text', x: 60, y: 60, width: 674, height: 40, content: 'First Last', style: { fontSize: 32, fontWeight: 'normal', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 105, width: 674, height: 20, content: 'email@email.com  •  (555) 123-4567  •  City, State', style: { fontSize: 12, color: '#64748b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'line', x: 60, y: 145, width: 674, height: 1, style: { color: '#e2e8f0' } },
-      { type: 'text', x: 60, y: 170, width: 674, height: 70, content: 'Brief professional summary highlighting your key strengths, experience, and what you bring to potential employers. Keep it concise and impactful.', style: { fontSize: 12, color: '#475569', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 260, width: 674, height: 20, content: 'Experience', style: { fontSize: 16, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 290, width: 400, height: 20, content: 'Job Title', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 460, y: 290, width: 274, height: 20, content: '2022 - Present', style: { fontSize: 12, color: '#64748b', fontFamily: 'Helvetica', textAlign: 'right' } },
-      { type: 'text', x: 60, y: 310, width: 674, height: 18, content: 'Company Name', style: { fontSize: 12, color: '#64748b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 335, width: 674, height: 60, content: '• Accomplishment or responsibility with measurable impact\n• Another key achievement demonstrating your skills\n• Additional relevant experience or contribution', style: { fontSize: 12, color: '#475569', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 450, width: 674, height: 20, content: 'Education', style: { fontSize: 16, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 480, width: 400, height: 20, content: 'Degree in Field', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 460, y: 480, width: 274, height: 20, content: '2018 - 2022', style: { fontSize: 12, color: '#64748b', fontFamily: 'Helvetica', textAlign: 'right' } },
-      { type: 'text', x: 60, y: 500, width: 674, height: 18, content: 'University Name', style: { fontSize: 12, color: '#64748b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 560, width: 674, height: 20, content: 'Skills', style: { fontSize: 16, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Helvetica', textAlign: 'left' } },
-      { type: 'text', x: 60, y: 590, width: 674, height: 40, content: 'Skill 1  •  Skill 2  •  Skill 3  •  Skill 4  •  Skill 5', style: { fontSize: 12, color: '#475569', fontFamily: 'Helvetica', textAlign: 'left' } },
-    ],
-  },
-];
 
 const QUICK_SECTIONS = [
   { id: 'header', name: 'Header', icon: User, elements: [
@@ -214,8 +136,11 @@ export default function TemplatesSidebar() {
                     className="w-full p-3 bg-slate-50 hover:bg-slate-100 rounded-lg text-left transition-colors group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-14 bg-white border border-slate-200 rounded flex items-center justify-center group-hover:border-indigo-300">
-                        <FileText className="w-5 h-5 text-slate-400 group-hover:text-indigo-500" />
+                      <div 
+                        className="w-10 h-14 border border-slate-200 rounded flex items-center justify-center group-hover:border-indigo-300"
+                        style={{ backgroundColor: template.color + '15' }}
+                      >
+                        <FileText className="w-5 h-5" style={{ color: template.color }} />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-slate-900">{template.name}</p>
