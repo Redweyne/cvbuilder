@@ -5,25 +5,113 @@ export const CV_TEMPLATES = [
     description: 'Clean and modern design perfect for corporate roles',
     color: '#4F46E5',
     elements: [
-      { type: 'shape', x: 0, y: 0, width: 250, height: 1122, style: { backgroundColor: '#1e293b', borderRadius: 0 } },
-      { type: 'text', x: 30, y: 40, width: 190, height: 40, content: 'Your Name', style: { fontSize: 28, fontWeight: 'bold', color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 90, width: 190, height: 24, content: 'Professional Title', style: { fontSize: 14, color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 30, y: 130, width: 190, height: 2, style: { color: '#475569' } },
-      { type: 'text', x: 30, y: 150, width: 190, height: 20, content: 'CONTACT', style: { fontSize: 12, fontWeight: 'bold', color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 175, width: 190, height: 80, content: 'email@example.com\n+1 234 567 890\nCity, Country', style: { fontSize: 12, color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 280, width: 190, height: 20, content: 'SKILLS', style: { fontSize: 12, fontWeight: 'bold', color: '#94a3b8', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 30, y: 305, width: 190, height: 120, content: 'Leadership\nCommunication\nProblem Solving\nTeam Management\nStrategic Planning', style: { fontSize: 12, color: '#ffffff', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 40, width: 480, height: 20, content: 'PROFILE', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 70, width: 480, height: 80, content: 'A brief summary of your professional background, key achievements, and career objectives. Highlight what makes you unique and what value you bring to potential employers.', style: { fontSize: 12, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 280, y: 165, width: 480, height: 2, style: { color: '#e2e8f0' } },
-      { type: 'text', x: 280, y: 180, width: 480, height: 20, content: 'EXPERIENCE', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 210, width: 480, height: 24, content: 'Job Title at Company Name', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 235, width: 480, height: 18, content: '2020 - Present', style: { fontSize: 11, color: '#4f46e5', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 260, width: 480, height: 60, content: '• Key achievement or responsibility\n• Another important accomplishment\n• Measurable result or impact', style: { fontSize: 12, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'line', x: 280, y: 500, width: 480, height: 2, style: { color: '#e2e8f0' } },
-      { type: 'text', x: 280, y: 515, width: 480, height: 20, content: 'EDUCATION', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 545, width: 480, height: 24, content: 'Degree in Field of Study', style: { fontSize: 14, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
-      { type: 'text', x: 280, y: 570, width: 480, height: 18, content: 'University Name | 2016 - 2020', style: { fontSize: 11, color: '#4f46e5', fontFamily: 'Inter', textAlign: 'left' } },
+      // Dark sidebar
+      { type: 'shape', x: 0, y: 0, width: 240, height: 1122, style: { backgroundColor: '#1a1a2e', borderRadius: 0 } },
+      
+      // Profile photo placeholder (circle)
+      { type: 'shape', x: 80, y: 30, width: 80, height: 80, style: { backgroundColor: '#6366f140', borderRadius: 40 } },
+      { type: 'text', x: 80, y: 55, width: 80, height: 30, content: '👤', style: { fontSize: 30, color: '#ffffff60', fontFamily: 'Inter', textAlign: 'center' } },
+      
+      // Name (split like the real template)
+      { type: 'text', x: 20, y: 125, width: 200, height: 32, content: 'Redweyne', style: { fontSize: 26, fontWeight: 'bold', color: '#ffffff', fontFamily: 'Georgia', textAlign: 'center' } },
+      { type: 'text', x: 20, y: 155, width: 200, height: 24, content: 'MAKTOUF', style: { fontSize: 16, fontWeight: 'normal', color: '#ffffffcc', fontFamily: 'Georgia', textAlign: 'center', letterSpacing: '0.1em' } },
+      
+      // Decorative separator
+      { type: 'line', x: 60, y: 190, width: 40, height: 2, style: { color: '#6366f1' } },
+      { type: 'shape', x: 115, y: 186, width: 10, height: 10, style: { backgroundColor: '#f59e0b', borderRadius: 0 } },
+      { type: 'line', x: 140, y: 190, width: 40, height: 2, style: { color: '#6366f1' } },
+      
+      // Title
+      { type: 'text', x: 20, y: 205, width: 200, height: 18, content: 'PROFESSIONAL TITLE', style: { fontSize: 10, fontWeight: 'bold', color: '#818cf8', fontFamily: 'Inter', textAlign: 'center', letterSpacing: '0.15em' } },
+      
+      // Profile section
+      { type: 'shape', x: 20, y: 240, width: 24, height: 24, style: { backgroundColor: '#6366f130', borderRadius: 4 } },
+      { type: 'text', x: 50, y: 242, width: 170, height: 18, content: 'PROFILE', style: { fontSize: 10, fontWeight: 'bold', color: '#ffffffdd', fontFamily: 'Inter', textAlign: 'left', letterSpacing: '0.1em' } },
+      { type: 'text', x: 20, y: 270, width: 200, height: 80, content: 'Graduate in English with solid experience in customer relations, technical support, and administrative management. I excel in dynamic environments where listening, precision, and communication are key.', style: { fontSize: 9, color: '#ffffffaa', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Contact section
+      { type: 'shape', x: 20, y: 365, width: 24, height: 24, style: { backgroundColor: '#6366f130', borderRadius: 4 } },
+      { type: 'text', x: 50, y: 367, width: 170, height: 18, content: 'CONTACT', style: { fontSize: 10, fontWeight: 'bold', color: '#ffffffdd', fontFamily: 'Inter', textAlign: 'left', letterSpacing: '0.1em' } },
+      { type: 'text', x: 20, y: 395, width: 200, height: 16, content: 'Redweyne Maktouf', style: { fontSize: 9, color: '#ffffff99', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 20, y: 415, width: 200, height: 16, content: 'Le Pallet, France', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 20, y: 435, width: 200, height: 16, content: '0783883960', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 20, y: 455, width: 200, height: 16, content: 'redweyneb@gmail.com', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Competences section
+      { type: 'shape', x: 20, y: 490, width: 24, height: 24, style: { backgroundColor: '#6366f130', borderRadius: 4 } },
+      { type: 'text', x: 50, y: 492, width: 170, height: 18, content: 'COMPETENCES', style: { fontSize: 10, fontWeight: 'bold', color: '#ffffffdd', fontFamily: 'Inter', textAlign: 'left', letterSpacing: '0.1em' } },
+      { type: 'text', x: 20, y: 520, width: 200, height: 120, content: '• Negotiation & customer retention\n• Autonomy & proactive\n• Problem diagnosis and resolution\n• Microsoft Office Suite\n• Mastery of office and IT tools', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Languages section
+      { type: 'shape', x: 20, y: 660, width: 24, height: 24, style: { backgroundColor: '#6366f130', borderRadius: 4 } },
+      { type: 'text', x: 50, y: 662, width: 170, height: 18, content: 'LANGUAGES', style: { fontSize: 10, fontWeight: 'bold', color: '#ffffffdd', fontFamily: 'Inter', textAlign: 'left', letterSpacing: '0.1em' } },
+      { type: 'text', x: 20, y: 695, width: 100, height: 14, content: 'French', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'shape', x: 20, y: 712, width: 200, height: 6, style: { backgroundColor: '#ffffff20', borderRadius: 3 } },
+      { type: 'shape', x: 20, y: 712, width: 200, height: 6, style: { backgroundColor: '#6366f1', borderRadius: 3 } },
+      { type: 'text', x: 20, y: 730, width: 100, height: 14, content: 'Arabic', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 180, y: 730, width: 40, height: 14, content: '100%', style: { fontSize: 8, color: '#818cf8', fontFamily: 'Inter', textAlign: 'right' } },
+      { type: 'shape', x: 20, y: 747, width: 200, height: 6, style: { backgroundColor: '#ffffff20', borderRadius: 3 } },
+      { type: 'shape', x: 20, y: 747, width: 200, height: 6, style: { backgroundColor: '#6366f1', borderRadius: 3 } },
+      { type: 'text', x: 20, y: 765, width: 100, height: 14, content: 'English', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 180, y: 765, width: 40, height: 14, content: '100%', style: { fontSize: 8, color: '#818cf8', fontFamily: 'Inter', textAlign: 'right' } },
+      { type: 'shape', x: 20, y: 782, width: 200, height: 6, style: { backgroundColor: '#ffffff20', borderRadius: 3 } },
+      { type: 'shape', x: 20, y: 782, width: 200, height: 6, style: { backgroundColor: '#6366f1', borderRadius: 3 } },
+      { type: 'text', x: 20, y: 800, width: 100, height: 14, content: 'Japanese', style: { fontSize: 9, color: '#ffffffcc', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 180, y: 800, width: 40, height: 14, content: '25%', style: { fontSize: 8, color: '#818cf8', fontFamily: 'Inter', textAlign: 'right' } },
+      { type: 'shape', x: 20, y: 817, width: 200, height: 6, style: { backgroundColor: '#ffffff20', borderRadius: 3 } },
+      { type: 'shape', x: 20, y: 817, width: 50, height: 6, style: { backgroundColor: '#6366f1', borderRadius: 3 } },
+      
+      // Right content area background
+      { type: 'shape', x: 240, y: 0, width: 554, height: 1122, style: { backgroundColor: '#f8f9fb', borderRadius: 0 } },
+      
+      // Education section
+      { type: 'shape', x: 260, y: 30, width: 28, height: 28, style: { backgroundColor: '#6366f1', borderRadius: 8 } },
+      { type: 'text', x: 265, y: 35, width: 18, height: 18, content: '🎓', style: { fontSize: 14, color: '#ffffff', fontFamily: 'Inter', textAlign: 'center' } },
+      { type: 'text', x: 295, y: 33, width: 200, height: 20, content: 'EDUCATION', style: { fontSize: 13, fontWeight: 'bold', color: '#1a1a2e', fontFamily: 'Georgia', textAlign: 'left' } },
+      { type: 'line', x: 295, y: 55, width: 80, height: 3, style: { backgroundColor: '#6366f1', borderRadius: 2 } },
+      
+      // Education entry with timeline dot
+      { type: 'shape', x: 270, y: 75, width: 12, height: 12, style: { backgroundColor: '#6366f1', borderRadius: 6 } },
+      { type: 'line', x: 275, y: 90, width: 2, height: 60, style: { color: '#6366f140' } },
+      { type: 'shape', x: 290, y: 70, width: 480, height: 80, style: { backgroundColor: '#ffffff', borderRadius: 8 } },
+      { type: 'shape', x: 300, y: 80, width: 120, height: 20, style: { backgroundColor: '#6366f115', borderRadius: 4 } },
+      { type: 'text', x: 305, y: 82, width: 110, height: 16, content: 'Jan 2020 - May 2023', style: { fontSize: 9, fontWeight: 'bold', color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 105, width: 450, height: 20, content: "Bachelor's Degree in English (LLCE)", style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 125, width: 450, height: 16, content: 'Faculty of Arts and Humanities', style: { fontSize: 10, color: '#64748b', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Experiences section
+      { type: 'shape', x: 260, y: 170, width: 28, height: 28, style: { backgroundColor: '#6366f1', borderRadius: 8 } },
+      { type: 'text', x: 265, y: 175, width: 18, height: 18, content: '💼', style: { fontSize: 14, color: '#ffffff', fontFamily: 'Inter', textAlign: 'center' } },
+      { type: 'text', x: 295, y: 173, width: 200, height: 20, content: 'EXPERIENCES', style: { fontSize: 13, fontWeight: 'bold', color: '#1a1a2e', fontFamily: 'Georgia', textAlign: 'left' } },
+      { type: 'line', x: 295, y: 195, width: 100, height: 3, style: { backgroundColor: '#6366f1', borderRadius: 2 } },
+      
+      // Experience entry 1
+      { type: 'shape', x: 270, y: 215, width: 12, height: 12, style: { backgroundColor: '#6366f1', borderRadius: 6 } },
+      { type: 'line', x: 275, y: 230, width: 2, height: 80, style: { color: '#6366f140' } },
+      { type: 'shape', x: 290, y: 210, width: 480, height: 100, style: { backgroundColor: '#ffffff', borderRadius: 8 } },
+      { type: 'shape', x: 300, y: 220, width: 100, height: 20, style: { backgroundColor: '#6366f115', borderRadius: 4 } },
+      { type: 'text', x: 305, y: 222, width: 90, height: 16, content: 'Jun 2023 - Jun 2024', style: { fontSize: 9, fontWeight: 'bold', color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 245, width: 450, height: 20, content: 'Commercial & Technical Advisor BtoB/BtoC', style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 265, width: 450, height: 16, content: 'ApgSystems International', style: { fontSize: 10, color: '#64748b', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Experience entry 2
+      { type: 'shape', x: 270, y: 325, width: 12, height: 12, style: { backgroundColor: '#6366f1', borderRadius: 6 } },
+      { type: 'line', x: 275, y: 340, width: 2, height: 140, style: { color: '#6366f140' } },
+      { type: 'shape', x: 290, y: 320, width: 480, height: 160, style: { backgroundColor: '#ffffff', borderRadius: 8 } },
+      { type: 'shape', x: 300, y: 330, width: 120, height: 20, style: { backgroundColor: '#6366f115', borderRadius: 4 } },
+      { type: 'text', x: 305, y: 332, width: 110, height: 16, content: 'Aug 2024 - Oct 2024', style: { fontSize: 9, fontWeight: 'bold', color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 355, width: 450, height: 20, content: 'Customer Service & Management Assistant', style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 375, width: 450, height: 16, content: 'La Poste', style: { fontSize: 10, color: '#64748b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 395, width: 450, height: 80, content: '• Project coordination and team management\n• Handling incoming and outgoing calls\n• Ticket tracking and customer file management\n• Advanced use of Excel (formulas and reports)', style: { fontSize: 10, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
+      
+      // Experience entry 3
+      { type: 'shape', x: 270, y: 495, width: 12, height: 12, style: { backgroundColor: '#6366f1', borderRadius: 6 } },
+      { type: 'shape', x: 290, y: 490, width: 480, height: 160, style: { backgroundColor: '#ffffff', borderRadius: 8 } },
+      { type: 'shape', x: 300, y: 500, width: 120, height: 20, style: { backgroundColor: '#6366f115', borderRadius: 4 } },
+      { type: 'text', x: 305, y: 502, width: 110, height: 16, content: 'Jan 2025 - Sep 2025', style: { fontSize: 9, fontWeight: 'bold', color: '#6366f1', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 525, width: 450, height: 20, content: 'Administrative Assistant', style: { fontSize: 13, fontWeight: 'bold', color: '#1e293b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 545, width: 450, height: 16, content: 'ERT Technologies (SFR)', style: { fontSize: 10, color: '#64748b', fontFamily: 'Inter', textAlign: 'left' } },
+      { type: 'text', x: 300, y: 565, width: 450, height: 80, content: '• Administrative processing of SFR technical files\n• Communication with technicians and clients\n• Management of anomalies, creation, and closure of tickets\n• Verification of reports and quotes', style: { fontSize: 10, color: '#475569', fontFamily: 'Inter', textAlign: 'left' } },
     ],
   },
   {
