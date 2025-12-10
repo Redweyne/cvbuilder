@@ -17,6 +17,9 @@ import {
 } from 'lucide-react';
 import FontPicker from './FontPicker';
 import IconPicker from './IconPicker';
+import GradientPicker from './GradientPicker';
+import { PHOTO_MASK_OPTIONS } from './PhotoPlaceholder';
+import { DIVIDER_OPTIONS } from './DecorativeDividers';
 import * as LucideIcons from 'lucide-react';
 
 const FONT_SIZES = [10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 42, 48, 56, 64, 72];
@@ -25,6 +28,24 @@ const PRESET_COLORS = [
   '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
   '#f97316', '#eab308', '#22c55e', '#14b8a6',
   '#0ea5e9', '#3b82f6', '#ffffff', '#000000',
+];
+
+const SHAPE_TYPES = [
+  { value: 'rectangle', label: 'Rectangle' },
+  { value: 'circle', label: 'Circle' },
+  { value: 'roundedRect', label: 'Rounded Rect' },
+  { value: 'triangle', label: 'Triangle' },
+  { value: 'diamond', label: 'Diamond' },
+  { value: 'hexagon', label: 'Hexagon' },
+  { value: 'pentagon', label: 'Pentagon' },
+  { value: 'octagon', label: 'Octagon' },
+  { value: 'star', label: 'Star' },
+  { value: 'heart', label: 'Heart' },
+  { value: 'arrowRight', label: 'Arrow Right' },
+  { value: 'arrowLeft', label: 'Arrow Left' },
+  { value: 'badge', label: 'Badge' },
+  { value: 'shield', label: 'Shield' },
+  { value: 'bookmark', label: 'Bookmark' },
 ];
 
 export default function PropertiesPanel() {
@@ -78,6 +99,10 @@ export default function PropertiesPanel() {
       case 'progressBar': return 'Skill Bar';
       case 'section': return 'Section';
       case 'columns': return 'Columns';
+      case 'advancedShape': return 'Shape';
+      case 'photoPlaceholder': return 'Photo';
+      case 'divider': return 'Divider';
+      case 'banner': return 'Banner';
       default: return 'Element';
     }
   };
@@ -514,6 +539,217 @@ export default function PropertiesPanel() {
                 className="w-full"
               />
               <div className="text-xs text-slate-500 text-center">{selectedElement.gap || 16}px</div>
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'advancedShape' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Shape Type</Label>
+              <select
+                value={selectedElement.shapeType || 'rectangle'}
+                onChange={(e) => handlePropertyChange('shapeType', e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md"
+              >
+                {SHAPE_TYPES.map(shape => (
+                  <option key={shape.value} value={shape.value}>{shape.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Fill Color</Label>
+              <GradientPicker
+                value={selectedElement.style?.backgroundColor || '#6366f1'}
+                onChange={(value) => handleStyleChange('backgroundColor', value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Border</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="20"
+                    value={selectedElement.style?.borderWidth || 0}
+                    onChange={(e) => handleStyleChange('borderWidth', parseInt(e.target.value) || 0)}
+                    className="h-7 text-xs"
+                    placeholder="Width"
+                  />
+                </div>
+                <div>
+                  <Input
+                    type="color"
+                    value={selectedElement.style?.borderColor || '#000000'}
+                    onChange={(e) => handleStyleChange('borderColor', e.target.value)}
+                    className="h-7"
+                  />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'photoPlaceholder' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Mask Shape</Label>
+              <div className="grid grid-cols-3 gap-1">
+                {PHOTO_MASK_OPTIONS.map(mask => (
+                  <Button
+                    key={mask.value}
+                    variant={selectedElement.maskType === mask.value ? 'secondary' : 'outline'}
+                    size="sm"
+                    onClick={() => handlePropertyChange('maskType', mask.value)}
+                    className="text-xs"
+                  >
+                    {mask.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Border Color</Label>
+              <div className="grid grid-cols-8 gap-1 mb-2">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleStyleChange('borderColor', color)}
+                    className={`w-6 h-6 rounded border-2 ${
+                      selectedElement.style?.borderColor === color ? 'border-indigo-500' : 'border-slate-200'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Border Width: {selectedElement.style?.borderWidth || 3}px</Label>
+              <input
+                type="range"
+                min="0"
+                max="10"
+                value={selectedElement.style?.borderWidth || 3}
+                onChange={(e) => handleStyleChange('borderWidth', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={selectedElement.showBorder !== false}
+                onChange={(e) => handlePropertyChange('showBorder', e.target.checked)}
+              />
+              <Label className="text-xs text-slate-600">Show Border</Label>
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'divider' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Divider Style</Label>
+              <select
+                value={selectedElement.dividerType || 'solid'}
+                onChange={(e) => handlePropertyChange('dividerType', e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-slate-200 rounded-md"
+              >
+                {DIVIDER_OPTIONS.map(opt => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Color</Label>
+              <div className="grid grid-cols-8 gap-1 mb-2">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleStyleChange('color', color)}
+                    className={`w-6 h-6 rounded border-2 ${
+                      selectedElement.style?.color === color ? 'border-indigo-500' : 'border-slate-200'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Thickness: {selectedElement.style?.thickness || 2}px</Label>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={selectedElement.style?.thickness || 2}
+                onChange={(e) => handleStyleChange('thickness', parseInt(e.target.value))}
+                className="w-full"
+              />
+            </div>
+          </>
+        )}
+
+        {selectedElement.type === 'banner' && (
+          <>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Banner Text</Label>
+              <Input
+                value={selectedElement.content || ''}
+                onChange={(e) => handlePropertyChange('content', e.target.value)}
+                placeholder="Banner text"
+                className="h-8"
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Banner Style</Label>
+              <div className="flex gap-1">
+                <Button
+                  variant={selectedElement.bannerType === 'ribbon' ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => handlePropertyChange('bannerType', 'ribbon')}
+                  className="flex-1"
+                >
+                  Ribbon
+                </Button>
+                <Button
+                  variant={selectedElement.bannerType === 'tag' ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => handlePropertyChange('bannerType', 'tag')}
+                  className="flex-1"
+                >
+                  Tag
+                </Button>
+                <Button
+                  variant={!selectedElement.bannerType || selectedElement.bannerType === 'flat' ? 'secondary' : 'outline'}
+                  size="sm"
+                  onClick={() => handlePropertyChange('bannerType', 'flat')}
+                  className="flex-1"
+                >
+                  Flat
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Background</Label>
+              <GradientPicker
+                value={selectedElement.style?.backgroundColor || '#6366f1'}
+                onChange={(value) => handleStyleChange('backgroundColor', value)}
+              />
+            </div>
+            <div>
+              <Label className="text-xs text-slate-600 mb-2 block">Text Color</Label>
+              <div className="grid grid-cols-8 gap-1">
+                {PRESET_COLORS.map(color => (
+                  <button
+                    key={color}
+                    onClick={() => handleStyleChange('color', color)}
+                    className={`w-6 h-6 rounded border-2 ${
+                      selectedElement.style?.color === color ? 'border-indigo-500' : 'border-slate-200'
+                    }`}
+                    style={{ backgroundColor: color }}
+                  />
+                ))}
+              </div>
             </div>
           </>
         )}

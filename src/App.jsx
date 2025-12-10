@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'sonner';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ColorPaletteProvider } from './context/ColorPaletteContext';
 import Layout from './Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -168,10 +169,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Router>
-          <AppRoutes />
-          <Toaster richColors position="top-right" />
-        </Router>
+        <ColorPaletteProvider>
+          <Router>
+            <AppRoutes />
+            <Toaster richColors position="top-right" />
+          </Router>
+        </ColorPaletteProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

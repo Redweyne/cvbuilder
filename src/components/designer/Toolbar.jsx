@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useDesign } from '@/context/DesignContext';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +26,14 @@ import {
   AlignVerticalDistributeCenter,
   LayoutGrid,
   Columns,
+  Circle,
+  Triangle,
+  Star,
+  Hexagon,
+  User,
+  SeparatorHorizontal,
+  Shapes,
+  ChevronDown,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -57,6 +65,8 @@ export default function Toolbar() {
     A4_WIDTH_PX,
     A4_HEIGHT_PX,
   } = useDesign();
+
+  const [showShapesMenu, setShowShapesMenu] = useState(false);
 
   const handleAddText = () => {
     addElement({
@@ -165,6 +175,54 @@ export default function Toolbar() {
         borderWidth: 0,
         borderRadius: 0,
         padding: 0,
+      },
+    });
+  };
+
+  const handleAddAdvancedShape = (shapeType) => {
+    const baseStyle = {
+      backgroundColor: '#6366f1',
+      borderRadius: shapeType === 'circle' ? 999 : shapeType === 'roundedRect' ? 16 : 0,
+      borderWidth: 0,
+      borderColor: 'transparent',
+    };
+
+    addElement({
+      type: 'advancedShape',
+      shapeType,
+      width: shapeType === 'circle' ? 100 : 120,
+      height: shapeType === 'circle' ? 100 : 80,
+      style: baseStyle,
+    });
+    setShowShapesMenu(false);
+  };
+
+  const handleAddPhotoPlaceholder = () => {
+    addElement({
+      type: 'photoPlaceholder',
+      width: 120,
+      height: 120,
+      maskType: 'circle',
+      showBorder: true,
+      placeholderIcon: 'user',
+      style: {
+        backgroundColor: '#e2e8f0',
+        borderColor: '#6366f1',
+        borderWidth: 3,
+        iconColor: '#94a3b8',
+      },
+    });
+  };
+
+  const handleAddDivider = (dividerType = 'solid') => {
+    addElement({
+      type: 'divider',
+      dividerType,
+      width: 300,
+      height: 20,
+      style: {
+        color: '#e2e8f0',
+        thickness: 2,
       },
     });
   };
@@ -387,18 +445,88 @@ export default function Toolbar() {
               <TooltipContent>Add Column Layout</TooltipContent>
             </Tooltip>
 
+            <div className="relative">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowShapesMenu(!showShapesMenu)}
+                    className="h-9 w-9"
+                  >
+                    <Shapes className="w-4 h-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Advanced Shapes</TooltipContent>
+              </Tooltip>
+              {showShapesMenu && (
+                <div className="absolute top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-lg p-2 z-50 w-48">
+                  <div className="text-xs font-medium text-slate-500 mb-2 px-2">Shapes</div>
+                  <div className="grid grid-cols-4 gap-1 mb-2">
+                    <button onClick={() => handleAddAdvancedShape('rectangle')} className="p-2 hover:bg-slate-100 rounded" title="Rectangle">
+                      <Square className="w-4 h-4 mx-auto" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('circle')} className="p-2 hover:bg-slate-100 rounded" title="Circle">
+                      <Circle className="w-4 h-4 mx-auto" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('triangle')} className="p-2 hover:bg-slate-100 rounded" title="Triangle">
+                      <Triangle className="w-4 h-4 mx-auto" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('star')} className="p-2 hover:bg-slate-100 rounded" title="Star">
+                      <Star className="w-4 h-4 mx-auto" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('hexagon')} className="p-2 hover:bg-slate-100 rounded" title="Hexagon">
+                      <Hexagon className="w-4 h-4 mx-auto" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('diamond')} className="p-2 hover:bg-slate-100 rounded" title="Diamond">
+                      <div className="w-4 h-4 mx-auto bg-slate-600 rotate-45 scale-75" />
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('heart')} className="p-2 hover:bg-slate-100 rounded" title="Heart">
+                      <span className="text-sm">♥</span>
+                    </button>
+                    <button onClick={() => handleAddAdvancedShape('arrowRight')} className="p-2 hover:bg-slate-100 rounded" title="Arrow">
+                      <span className="text-sm">→</span>
+                    </button>
+                  </div>
+                  <div className="border-t border-slate-200 pt-2 mt-2">
+                    <div className="text-xs font-medium text-slate-500 mb-2 px-2">Badges</div>
+                    <div className="grid grid-cols-4 gap-1">
+                      <button onClick={() => handleAddAdvancedShape('badge')} className="p-2 hover:bg-slate-100 rounded text-xs">Badge</button>
+                      <button onClick={() => handleAddAdvancedShape('shield')} className="p-2 hover:bg-slate-100 rounded text-xs">Shield</button>
+                      <button onClick={() => handleAddAdvancedShape('bookmark')} className="p-2 hover:bg-slate-100 rounded text-xs">Mark</button>
+                      <button onClick={() => handleAddAdvancedShape('burst')} className="p-2 hover:bg-slate-100 rounded text-xs">Burst</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 opacity-50"
-                  disabled
+                  onClick={handleAddPhotoPlaceholder}
+                  className="h-9 w-9"
                 >
-                  <Image className="w-4 h-4" />
+                  <User className="w-4 h-4" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Add Image (Coming Soon)</TooltipContent>
+              <TooltipContent>Add Photo Placeholder</TooltipContent>
+            </Tooltip>
+
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleAddDivider('solid')}
+                  className="h-9 w-9"
+                >
+                  <SeparatorHorizontal className="w-4 h-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Add Divider</TooltipContent>
             </Tooltip>
           </div>
 

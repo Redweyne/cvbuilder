@@ -4,6 +4,9 @@ import { motion } from 'framer-motion';
 import { calculateSnapGuides, getGuideColor } from '@/utils/smartGuides';
 import * as LucideIcons from 'lucide-react';
 import { isDialogOpen } from '@/components/ui/dialog';
+import { AdvancedShapeElement } from './AdvancedShapeElement';
+import { PhotoPlaceholderElement } from './PhotoPlaceholder';
+import { DividerElement } from './DecorativeDividers';
 
 export default function Canvas() {
   const {
@@ -540,6 +543,35 @@ export default function Canvas() {
                 <span className="text-slate-400 text-xs">Column {idx + 1}</span>
               </div>
             ))}
+          </div>
+        )}
+        {element.type === 'advancedShape' && (
+          <AdvancedShapeElement element={element} isSelected={isSelected} />
+        )}
+        {element.type === 'photoPlaceholder' && (
+          <PhotoPlaceholderElement element={element} isSelected={isSelected} />
+        )}
+        {element.type === 'divider' && (
+          <DividerElement element={element} isSelected={isSelected} />
+        )}
+        {element.type === 'banner' && (
+          <div
+            className="w-full h-full flex items-center justify-center"
+            style={{
+              background: element.style?.backgroundColor || '#6366f1',
+              color: element.style?.color || '#ffffff',
+              fontSize: element.style?.fontSize || 14,
+              fontWeight: element.style?.fontWeight || 'bold',
+              textAlign: element.style?.textAlign || 'center',
+              borderRadius: element.style?.borderRadius || 0,
+              clipPath: element.bannerType === 'ribbon' 
+                ? 'polygon(5% 0%, 95% 0%, 100% 50%, 95% 100%, 5% 100%, 0% 50%)'
+                : element.bannerType === 'tag'
+                ? 'polygon(10% 0%, 100% 0%, 100% 100%, 10% 100%, 0% 50%)'
+                : 'none',
+            }}
+          >
+            {element.content || 'Banner'}
           </div>
         )}
 
