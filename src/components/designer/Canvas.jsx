@@ -750,7 +750,6 @@ export default function Canvas() {
             onClick={handleCanvasClick}
           >
             {renderGrid()}
-            {renderMarginGuides()}
             {renderSmartGuides()}
             {elements
               .slice()
