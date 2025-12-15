@@ -26,7 +26,7 @@ import {
   generateSuccessRoadmap,
   parseUploadedCV
 } from './ai.js';
-import { generateCVPdf, generateCoverLetterPdf, generateDesignPdf } from './pdf.js';
+import { generateCVPdf, generateCoverLetterPdf, generateDesignPdf, generateDesignImage } from './pdf.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -617,8 +617,9 @@ app.post('/api/export/cover-letter-pdf', authMiddleware, async (req, res) => {
 
 app.post('/api/export/design-pdf', authMiddleware, async (req, res) => {
   try {
-    const { elements, name, width, height } = req.body;
-    const pdfBytes = await generateDesignPdf(elements || [], name, width, height);
+    const { elements, name, width, height, dpi } = req.body;
+    const options = { dpi: dpi || 2 };
+    const pdfBytes = await generateDesignPdf(elements || [], name, width, height, options);
     
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${name || 'design'}.pdf"`);
@@ -626,6 +627,24 @@ app.post('/api/export/design-pdf', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Design PDF export error:', error);
     res.status(500).json({ error: 'Failed to export design PDF' });
+  }
+});
+
+app.post('/api/export/design-image', authMiddleware, async (req, res) => {
+  try {
+    const { elements, name, width, height, format, dpi, quality } = req.body;
+    const options = { format: format || 'png', dpi: dpi || 2, quality: quality || 90 };
+    const imageBytes = await generateDesignImage(elements || [], name, width, height, options);
+    
+    const contentType = options.format === 'jpeg' ? 'image/jpeg' : 'image/png';
+    const extension = options.format === 'jpeg' ? 'jpg' : 'png';
+    
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${name || 'design'}.${extension}"`);
+    res.send(Buffer.from(imageBytes));
+  } catch (error) {
+    console.error('Design image export error:', error);
+    res.status(500).json({ error: 'Failed to export design image' });
   }
 });
 

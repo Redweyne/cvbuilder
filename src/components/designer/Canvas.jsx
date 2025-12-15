@@ -12,6 +12,7 @@ export default function Canvas() {
   const {
     elements,
     zoom,
+    setZoom,
     showGrid,
     gridSize,
     smartSnapping,
@@ -23,6 +24,7 @@ export default function Canvas() {
     updateElement,
     commitElementChange,
     deleteElement,
+    duplicateElement,
     pageMargins,
     showMarginGuides,
     A4_WIDTH_PX,
@@ -43,6 +45,10 @@ export default function Canvas() {
   const [activeGuides, setActiveGuides] = useState({ vertical: [], horizontal: [] });
   const [isMultiDragging, setIsMultiDragging] = useState(false);
   const [multiDragStartPositions, setMultiDragStartPositions] = useState({});
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [scrollStart, setScrollStart] = useState({ x: 0, y: 0 });
+  const [contextMenu, setContextMenu] = useState(null);
 
   const handleCanvasClick = (e) => {
     if (e.target === canvasRef.current) {
@@ -327,9 +333,20 @@ export default function Canvas() {
       
       if (editingElementId || isDialogOpen()) return;
       
+      if (e.key === ' ' && !isInputField) {
+        e.preventDefault();
+        setIsPanning(true);
+        document.body.style.cursor = 'grab';
+      }
+      
       if (e.key === 'a' && (e.metaKey || e.ctrlKey) && !isInputField) {
         e.preventDefault();
         selectAll();
+      }
+      
+      if (e.key === 'd' && (e.metaKey || e.ctrlKey) && selectedElementId && !isInputField) {
+        e.preventDefault();
+        duplicateElement(selectedElementId);
       }
       
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElementId && !isInputField) {
@@ -339,12 +356,102 @@ export default function Canvas() {
       
       if (e.key === 'Escape') {
         clearSelection();
+        setContextMenu(null);
+      }
+      
+      if (e.key === '+' || e.key === '=' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setZoom(zoom + 0.1);
+      }
+      
+      if (e.key === '-' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setZoom(zoom - 0.1);
+      }
+      
+      if (e.key === '0' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        setZoom(1);
+      }
+    };
+    
+    const handleKeyUp = (e) => {
+      if (e.key === ' ') {
+        setIsPanning(false);
+        document.body.style.cursor = '';
       }
     };
     
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectAll, deleteElement, selectedElementId, editingElementId, clearSelection]);
+    window.addEventListener('keyup', handleKeyUp);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, [selectAll, deleteElement, duplicateElement, selectedElementId, editingElementId, clearSelection, zoom, setZoom]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    
+    const handleWheel = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.05 : 0.05;
+        setZoom(zoom + delta);
+      }
+    };
+    
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [zoom, setZoom]);
+
+  const handleContainerMouseDown = (e) => {
+    if (isPanning) {
+      e.preventDefault();
+      setPanStart({ x: e.clientX, y: e.clientY });
+      setScrollStart({ 
+        x: containerRef.current?.scrollLeft || 0, 
+        y: containerRef.current?.scrollTop || 0 
+      });
+      document.body.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleContainerMouseMove = useCallback((e) => {
+    if (isPanning && panStart.x !== 0) {
+      const dx = e.clientX - panStart.x;
+      const dy = e.clientY - panStart.y;
+      if (containerRef.current) {
+        containerRef.current.scrollLeft = scrollStart.x - dx;
+        containerRef.current.scrollTop = scrollStart.y - dy;
+      }
+    }
+  }, [isPanning, panStart, scrollStart]);
+
+  const handleContainerMouseUp = () => {
+    if (isPanning) {
+      setPanStart({ x: 0, y: 0 });
+      document.body.style.cursor = 'grab';
+    }
+  };
+
+  const handleContextMenu = (e, element = null) => {
+    e.preventDefault();
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (rect) {
+      setContextMenu({
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+        element
+      });
+      if (element) {
+        selectElement(element.id, false);
+      }
+    }
+  };
+
+  const closeContextMenu = () => setContextMenu(null);
 
   const renderIcon = (iconName, color, size) => {
     const IconComponent = LucideIcons[iconName];
@@ -428,6 +535,7 @@ export default function Canvas() {
         }}
         onMouseDown={(e) => !isEditing && handleElementMouseDown(e, element)}
         onDoubleClick={(e) => handleDoubleClick(e, element)}
+        onContextMenu={(e) => { e.stopPropagation(); handleContextMenu(e, element); }}
       >
         {element.type === 'text' && (
           <div
@@ -723,11 +831,16 @@ export default function Canvas() {
   return (
     <div
       ref={containerRef}
-      className="flex-1 overflow-auto bg-slate-200 p-8"
+      className={`flex-1 overflow-auto bg-slate-200 p-8 relative ${isPanning ? 'cursor-grab' : ''}`}
       style={{ 
         backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)',
         backgroundSize: '20px 20px'
       }}
+      onMouseDown={handleContainerMouseDown}
+      onMouseMove={handleContainerMouseMove}
+      onMouseUp={handleContainerMouseUp}
+      onMouseLeave={handleContainerMouseUp}
+      onClick={() => contextMenu && closeContextMenu()}
     >
       <div className="flex items-center justify-center min-h-full">
         <motion.div
@@ -748,6 +861,7 @@ export default function Canvas() {
               height: A4_HEIGHT_PX,
             }}
             onClick={handleCanvasClick}
+            onContextMenu={(e) => handleContextMenu(e)}
           >
             {renderGrid()}
             {renderSmartGuides()}
@@ -758,6 +872,73 @@ export default function Canvas() {
           </div>
         </motion.div>
       </div>
+      
+      {contextMenu && (
+        <div 
+          className="fixed bg-white rounded-lg shadow-xl border border-slate-200 py-1 z-[9999] min-w-[160px]"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.element ? (
+            <>
+              <button
+                onClick={() => { duplicateElement(contextMenu.element.id); closeContextMenu(); }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+              >
+                <LucideIcons.Copy className="w-4 h-4" /> Duplicate
+                <span className="ml-auto text-xs text-slate-400">Ctrl+D</span>
+              </button>
+              <button
+                onClick={() => { deleteElement(contextMenu.element.id); closeContextMenu(); }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
+              >
+                <LucideIcons.Trash2 className="w-4 h-4" /> Delete
+                <span className="ml-auto text-xs text-red-400">Del</span>
+              </button>
+              <div className="border-t border-slate-100 my-1" />
+              <button
+                onClick={() => { 
+                  updateElement(contextMenu.element.id, { zIndex: (contextMenu.element.zIndex || 0) + 10 }, true);
+                  closeContextMenu(); 
+                }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+              >
+                <LucideIcons.ArrowUp className="w-4 h-4" /> Bring Forward
+              </button>
+              <button
+                onClick={() => { 
+                  updateElement(contextMenu.element.id, { zIndex: Math.max(0, (contextMenu.element.zIndex || 0) - 10) }, true);
+                  closeContextMenu(); 
+                }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+              >
+                <LucideIcons.ArrowDown className="w-4 h-4" /> Send Backward
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => { selectAll(); closeContextMenu(); }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+              >
+                <LucideIcons.SquareStack className="w-4 h-4" /> Select All
+                <span className="ml-auto text-xs text-slate-400">Ctrl+A</span>
+              </button>
+              <div className="border-t border-slate-100 my-1" />
+              <div className="px-3 py-2 text-xs text-slate-400">
+                Zoom: {Math.round(zoom * 100)}%
+              </div>
+              <button
+                onClick={() => { setZoom(1); closeContextMenu(); }}
+                className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+              >
+                <LucideIcons.Maximize2 className="w-4 h-4" /> Reset Zoom
+                <span className="ml-auto text-xs text-slate-400">Ctrl+0</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }

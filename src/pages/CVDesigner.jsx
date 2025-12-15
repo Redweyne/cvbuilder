@@ -4,12 +4,13 @@ import { DesignProvider, useDesign } from '@/context/DesignContext';
 import Canvas from '@/components/designer/Canvas';
 import Toolbar from '@/components/designer/Toolbar';
 import PropertiesPanel from '@/components/designer/PropertiesPanel';
+import LayersPanel from '@/components/designer/LayersPanel';
 import TemplatePreview from '@/components/designer/TemplatePreview';
 import PageNavigator from '@/components/designer/PageNavigator';
 import PageSettings from '@/components/designer/PageSettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp, Settings2 } from 'lucide-react';
+import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp, Settings2, FileText, Image, FileImage } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
@@ -144,10 +145,17 @@ function DesignerContent() {
     }
   };
 
-  const handleExportPDF = async () => {
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const handleExport = async (format = 'pdf', quality = 'high') => {
     setIsExporting(true);
+    setShowExportMenu(false);
+    
+    const dpi = quality === 'high' ? 3 : quality === 'medium' ? 2 : 1;
+    
     try {
-      const response = await fetch('/api/export/design-pdf', {
+      const endpoint = format === 'pdf' ? '/api/export/design-pdf' : '/api/export/design-image';
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -155,7 +163,10 @@ function DesignerContent() {
           elements: elements,
           name: documentName,
           width: A4_WIDTH_PX,
-          height: A4_HEIGHT_PX
+          height: A4_HEIGHT_PX,
+          format: format,
+          dpi: dpi,
+          quality: 90
         })
       });
 
@@ -164,17 +175,18 @@ function DesignerContent() {
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${documentName || 'cv-design'}.pdf`;
+        const ext = format === 'pdf' ? 'pdf' : format === 'jpeg' ? 'jpg' : 'png';
+        a.download = `${documentName || 'cv-design'}.${ext}`;
         document.body.appendChild(a);
         a.click();
         window.URL.revokeObjectURL(url);
         a.remove();
-        toast.success('PDF exported!');
+        toast.success(`${format.toUpperCase()} exported!`);
       } else {
         throw new Error('Export failed');
       }
     } catch (error) {
-      toast.error('Failed to export PDF');
+      toast.error(`Failed to export ${format.toUpperCase()}`);
     } finally {
       setIsExporting(false);
     }
@@ -227,19 +239,57 @@ function DesignerContent() {
             )}
             {showSaved ? 'Saved!' : 'Save'}
           </Button>
-          <Button 
-            size="sm" 
-            onClick={handleExportPDF}
-            disabled={isExporting}
-            className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
-          >
-            {isExporting ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Download className="w-4 h-4 mr-2" />
+          <div className="relative">
+            <Button 
+              size="sm" 
+              onClick={() => setShowExportMenu(!showExportMenu)}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700"
+            >
+              {isExporting ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Download className="w-4 h-4 mr-2" />
+              )}
+              {isExporting ? 'Exporting...' : 'Export'}
+              <ChevronDown className="w-3 h-3 ml-1" />
+            </Button>
+            
+            {showExportMenu && (
+              <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                <button
+                  onClick={() => handleExport('pdf', 'high')}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4 text-red-500" />
+                  <div>
+                    <div className="font-medium">PDF (High Quality)</div>
+                    <div className="text-xs text-slate-400">Best for printing</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleExport('png', 'high')}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <Image className="w-4 h-4 text-blue-500" />
+                  <div>
+                    <div className="font-medium">PNG Image</div>
+                    <div className="text-xs text-slate-400">Transparent background</div>
+                  </div>
+                </button>
+                <button
+                  onClick={() => handleExport('jpeg', 'high')}
+                  className="w-full px-3 py-2 text-left text-sm hover:bg-slate-50 flex items-center gap-2"
+                >
+                  <FileImage className="w-4 h-4 text-green-500" />
+                  <div>
+                    <div className="font-medium">JPEG Image</div>
+                    <div className="text-xs text-slate-400">Smaller file size</div>
+                  </div>
+                </button>
+              </div>
             )}
-            {isExporting ? 'Exporting...' : 'Export PDF'}
-          </Button>
+          </div>
         </div>
       </header>
 
@@ -319,7 +369,12 @@ function DesignerContent() {
           <PageNavigator />
         </div>
         
-        <PropertiesPanel />
+        <div className="flex">
+          <div className="w-48 bg-white border-l border-slate-200 flex flex-col overflow-hidden">
+            <LayersPanel />
+          </div>
+          <PropertiesPanel />
+        </div>
       </div>
     </div>
   );
