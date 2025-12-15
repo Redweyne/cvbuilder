@@ -39,62 +39,6 @@ externalPort = 3001
 localPort = 5000
 externalPort = 80
 
-[[ports]]
-localPort = 32971
-externalPort = 3002
-
-[[ports]]
-localPort = 33601
-externalPort = 3003
-
-[[ports]]
-localPort = 35299
-externalPort = 8008
-
-[[ports]]
-localPort = 35547
-externalPort = 6000
-
-[[ports]]
-localPort = 35555
-externalPort = 4200
-
-[[ports]]
-localPort = 35563
-externalPort = 3000
-
-[[ports]]
-localPort = 36663
-externalPort = 8080
-
-[[ports]]
-localPort = 37091
-externalPort = 8000
-
-[[ports]]
-localPort = 39737
-externalPort = 5173
-
-[[ports]]
-localPort = 39913
-externalPort = 6800
-
-[[ports]]
-localPort = 40579
-externalPort = 5000
-
-[[ports]]
-localPort = 43595
-externalPort = 8099
-
-[[ports]]
-localPort = 44431
-externalPort = 9000
-
-[[ports]]
-localPort = 45121
-externalPort = 8081
-
 [deployment]
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
