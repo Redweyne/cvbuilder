@@ -716,46 +716,6 @@ export default function Canvas() {
           strokeDasharray="4,4"
           opacity="0.6"
         />
-        {left > 0 && (
-          <rect
-            x={0}
-            y={0}
-            width={left}
-            height={A4_HEIGHT_PX}
-            fill="#dbeafe"
-            opacity="0.3"
-          />
-        )}
-        {right > 0 && (
-          <rect
-            x={A4_WIDTH_PX - right}
-            y={0}
-            width={right}
-            height={A4_HEIGHT_PX}
-            fill="#dbeafe"
-            opacity="0.3"
-          />
-        )}
-        {top > 0 && (
-          <rect
-            x={left}
-            y={0}
-            width={A4_WIDTH_PX - left - right}
-            height={top}
-            fill="#dbeafe"
-            opacity="0.3"
-          />
-        )}
-        {bottom > 0 && (
-          <rect
-            x={left}
-            y={A4_HEIGHT_PX - bottom}
-            width={A4_WIDTH_PX - left - right}
-            height={bottom}
-            fill="#dbeafe"
-            opacity="0.3"
-          />
-        )}
       </svg>
     );
   };
