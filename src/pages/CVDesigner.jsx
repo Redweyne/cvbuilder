@@ -246,7 +246,7 @@ function DesignerContent() {
       <Toolbar />
 
       <div className="flex-1 flex overflow-hidden">
-        <div className="w-52 bg-white border-r border-slate-200 flex flex-col overflow-hidden">
+        <div className="w-44 bg-white border-r border-slate-200 flex flex-col overflow-hidden">
           <button 
             onClick={() => setShowTemplates(!showTemplates)}
             className="flex items-center justify-between px-4 py-3 border-b border-slate-200 hover:bg-slate-50 transition-colors"
@@ -260,35 +260,34 @@ function DesignerContent() {
           </button>
           
           {showTemplates && (
-            <div className="flex-1 overflow-y-auto p-2 space-y-3">
+            <div className="flex-1 overflow-y-auto p-2 space-y-2">
               {DISPLAY_TEMPLATES.map(template => (
                 <button
                   key={template.id}
                   onClick={() => handleLoadTemplate(template.id)}
-                  className={`w-full rounded-lg text-left transition-all overflow-hidden ${
+                  className={`w-full rounded-md text-left transition-all overflow-hidden bg-slate-50 hover:bg-slate-100 ${
                     selectedTemplateId === template.id
-                      ? 'ring-2 ring-indigo-500'
-                      : 'hover:ring-2 hover:ring-slate-300'
+                      ? 'ring-2 ring-indigo-500 bg-indigo-50'
+                      : ''
                   }`}
                 >
-                  <div className="w-full">
-                    <TemplatePreview 
-                      templateId={template.id} 
-                      scale={0.22}
-                      showShadow={false}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="p-2 bg-white border-t border-slate-100">
-                    <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 p-2">
+                    <div className="shrink-0 rounded border border-slate-200 overflow-hidden">
+                      <TemplatePreview 
+                        templateId={template.id} 
+                        scale={0.06}
+                        showShadow={false}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1">
-                        <p className="text-xs font-medium text-slate-900">{template.name}</p>
+                        <p className="text-xs font-medium text-slate-800 truncate">{template.name}</p>
                         {template.isPremium && (
-                          <Crown className="w-3 h-3 text-amber-500" />
+                          <Crown className="w-3 h-3 text-amber-500 shrink-0" />
                         )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <div className="w-10 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+                      <div className="flex items-center gap-1 mt-1">
+                        <div className="w-8 h-1 bg-slate-200 rounded-full overflow-hidden">
                           <div 
                             className="h-full rounded-full"
                             style={{ 
@@ -297,7 +296,7 @@ function DesignerContent() {
                             }}
                           />
                         </div>
-                        <span className="text-[10px] text-slate-500">{template.atsScore}%</span>
+                        <span className="text-[9px] text-slate-400">{template.atsScore}%</span>
                       </div>
                     </div>
                   </div>
