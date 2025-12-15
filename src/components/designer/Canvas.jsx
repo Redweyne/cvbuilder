@@ -575,17 +575,6 @@ export default function Canvas() {
           </div>
         )}
 
-        {isSelected && !isEditing && (
-          <>
-            {resizeHandles.map(handle => (
-              <div
-                key={handle.position}
-                className={`absolute w-3 h-3 bg-white border-2 border-indigo-500 rounded-sm ${handle.className}`}
-                onMouseDown={(e) => handleResizeMouseDown(e, element, handle.position)}
-              />
-            ))}
-          </>
-        )}
       </div>
     );
   };
