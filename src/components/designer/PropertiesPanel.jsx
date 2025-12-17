@@ -297,12 +297,12 @@ export default function PropertiesPanel() {
 
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Progress Color</Label>
-              <div className="grid grid-cols-8 gap-1 mb-2">
+              <div className="grid grid-cols-6 gap-1 mb-2">
                 {PRESET_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => handleStyleChange('progressColor', color)}
-                    className={`w-6 h-6 rounded border-2 ${
+                    className={`w-5 h-5 rounded border-2 ${
                       selectedElement.style?.progressColor === color ? 'border-indigo-500' : 'border-slate-200'
                     }`}
                     style={{ backgroundColor: color }}
@@ -313,12 +313,12 @@ export default function PropertiesPanel() {
 
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Background Color</Label>
-              <div className="grid grid-cols-8 gap-1 mb-2">
+              <div className="grid grid-cols-6 gap-1 mb-2">
                 {PRESET_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => handleStyleChange('backgroundColor', color)}
-                    className={`w-6 h-6 rounded border-2 ${
+                    className={`w-5 h-5 rounded border-2 ${
                       selectedElement.style?.backgroundColor === color ? 'border-indigo-500' : 'border-slate-200'
                     }`}
                     style={{ backgroundColor: color }}
@@ -368,7 +368,7 @@ export default function PropertiesPanel() {
              selectedElement.type === 'progressBar' ? 'Label Color' :
              'Background Color'}
           </Label>
-          <div className="grid grid-cols-8 gap-1 mb-2">
+          <div className="grid grid-cols-6 gap-1 mb-2">
             {PRESET_COLORS.map(color => (
               <button
                 key={color}
@@ -380,7 +380,7 @@ export default function PropertiesPanel() {
                       : 'backgroundColor', 
                   color
                 )}
-                className={`w-6 h-6 rounded border-2 ${
+                className={`w-5 h-5 rounded border-2 ${
                   (selectedElement.type === 'text' || selectedElement.type === 'line' || selectedElement.type === 'icon'
                     ? selectedElement.style?.color 
                     : selectedElement.type === 'progressBar'
@@ -415,12 +415,12 @@ export default function PropertiesPanel() {
         {selectedElement.type === 'text' && (
           <div>
             <Label className="text-xs text-slate-600 mb-2 block">Background Color</Label>
-            <div className="grid grid-cols-8 gap-1 mb-2">
+            <div className="grid grid-cols-6 gap-1 mb-2">
               {PRESET_COLORS.map(color => (
                 <button
                   key={color}
                   onClick={() => handleStyleChange('backgroundColor', color)}
-                  className={`w-6 h-6 rounded border-2 ${
+                  className={`w-5 h-5 rounded border-2 ${
                     selectedElement.style?.backgroundColor === color
                       ? 'border-indigo-500'
                       : 'border-slate-200'
@@ -611,12 +611,12 @@ export default function PropertiesPanel() {
             </div>
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Border Color</Label>
-              <div className="grid grid-cols-8 gap-1 mb-2">
+              <div className="grid grid-cols-6 gap-1 mb-2">
                 {PRESET_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => handleStyleChange('borderColor', color)}
-                    className={`w-6 h-6 rounded border-2 ${
+                    className={`w-5 h-5 rounded border-2 ${
                       selectedElement.style?.borderColor === color ? 'border-indigo-500' : 'border-slate-200'
                     }`}
                     style={{ backgroundColor: color }}
@@ -662,12 +662,12 @@ export default function PropertiesPanel() {
             </div>
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Color</Label>
-              <div className="grid grid-cols-8 gap-1 mb-2">
+              <div className="grid grid-cols-6 gap-1 mb-2">
                 {PRESET_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => handleStyleChange('color', color)}
-                    className={`w-6 h-6 rounded border-2 ${
+                    className={`w-5 h-5 rounded border-2 ${
                       selectedElement.style?.color === color ? 'border-indigo-500' : 'border-slate-200'
                     }`}
                     style={{ backgroundColor: color }}
@@ -738,12 +738,12 @@ export default function PropertiesPanel() {
             </div>
             <div>
               <Label className="text-xs text-slate-600 mb-2 block">Text Color</Label>
-              <div className="grid grid-cols-8 gap-1">
+              <div className="grid grid-cols-6 gap-1">
                 {PRESET_COLORS.map(color => (
                   <button
                     key={color}
                     onClick={() => handleStyleChange('color', color)}
-                    className={`w-6 h-6 rounded border-2 ${
+                    className={`w-5 h-5 rounded border-2 ${
                       selectedElement.style?.color === color ? 'border-indigo-500' : 'border-slate-200'
                     }`}
                     style={{ backgroundColor: color }}
