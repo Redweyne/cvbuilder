@@ -129,6 +129,7 @@ export default function Register() {
                       placeholder="Your name"
                       value={fullName}
                       onChange={(e) => setFullName(e.target.value)}
+                      autoComplete="name"
                       className="pl-12 h-12 text-base border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 input-focus-glow transition-all"
                       required
                     />
@@ -145,6 +146,7 @@ export default function Register() {
                       placeholder="you@example.com"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
                       className="pl-12 h-12 text-base border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 input-focus-glow transition-all"
                       required
                     />
@@ -161,6 +163,7 @@ export default function Register() {
                       placeholder="Create a secure password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      autoComplete="new-password"
                       className="pl-12 pr-12 h-12 text-base border-slate-200 focus:border-indigo-500 focus:ring-indigo-500/20 input-focus-glow transition-all"
                       minLength={6}
                       required

@@ -170,7 +170,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <ColorPaletteProvider>
-          <Router>
+          <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
             <AppRoutes />
             <Toaster richColors position="top-right" />
           </Router>
