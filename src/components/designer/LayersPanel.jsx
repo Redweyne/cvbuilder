@@ -66,12 +66,6 @@ export default function LayersPanel() {
 
   return (
     <div className="flex flex-col h-full">
-      <div className="px-3 py-2 border-b border-slate-200 flex items-center gap-2">
-        <Layers className="w-4 h-4 text-slate-500" />
-        <span className="text-sm font-medium text-slate-700">Layers</span>
-        <span className="text-xs text-slate-400 ml-auto">{elements.length}</span>
-      </div>
-      
       <div className="flex-1 overflow-y-auto">
         {sortedElements.map((element, index) => {
           const Icon = getElementIcon(element.type);

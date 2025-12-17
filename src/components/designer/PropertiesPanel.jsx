@@ -64,14 +64,14 @@ export default function PropertiesPanel() {
 
   if (!selectedElement) {
     return (
-      <div className="w-64 bg-white border-l border-slate-200 p-4 flex flex-col items-center justify-center text-center">
-        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-          <Layers className="w-8 h-8 text-slate-400" />
+      <div className="h-full p-4 flex flex-col items-center justify-center text-center">
+        <div className="w-12 h-12 bg-slate-100 rounded-xl flex items-center justify-center mb-3">
+          <Layers className="w-6 h-6 text-slate-400" />
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-xs text-slate-500">
           Select an element to edit its properties
         </p>
-        <p className="text-xs text-slate-400 mt-2">
+        <p className="text-[10px] text-slate-400 mt-1">
           Hold Shift + Click to select multiple
         </p>
       </div>
@@ -114,11 +114,11 @@ export default function PropertiesPanel() {
   };
 
   return (
-    <div className="w-64 bg-white border-l border-slate-200 p-4 overflow-y-auto">
-      <div className="space-y-6">
+    <div className="h-full p-3 overflow-y-auto">
+      <div className="space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-slate-900 mb-3">
-            {getElementTypeLabel()} Properties
+          <h3 className="text-xs font-semibold text-slate-600 uppercase tracking-wide mb-2">
+            {getElementTypeLabel()}
           </h3>
           
           <div className="flex gap-2 mb-4">
