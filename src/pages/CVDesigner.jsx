@@ -10,7 +10,8 @@ import PageNavigator from '@/components/designer/PageNavigator';
 import PageSettings from '@/components/designer/PageSettings';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp, Settings2, FileText, Image, FileImage } from 'lucide-react';
+import { ArrowLeft, Download, Save, Loader2, Check, Sparkles, Crown, ChevronDown, ChevronUp, Settings2, FileText, Image, FileImage, Eye } from 'lucide-react';
+import PrintPreview from '@/components/designer/PrintPreview';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { CV_TEMPLATES, getTemplateById } from '@/data/cvTemplates';
@@ -146,6 +147,7 @@ function DesignerContent() {
   };
 
   const [showExportMenu, setShowExportMenu] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const handleExport = async (format = 'pdf', quality = 'high') => {
     setIsExporting(true);
@@ -224,6 +226,15 @@ function DesignerContent() {
               </Button>
             }
           />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowPrintPreview(true)}
+            title="Print Preview"
+          >
+            <Eye className="w-4 h-4 mr-2" />
+            Preview
+          </Button>
           <Button 
             variant="outline" 
             size="sm" 
@@ -376,6 +387,16 @@ function DesignerContent() {
           <PropertiesPanel />
         </div>
       </div>
+
+      {showPrintPreview && (
+        <PrintPreview 
+          onClose={() => setShowPrintPreview(false)}
+          onExport={() => {
+            setShowPrintPreview(false);
+            handleExport('pdf', 'high');
+          }}
+        />
+      )}
     </div>
   );
 }
