@@ -22,6 +22,7 @@ import {
   Upload,
   FileUp,
   Sparkles,
+  Sun,
   Info,
   X
 } from 'lucide-react';
@@ -110,6 +111,8 @@ export default function CVEditor() {
     role: '',
     level: '',
     target: '',
+    templateId: '',
+    atsTarget: '85',
   });
   const [cvData, setCvData] = useState({
     title: 'My CV',
@@ -297,6 +300,28 @@ export default function CVEditor() {
     'Customer Support': ['Customer Success', 'Issue Resolution', 'Zendesk', 'Retention', 'Empathy & Communication'],
   };
 
+  const templateRecommendations = {
+    'Software Engineer': 'tech',
+    'Product Manager': 'modern',
+    'Designer': 'creative',
+    'Data Analyst': 'professional',
+    'Marketing': 'creative',
+    'Sales': 'executive',
+    'Operations': 'professional',
+    'Customer Support': 'minimal',
+  };
+
+  const templateOptions = [
+    { id: 'professional', label: 'Professional', color: '#1e40af' },
+    { id: 'modern', label: 'Modern', color: '#6366f1' },
+    { id: 'minimal', label: 'Minimal', color: '#111827' },
+    { id: 'executive', label: 'Executive', color: '#1c1917' },
+    { id: 'tech', label: 'Tech', color: '#10b981' },
+    { id: 'creative', label: 'Creative', color: '#ec4899' },
+    { id: 'academic', label: 'Academic', color: '#7c3aed' },
+    { id: 'compact', label: 'Compact', color: '#3b82f6' },
+  ];
+
   const saveMutation = useMutation({
     mutationFn: async (data) => {
       if (cvId) {
@@ -390,6 +415,8 @@ export default function CVEditor() {
       return;
     }
 
+    const recommendedTemplate = templateRecommendations[quickStart.role] || 'professional';
+    const chosenTemplate = quickStart.templateId || recommendedTemplate;
     const suggestedSkills = quickStartSkillMap[quickStart.role] || [];
     const nextSkills = cvData.skills.length
       ? cvData.skills
@@ -409,6 +436,7 @@ export default function CVEditor() {
         title: prev.personal_info.title || quickStart.role,
         summary: prev.personal_info.summary || buildQuickStartSummary(quickStart),
       },
+      template_id: prev.template_id || chosenTemplate,
       skills: nextSkills,
     }));
     setHasChanges(true);
@@ -876,6 +904,58 @@ export default function CVEditor() {
                           className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
                       </label>
+                    </div>
+
+                    <div className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs font-semibold text-slate-600">Template match</p>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {templateOptions.find((option) => option.id === (quickStart.templateId || templateRecommendations[quickStart.role] || 'professional'))?.label || 'Professional'}
+                          </p>
+                        </div>
+                        <Badge variant="secondary" className="text-xs bg-indigo-100 text-indigo-700">
+                          ATS Target {quickStart.atsTarget}%
+                        </Badge>
+                      </div>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {templateOptions.slice(0, 4).map((template) => (
+                          <button
+                            key={template.id}
+                            type="button"
+                            onClick={() => setQuickStart(prev => ({ ...prev, templateId: template.id }))}
+                            className={`px-2.5 py-1 text-xs font-medium rounded-full transition-all ${
+                              (quickStart.templateId || templateRecommendations[quickStart.role] || 'professional') === template.id
+                                ? 'text-white shadow-md'
+                                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                            }`}
+                            style={
+                              (quickStart.templateId || templateRecommendations[quickStart.role] || 'professional') === template.id
+                                ? { backgroundColor: template.color }
+                                : {}
+                            }
+                          >
+                            {template.label}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <label className="text-xs font-semibold text-slate-600">
+                          ATS target
+                          <select
+                            value={quickStart.atsTarget}
+                            onChange={(event) => setQuickStart(prev => ({ ...prev, atsTarget: event.target.value }))}
+                            className="mt-2 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          >
+                            <option value="80">80% (solid)</option>
+                            <option value="85">85% (strong)</option>
+                            <option value="90">90% (elite)</option>
+                          </select>
+                        </label>
+                        <div className="text-xs text-slate-500 flex items-end pb-1">
+                          Aim above 85% to beat ATS filters and human skim time.
+                        </div>
+                      </div>
                     </div>
 
                     <Button
